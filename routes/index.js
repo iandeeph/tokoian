@@ -217,7 +217,7 @@ router.post('/', function(req, res) {
 router.get('/code-list', function(req, res) {
     var passedVariable = req.query.respost || {};
     var message = {"text": "", "color": ""};
-    return tokoianConn.query("select * from kode")
+    return tokoianConn.query("select kode.idkode idkode, kode.nama nama, kode.kode kode, kode.status status, item.jumlah jumlah from kode left join item on kode.idkode = item.idkode order by kode.kode")
         .then(function (listCode) {
             switch (passedVariable) {
                 case '1':
@@ -225,6 +225,12 @@ router.get('/code-list', function(req, res) {
                     break;
                 case '2':
                     message = {"text": "Tambah kode produk gagal..!! "+ req.query.error, "color": "red"};
+                    break;
+                case '3':
+                    message = {"text": "Edit detail kode berhasil..", "color": "green"};
+                    break;
+                case '4':
+                    message = {"text": "Edit detail kode gagal..!! "+ req.query.error, "color": "red"};
                     break;
                 default :
                     message = {"text": "", "color": ""};
@@ -242,6 +248,7 @@ router.post('/code-list', function(req, res) {
     var dateNow = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
     var user = req.session.name;
     var arrayKodeQuery = [];
+    var arrayItemQuery = [];
     var arrayLogQuery = [];
     var num = 1;
     if (!_.isUndefined(req.body.addCodeSubmit)){
@@ -251,10 +258,10 @@ router.post('/code-list', function(req, res) {
             .then(function (maxId) {
                 // console.log(maxId);
                 return Promise.each(lists, function (listStock) {
-                    //`tb_kode` (`idkode`, `kode`, `nama`, `merek`, `jenis`, `deskripsi`, `catatan`)
                     var maxIdCode = (parseInt(maxId[0].maxid) + num);
-                    //console.log(maxIdCode);
+                    // console.log(maxIdCode);
                     arrayKodeQuery.push([listStock.kode, listStock.nama]);
+                    arrayItemQuery.push([maxIdCode]);
 
                     var logString = "ID Kode : " + maxIdCode + "\n" +
                         "Kode Barang : " + listStock.kode + "\n" +
@@ -264,13 +271,16 @@ router.post('/code-list', function(req, res) {
                     num++;
                 }).then(function () {
                     var queryKodeString = "INSERT INTO kode (kode, nama) VALUES?";
+                    var queryItemString = "INSERT INTO item (idkode) VALUES?";
                     var queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES?";
 
                     var pushKode = tokoianConn.query(queryKodeString, [arrayKodeQuery]);
+                    var pushItem = tokoianConn.query(queryItemString, [arrayItemQuery]);
                     var pushLog = tokoianConn.query(queryLogString, [arrayLogQuery]);
 
-                    Promise.all([pushKode, pushLog])
+                    Promise.all([pushKode, pushItem, pushLog])
                         .then(function (results) {
+                            // console.log(results);
                             var string = encodeURIComponent("1");
                             res.redirect('/code-list?respost=' + string);
                         }).catch(function (error) {
@@ -282,6 +292,29 @@ router.post('/code-list', function(req, res) {
                     });
                 });
             });
+    }else if (!_.isUndefined(req.body.editCodeSubmit)){
+        var updateKode = "UPDATE kode SET nama =  '" + req.body.editKode.nama + "', kode =  '" + req.body.editKode.kode + "' where idkode = '" + decrypt(req.body.editCodeSubmit) + "'";
+
+        var logString = "Kode Barang : " + req.body.editKode.kodeOld + "\n" +
+            "Nama Barang : " + req.body.editKode.namaOld + "\n" +
+            "Updated to :\n " +
+            "Kode Barang : " + req.body.editKode.kode + "\n" +
+            "Nama Barang : " + req.body.editKode.nama;
+        var insertLog = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
+            "('" + user + "', 'Edit Detail Kode','" + logString + "','" + dateNow + "')";
+        var kodePush = tokoianConn.query(updateKode);
+        var logPush = tokoianConn.query(insertLog);
+        Promise.all([kodePush, logPush])
+            .then(function () {
+                var string = encodeURIComponent("3");
+                res.redirect('/code-list?respost=' + string);
+            }).catch(function (error) {
+            //logs out the error
+            console.error(error);
+            var string = encodeURIComponent("4");
+            var errorStr = encodeURIComponent(error);
+            res.redirect('/code-list?respost=' + string +'&error='+error);
+        });
     }
 });
 
@@ -293,22 +326,38 @@ router.get('/status-code', function(req, res) {
     var idkode = decrypt(req.query.kode) || {};
     var updateStatus = "UPDATE kode SET status =  '" + passedVariable + "' where idkode = '" + idkode + "'";
     // console.log(updateStatus);
-    return tokoianConn.query("select * from kode where idkode = '" + idkode + "'").then(function (listKode) {
-        var logString = "Kode Barang : " + listKode[0].kode + "\n" +
-            "Nama Barang : " + listKode[0].nama + "\n" +
-            "Status to : " + passedVariable + "\n";
-        var insertLog = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
-            "('" + user + "', 'Edit Status','" + logString + "','" + dateNow + "')";
-        var kodePush = tokoianConn.query(updateStatus);
-        var logPush = tokoianConn.query(insertLog);
+    return tokoianConn.query("select " +
+        "kode.idkode idkode, " +
+        "kode.nama nama, " +
+        "kode.kode kode, " +
+        "kode.status status, " +
+        "item.jumlah jumlah " +
+        "from " +
+        "kode " +
+        "left join " +
+        "item " +
+        "on " +
+        "kode.idkode = item.idkode " +
+        "where kode.idkode = '" + idkode + "'").then(function (listKode) {
 
-        Promise.all([kodePush, logPush])
-            .then(function () {
-                res.send("ok")
-            }).catch(function (error) {
-            //logs out the error
-            console.error(error);
-        });
+        if (listKode[0].jumlah > 0 ){
+            res.send("Not Empty");
+        } else {
+            var logString = "Kode Barang : " + listKode[0].kode + "\n" +
+                "Nama Barang : " + listKode[0].nama + "\n" +
+                "Status to : " + passedVariable + "\n";
+            var insertLog = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
+                "('" + user + "', 'Edit Status','" + logString + "','" + dateNow + "')";
+            var kodePush = tokoianConn.query(updateStatus);
+            var logPush = tokoianConn.query(insertLog);
+            Promise.all([kodePush, logPush])
+                .then(function () {
+                    res.send("ok");
+                }).catch(function (error) {
+                //logs out the error
+                console.error(error);
+            });
+        }
     }).catch(function (error) {
         //logs out the error
         console.error(error);

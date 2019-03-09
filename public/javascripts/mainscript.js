@@ -54,7 +54,12 @@ $(document).ready(function() {
             url: './status-code?changeStatus='+ idkode +'&kode='+kode,
             type: "GET",
             success: function (datas) {
-
+                console.log(datas);
+                var alertString = "Jumlah stock tidak kosong!!";
+                if(datas === "Not Empty"){
+                    alert(alertString);
+                    location.reload();
+                }
             }
         });
     });
