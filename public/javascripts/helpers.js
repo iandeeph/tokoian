@@ -1,6 +1,11 @@
 var moment          = require('moment');
 var _               = require('lodash');
 var Handlebars      = require('handlebars');
+const {createCipher, createCipheriv, createDecipher, createDecipheriv, randomBytes} = require('crypto');
+const algorithm = 'aes-256-ctr';
+const key = process.env.KEY || 'b2df428b9929d3ace7c598bbf4e496b2';
+const inputEncoding = 'utf8';
+const outputEncoding = 'hex';
 
 exports.fullDate = function (date) {
     var parse = "";
@@ -147,6 +152,42 @@ exports.jenisTrx = function (num) {
     return parse;
 };
 
+exports.statusParser = function (status) {
+    var parse;
+    switch (status){
+        case 1 :
+            parse = "Aktif";
+            break;
+
+        case 2 :
+            parse = "Non Aktif";
+            break;
+
+        default:
+            parse = "error";
+            break;
+    }
+    return parse;
+};
+
+exports.invertStatus = function (status) {
+    var parse;
+    switch (status){
+        case 1 :
+            parse = 0;
+            break;
+
+        case 0 :
+            parse = 1;
+            break;
+
+        default:
+            parse = 0;
+            break;
+    }
+    return parse;
+};
+
 exports.compare = function(lvalue, rvalue, options) {
 
     if (arguments.length < 3)
@@ -176,4 +217,29 @@ exports.compare = function(lvalue, rvalue, options) {
         return options.inverse(this);
     }
 
+};
+
+exports.encrypt = function(value) {
+    let str = value.toString();
+    const iv = new Buffer(randomBytes(16));
+    const cipher = createCipheriv(algorithm, key, iv);
+    let crypted = cipher.update(str, inputEncoding, outputEncoding);
+    crypted += cipher.final(outputEncoding);
+    return `${iv.toString('hex')}:${crypted.toString()}`;
+};
+
+exports.decrypt = function(value) {
+    const textParts = value.split(':');
+
+    //extract the IV from the first half of the value
+    const IV = new Buffer(textParts.shift(), outputEncoding);
+
+    //extract the encrypted text without the IV
+    const encryptedText = new Buffer(textParts.join(':'), outputEncoding);
+
+    //decipher the string
+    const decipher = createDecipheriv(algorithm,key, IV);
+    let decrypted = decipher.update(encryptedText,  outputEncoding, inputEncoding);
+    decrypted += decipher.final(inputEncoding);
+    return decrypted.toString();
 };

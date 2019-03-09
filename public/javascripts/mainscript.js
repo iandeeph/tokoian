@@ -21,6 +21,7 @@ $(document).ready(function() {
     });
     $('.modal').modal();
 
+    //================ page add kode ==================
     $("#btnAddKode").click(function () {
         $("#kodeField").append('' +
             '<div class="row addedTrx'+ numFieldTrx +'">' +
@@ -43,6 +44,18 @@ $(document).ready(function() {
             var elm = ".addedTrx"+ numToRem;
 
             $(elm).remove();
+        });
+    });
+
+    $('input[id^=status]').change(function(){
+        let idkode = $(this).attr("data-text");
+        let kode = $(this).attr("data-kode");
+        $.ajax({
+            url: './status-code?changeStatus='+ idkode +'&kode='+kode,
+            type: "GET",
+            success: function (datas) {
+
+            }
         });
     });
 

@@ -24,7 +24,8 @@
                             <thead>
                                 <tr class="border-bottom">
                                     <th width="30%">Kode Produk</th>
-                                    <th width="70%">Nama Produk</th>
+                                    <th width="50%">Nama Produk</th>
+                                    <th width="20%">Status</th>
                                 </tr>
                             </thead>
                             <tbody id="addStockBlock">
@@ -32,6 +33,16 @@
                                 <tr>
                                     <td>{{kode}}</td>
                                     <td>{{nama}}</td>
+                                    <td>
+                                        <div class="switch">
+                                            <label>
+                                                Non Aktif
+                                                <input type="checkbox" id="status{{idkode}}" data-text="{{invertStatus status}}" data-kode="{{encrypt idkode}}" {{#compare status "1" operators="=="}}checked{{/compare}}>
+                                                <span class="lever"></span>
+                                                Aktif
+                                            </label>
+                                        </div>
+                                    </td>
                                 </tr>
                             {{/each}}
                             </tbody>

@@ -4,7 +4,11 @@ var _           = require('lodash');
 var mysql       = require('promise-mysql');
 var Promise     = require('bluebird');
 var moment      = require('moment');
-var crypto      = require('crypto');
+const {createCipher, createCipheriv, createDecipher, createDecipheriv, randomBytes} = require('crypto');
+const algorithm = 'aes-256-ctr';
+const key = process.env.KEY || 'b2df428b9929d3ace7c598bbf4e496b2';
+const inputEncoding = 'utf8';
+const outputEncoding = 'hex';
 
 //source : http://stackoverflow.com/questions/20210522/nodejs-mysql-error-connection-lost-the-server-closed-the-connection
 var db_config = {
@@ -42,6 +46,30 @@ function handleDisconnect() {
 
 handleDisconnect();
 
+function encrypt(value) {
+    const iv = new Buffer(randomBytes(16));
+    const cipher = createCipheriv(algorithm, key, iv);
+    let crypted = cipher.update(value, inputEncoding, outputEncoding);
+    crypted += cipher.final(outputEncoding);
+    return `${iv.toString('hex')}:${crypted.toString()}`;
+}
+
+function decrypt(value) {
+    const textParts = value.split(':');
+
+    //extract the IV from the first half of the value
+    const IV = new Buffer(textParts.shift(), outputEncoding);
+
+    //extract the encrypted text without the IV
+    const encryptedText = new Buffer(textParts.join(':'), outputEncoding);
+
+    //decipher the string
+    const decipher = createDecipheriv(algorithm,key, IV);
+    let decrypted = decipher.update(encryptedText,  outputEncoding, inputEncoding);
+    decrypted += decipher.final(inputEncoding);
+    return decrypted.toString();
+}
+
 /* GET Login page. */
 router.get('/', function(req, res, next) {
     res.render('login',{
@@ -53,31 +81,26 @@ router.get('/', function(req, res, next) {
 router.post('/', function(req, res, next) {
     var dateNow = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
     var postUsername = req.body.login_username;
-    var postPassword = crypto.createHash('md5').update(req.body.login_password).digest('hex');
-    var arrayLogQuery = [];
-    //console.log(postPassword);
-    tokoianConn.query('SELECT * FROM user').then(function(users) {
-        //console.log(users);
-        var loginPromise = new Promise(function (resolve, reject) {
-            resolve(_.find(users, {'username' : postUsername , 'password' : postPassword}));
-        });
-
-        loginPromise.then(function(loginItem) {
-            if (_.isEmpty(loginItem)){
+    var postPassword = req.body.login_password;
+    let users = {};
+    // console.log(postPassword);
+    tokoianConn.query('SELECT * FROM user where username = "'+ postUsername +'" limit 1').then(function(users) {
+        // console.log(decrypt(users[0].password));
+            if (decrypt(users[0].password) !== postPassword){
                 res.render('login',{
                     layout: 'login',
                     message : 'Username atau Password Salah..!!'
                 });
             }else{
                 req.session.login       = 'loged';
-                req.session.username    = loginItem.username;
-                req.session.name        = loginItem.nama;
-                req.session.priv        = loginItem.priv;
+                req.session.username    = users[0].username;
+                req.session.name        = users[0].nama;
+                req.session.priv        = users[0].priv;
                 //console.log(req.session.name );
-                var logString = "Username : "+ loginItem.username +"\n" +
-                    "Nama : "+loginItem.nama;
+                var logString = "Username : "+ users[0].username +"\n" +
+                    "Nama : "+users[0].nama;
                 var queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
-                    "('" + loginItem.nama + "', 'User Login','" + logString + "','" + dateNow + "')";
+                    "('" + users[0].nama + "', 'User Login','" + logString + "','" + dateNow + "')";
 
                 var logPush = tokoianConn.query(queryLogString);
 
@@ -90,10 +113,6 @@ router.post('/', function(req, res, next) {
             //logs out the error
             console.error(error);
         });
-    }).catch(function(error){
-        //logs out the error
-        console.error(error);
-    });
 });
 
 module.exports = router;

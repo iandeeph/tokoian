@@ -33,14 +33,14 @@ function checkAuth (req, res, next) {
             return;
         }else {
             if (req.session.priv == 1){
-                if(req.url === '/' || req.url.substring(0, 10) === '/code-list') {
+                if(req.url === '/' || req.url.substring(0, 10) === '/code-list' || req.url.substring(0, 12) === '/status-code') {
                     // console.log("Aman");
                 }else{
                     res.redirect('/');
                     return;
                 }
             }else if (req.session.priv == 2){
-                if(req.url === '/' || req.url.substring(0, 10) === '/code-list') {
+                if(req.url === '/' || req.url.substring(0, 10) === '/code-list' || req.url.substring(0, 12) === '/status-code') {
                 }else{
                     res.redirect('/');
                     return;
@@ -52,6 +52,13 @@ function checkAuth (req, res, next) {
     next();
 }
 
+process.on('uncaughtExeption', (e) => {
+    console.error("error", e);
+});
+
+process.on('unhandledRejection', (e) => {
+    console.error("error", e);
+});
 
 // view engine setup
 app.engine('handlebars', exphbs({

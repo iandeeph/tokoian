@@ -6,6 +6,7 @@ var Promise     = require('bluebird');
 var moment      = require('moment');
 var randomize   = require('randomatic');
 var querystring = require('querystring');
+const {createCipher, createCipheriv, createDecipher, createDecipheriv, randomBytes} = require('crypto');
 
 //source : http://stackoverflow.com/questions/20210522/nodejs-mysql-error-connection-lost-the-server-closed-the-connection
 var db_config = {
@@ -42,6 +43,35 @@ function handleDisconnect() {
 }
 
 handleDisconnect();
+
+const algorithm = 'aes-256-ctr';
+const key = process.env.KEY || 'b2df428b9929d3ace7c598bbf4e496b2';
+const inputEncoding = 'utf8';
+const outputEncoding = 'hex';
+
+function encrypt(value) {
+    const iv = new Buffer(randomBytes(16));
+    const cipher = createCipheriv(algorithm, key, iv);
+    let crypted = cipher.update(value, inputEncoding, outputEncoding);
+    crypted += cipher.final(outputEncoding);
+    return `${iv.toString('hex')}:${crypted.toString()}`;
+}
+
+function decrypt(value) {
+    const textParts = value.split(':');
+
+    //extract the IV from the first half of the value
+    const IV = new Buffer(textParts.shift(), outputEncoding);
+
+    //extract the encrypted text without the IV
+    const encryptedText = new Buffer(textParts.join(':'), outputEncoding);
+
+    //decipher the string
+    const decipher = createDecipheriv(algorithm,key, IV);
+    let decrypted = decipher.update(encryptedText,  outputEncoding, inputEncoding);
+    decrypted += decipher.final(inputEncoding);
+    return decrypted.toString();
+}
 
 /* GET home page. */
 router.get('/', function(req, res) {
@@ -191,10 +221,10 @@ router.get('/code-list', function(req, res) {
         .then(function (listCode) {
             switch (passedVariable) {
                 case '1':
-                    message = {"text": "Jenis berhasil ditambah..", "color": "green"};
+                    message = {"text": "Kode produk berhasil ditambah..", "color": "green"};
                     break;
                 case '2':
-                    message = {"text": "Tambah jenis gagal..!!", "color": "red"};
+                    message = {"text": "Tambah kode produk gagal..!! "+ req.query.error, "color": "red"};
                     break;
                 default :
                     message = {"text": "", "color": ""};
@@ -247,11 +277,42 @@ router.post('/code-list', function(req, res) {
                         //logs out the error
                         console.error(error);
                         var string = encodeURIComponent("2");
-                        res.redirect('/code-list?respost=' + string);
+                        var errorStr = encodeURIComponent(error);
+                        res.redirect('/code-list?respost=' + string +'&error='+error);
                     });
                 });
             });
     }
+});
+
+/* GET code-list page. */
+router.get('/status-code', function(req, res) {
+    var user = req.session.name;
+    var dateNow = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
+    var passedVariable = req.query.changeStatus || {};
+    var idkode = decrypt(req.query.kode) || {};
+    var updateStatus = "UPDATE kode SET status =  '" + passedVariable + "' where idkode = '" + idkode + "'";
+    // console.log(updateStatus);
+    return tokoianConn.query("select * from kode where idkode = '" + idkode + "'").then(function (listKode) {
+        var logString = "Kode Barang : " + listKode[0].kode + "\n" +
+            "Nama Barang : " + listKode[0].nama + "\n" +
+            "Status to : " + passedVariable + "\n";
+        var insertLog = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
+            "('" + user + "', 'Edit Status','" + logString + "','" + dateNow + "')";
+        var kodePush = tokoianConn.query(updateStatus);
+        var logPush = tokoianConn.query(insertLog);
+
+        Promise.all([kodePush, logPush])
+            .then(function () {
+                res.send("ok")
+            }).catch(function (error) {
+            //logs out the error
+            console.error(error);
+        });
+    }).catch(function (error) {
+        //logs out the error
+        console.error(error);
+    });
 });
 
 /* GET ajax-sending-code page. */
@@ -1058,6 +1119,14 @@ router.get('/logout', function(req, res) {
         req.session.destroy(function(err) {
             res.redirect('/login-auth');
         })
+    }
+});
+
+router.use(function (err, req, res, next) {
+    if (err) {
+        console.log('Error', err);
+    } else {
+        console.log('404')
     }
 });
 
