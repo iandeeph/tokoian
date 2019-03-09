@@ -10,28 +10,28 @@ var querystring = require('querystring');
 //source : http://stackoverflow.com/questions/20210522/nodejs-mysql-error-connection-lost-the-server-closed-the-connection
 var db_config = {
     host         : 'localhost',
-    user         : 'bengkelb_root',
-    password     : 'assholefuck123A',
+    user         : 'root',
+    password     : 'T!k3tp01nt',
     insecureAuth : 'true',
-    database     : 'bengkelb_bandotcom'
+    database     : 'tokoian_db'
 };
 
-var bandotcomConn;
+var tokoianConn;
 
 function handleDisconnect() {
-    bandotcomConn = mysql.createPool(db_config,{
+    tokoianConn = mysql.createPool(db_config,{
         multipleStatements: true //for multiple update. Source : https://stackoverflow.com/questions/25552115/updating-multiple-rows-with-node-mysql-nodejs-and-q
     }); // Recreate the connection, since
     // the old one cannot be reused.
 
-    bandotcomConn.getConnection(function(err) {              // The server is either down
+    tokoianConn.getConnection(function(err) {              // The server is either down
         if(err) {                                     // or restarting (takes a while sometimes).
             console.log('error when connecting to db:', err);
             setTimeout(handleDisconnect, 2000); // We introduce a delay before attempting to reconnect,
         }                                     // to avoid a hot loop, and to allow our node script to
     });                                     // process asynchronous requests in the meantime.
                                             // If you're also serving http, display a 503 error.
-    bandotcomConn.on('error', function(err) {
+    tokoianConn.on('error', function(err) {
         console.log('db error', err);
         if(err.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
             handleDisconnect();                         // lost due to either server restart, or a
@@ -97,7 +97,7 @@ router.post('/', function(req, res) {
         var queryStr = "select * from tb_kode " +
             "LEFT JOIN tb_item ON tb_kode.idkode = tb_item.idkode " +
             "order by tb_kode.kode";
-        return bandotcomConn.query(queryStr)
+        return tokoianConn.query(queryStr)
             .then(function(rowItem) {
                 return Promise.each(lists, function (listStock) {
                     var cekKodePromise = new Promise(function (resolve, reject) {
@@ -132,13 +132,13 @@ router.post('/', function(req, res) {
                             var queryTrxString = "INSERT INTO bengkelb_bandotcom.tb_trx (orderid, idkode, hargabeli, hargajual, tanggal, jenistrx, jumlah, ongkos, lain) VALUES?";
                             var queryLogString = "INSERT INTO bengkelb_bandotcom.tb_log (user, aksi, detail, tanggal) VALUES?";
 
-                            var pushTrx = bandotcomConn.query(queryTrxString, [arrayTrxQuery]);
-                            var pushLog = bandotcomConn.query(queryLogString, [arrayLogQuery]);
+                            var pushTrx = tokoianConn.query(queryTrxString, [arrayTrxQuery]);
+                            var pushLog = tokoianConn.query(queryLogString, [arrayLogQuery]);
 
                             Promise.all([pushTrx, pushLog])
                                 .then(function () {
                                     return Promise.each(queryItemString, function (queryItem) {
-                                        return bandotcomConn.query(queryItem)
+                                        return tokoianConn.query(queryItem)
                                             .then(function() {
                                             }).catch(function (error) {
                                                 //logs out the error
@@ -152,109 +152,120 @@ router.post('/', function(req, res) {
                                         res.redirect('/?'+ string);
                                     });
                                 }).catch(function (error) {
-                                    //logs out the error
-                                    console.error(error);
-                                    var string = encodeURIComponent("2");
-                                    res.redirect('/?respost='+ string);
-                                });
+                                //logs out the error
+                                console.error(error);
+                                var string = encodeURIComponent("2");
+                                res.redirect('/?respost='+ string);
+                            });
                         });
                 });
             });
     }
 });
 
-///* GET add-code page. */
-//router.get('/add-code', function(req, res) {
-//    if(_.isUndefined(req.session.login) || req.session.login != 'loged'){
-//        res.redirect('/login-auth');
-//    }else {
-//        var passedVariable = req.query.respost;
-//        var message = {"text": "", "color": ""};
-//        switch (passedVariable) {
-//            case '1':
-//                message = {"text": "Jenis berhasil ditambah..", "color": "green"};
-//                break;
-//            case '2':
-//                message = {"text": "Tambah jenis gagal..!!", "color": "red"};
-//                break;
-//            default :
-//                message = {"text": "", "color": ""};
-//                break;
-//        }
-//        res.render('add-code', {
-//            message: message
-//        });
-//    }
-//});
-//
-///* POST add-code page. */
-//router.post('/add-code', function(req, res) {
-//    if(_.isUndefined(req.session.login) || req.session.login != 'loged'){
-//        res.redirect('/login-auth');
-//    }else {
-//        var dateNow = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
-//        var lists = Array.prototype.slice.call(req.body.listStock);
-//        var user = req.session.name;
-//        var arrayKodeQuery = [];
-//        var arrayItemQuery = [];
-//        var arrayLogQuery = [];
-//        var num = 1;
-//        return bandotcomConn.query("select max(idkode) maxid from tb_kode")
-//            .then(function (maxId) {
-//                console.log(maxId);
-//                return Promise.each(lists, function (listStock) {
-//                    //`bengkelb_bandotcom`.`tb_kode` (`idkode`, `kode`, `nama`, `merek`, `jenis`, `deskripsi`, `catatan`)
-//                    var maxIdCode = (parseInt(maxId[0].maxid) + num);
-//                    //console.log(maxIdCode);
-//                    arrayKodeQuery.push([maxIdCode, listStock.kode, listStock.nama, listStock.merek, listStock.jenis, listStock.deskripsi, listStock.catatan]);
-//                    arrayItemQuery.push([maxIdCode, "0"]);
-//
-//                    var logString = "ID Kode : " + maxIdCode + "\n" +
-//                        "Kode Barang : " + listStock.kode + "\n" +
-//                        "Merek Barang : " + listStock.merek + "\n" +
-//                        "Nama Barang : " + listStock.nama + "\n" +
-//                        "Jenis Barang : " + listStock.jenis + "\n" +
-//                        "Deskripsi Barang : " + listStock.deskripsi + "\n" +
-//                        "Catatan Barang : " + listStock.catatan;
-//
-//                    arrayLogQuery.push([user, "Tambah Jenis Barang", logString, dateNow]);
-//                    num++;
-//                }).then(function () {
-//                    var queryKodeString = "INSERT INTO bengkelb_bandotcom.tb_kode (idkode, kode, nama, merek, jenis, deskripsi, catatan) VALUES?";
-//                    var queryItemString = "INSERT INTO bengkelb_bandotcom.tb_item (idkode, jumlah) VALUES?";
-//                    var queryLogString = "INSERT INTO bengkelb_bandotcom.tb_log (user, aksi, detail, tanggal) VALUES?";
-//
-//                    var pushKode = bandotcomConn.query(queryKodeString, [arrayKodeQuery]);
-//                    var pushItem = bandotcomConn.query(queryItemString, [arrayItemQuery]);
-//                    var pushLog = bandotcomConn.query(queryLogString, [arrayLogQuery]);
-//
-//                    Promise.all([pushKode, pushItem, pushLog])
-//                        .then(function (results) {
-//                            var string = encodeURIComponent("1");
-//                            res.redirect('/add-code?respost=' + string);
-//                        }).catch(function (error) {
-//                            //logs out the error
-//                            console.error(error);
-//                            var string = encodeURIComponent("2");
-//                            res.redirect('/add-code?respost=' + string);
-//                        });
-//                });
-//            });
-//    }
-//});
+// /* GET add-code page. */
+// router.get('/add-code', function(req, res) {
+//     var passedVariable = req.query.respost || {};
+//     var message = {"text": "", "color": ""};
+//     switch (passedVariable) {
+//         case '1':
+//             message = {"text": "Jenis berhasil ditambah..", "color": "green"};
+//             break;
+//         case '2':
+//             message = {"text": "Tambah jenis gagal..!!", "color": "red"};
+//             break;
+//         default :
+//             message = {"text": "", "color": ""};
+//             break;
+//     }
+//     res.render('add-code', {
+//         message: message
+//     });
+// });
+
+/* GET code-list page. */
+router.get('/code-list', function(req, res) {
+    var passedVariable = req.query.respost || {};
+    var message = {"text": "", "color": ""};
+    return tokoianConn.query("select * from kode")
+        .then(function (listCode) {
+            switch (passedVariable) {
+                case '1':
+                    message = {"text": "Jenis berhasil ditambah..", "color": "green"};
+                    break;
+                case '2':
+                    message = {"text": "Tambah jenis gagal..!!", "color": "red"};
+                    break;
+                default :
+                    message = {"text": "", "color": ""};
+                    break;
+            }
+            res.render('code', {
+                listCode : listCode,
+                message: message
+            });
+        });
+});
+
+/* POST add-code page. */
+router.post('/code-list', function(req, res) {
+    var dateNow = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
+    var user = req.session.name;
+    var arrayKodeQuery = [];
+    var arrayLogQuery = [];
+    var num = 1;
+    if (!_.isUndefined(req.body.addCodeSubmit)){
+        var lists = Array.prototype.slice.call(req.body.listKode);
+
+        return tokoianConn.query("select max(idkode) maxid from kode")
+            .then(function (maxId) {
+                // console.log(maxId);
+                return Promise.each(lists, function (listStock) {
+                    //`tb_kode` (`idkode`, `kode`, `nama`, `merek`, `jenis`, `deskripsi`, `catatan`)
+                    var maxIdCode = (parseInt(maxId[0].maxid) + num);
+                    //console.log(maxIdCode);
+                    arrayKodeQuery.push([listStock.kode, listStock.nama]);
+
+                    var logString = "ID Kode : " + maxIdCode + "\n" +
+                        "Kode Barang : " + listStock.kode + "\n" +
+                        "Nama Barang : " + listStock.nama + "\n";
+
+                    arrayLogQuery.push([user, "Tambah Kode Produk", logString, dateNow]);
+                    num++;
+                }).then(function () {
+                    var queryKodeString = "INSERT INTO kode (kode, nama) VALUES?";
+                    var queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES?";
+
+                    var pushKode = tokoianConn.query(queryKodeString, [arrayKodeQuery]);
+                    var pushLog = tokoianConn.query(queryLogString, [arrayLogQuery]);
+
+                    Promise.all([pushKode, pushLog])
+                        .then(function (results) {
+                            var string = encodeURIComponent("1");
+                            res.redirect('/code-list?respost=' + string);
+                        }).catch(function (error) {
+                        //logs out the error
+                        console.error(error);
+                        var string = encodeURIComponent("2");
+                        res.redirect('/code-list?respost=' + string);
+                    });
+                });
+            });
+    }
+});
 
 /* GET ajax-sending-code page. */
 router.get('/sending-code', function(req, res) {
     if(_.isUndefined(req.session.login) || req.session.login != 'loged'){
         res.redirect('/login-auth');
     }else {
-        bandotcomConn.query("select * from tb_kode order by kode")
+        tokoianConn.query("select * from tb_kode order by kode")
             .then(function (rowKode) {
                 res.json(rowKode);
             }).catch(function (error) {
-                //logs out the error
-                console.error(error);
-            });
+            //logs out the error
+            console.error(error);
+        });
     }
 });
 
@@ -272,7 +283,7 @@ router.get('/sending-code-content', function(req, res) {
             passedVariable = decodeURI(req.query.name);
             queryStr = "select * from tb_kode left join tb_item on tb_kode.idkode = tb_item.idkode where tb_kode.kode = '" + passedVariable + "' order by kode";
         }
-        return bandotcomConn.query(queryStr)
+        return tokoianConn.query(queryStr)
             .then(function (rowItem) {
                 res.json(rowItem);
             }).catch(function (error) {
@@ -295,7 +306,7 @@ router.get('/sending-content-by-name', function(req, res) {
             "LEFT JOIN tb_item ON tb_kode.idkode = tb_item.idkode " +
             "WHERE tb_kode.kode = '" + passedVariable + "'" +
             "order by tb_kode.kode";
-        return bandotcomConn.query(queryStr)
+        return tokoianConn.query(queryStr)
             .then(function (rowItem) {
                 res.json(rowItem);
             }).catch(function (error) {
@@ -315,7 +326,7 @@ router.get('/sending-full-content', function(req, res) {
         queryStr = "select * from tb_kode " +
             "LEFT JOIN tb_item ON tb_kode.idkode = tb_item.idkode " +
             "order by tb_kode.kode";
-        return bandotcomConn.query(queryStr)
+        return tokoianConn.query(queryStr)
             .then(function (rowItem) {
                 res.json(rowItem);
             }).catch(function (error) {
@@ -344,16 +355,16 @@ router.get('/add-stock', function(req, res) {
                 break;
         }
 
-        bandotcomConn.query("select * from tb_kode order by kode")
+        tokoianConn.query("select * from tb_kode order by kode")
             .then(function (rowKode) {
                 res.render('add-stock', {
                     message: message,
                     rows: rowKode
                 });
             }).catch(function (error) {
-                //logs out the error
-                console.error(error);
-            });
+            //logs out the error
+            console.error(error);
+        });
     }
 });
 
@@ -374,7 +385,7 @@ router.post('/add-stock', function(req, res) {
         var logString;
         var string = encodeURIComponent("1");
         var num = 1;
-        return bandotcomConn.query("select *, tb_kode.idkode as idkode from tb_kode " +
+        return tokoianConn.query("select *, tb_kode.idkode as idkode from tb_kode " +
             "LEFT JOIN tb_item ON tb_kode.idkode = tb_item.idkode " +
             "order by tb_kode.kode")
             .then(function (rows) {
@@ -410,18 +421,18 @@ router.post('/add-stock', function(req, res) {
                             queryLogString = "INSERT INTO bengkelb_bandotcom.tb_log (user, aksi, detail, tanggal) VALUES " +
                                 "('" + user + "', 'Tambah Stock','" + logString + "','" + dateNow + "')";
 
-                            var itemPush = bandotcomConn.query(queryItemString);
-                            var trxPush = bandotcomConn.query(queryTrxString);
-                            var logPush = bandotcomConn.query(queryLogString);
+                            var itemPush = tokoianConn.query(queryItemString);
+                            var trxPush = tokoianConn.query(queryTrxString);
+                            var logPush = tokoianConn.query(queryLogString);
 
                             Promise.all([itemPush, trxPush, logPush])
                                 .then(function () {
                                     string = encodeURIComponent("1");
                                 }).catch(function (error) {
-                                    //logs out the error
-                                    string = encodeURIComponent("2");
-                                    console.error(error);
-                                });
+                                //logs out the error
+                                string = encodeURIComponent("2");
+                                console.error(error);
+                            });
                         } else {
                             //KALO KODE BELUM ADA SAMA SEKALI
                             var findMaxIdKodePromise = new Promise(function (resolve, reject) {
@@ -453,19 +464,19 @@ router.post('/add-stock', function(req, res) {
                                 queryLogString = "INSERT INTO bengkelb_bandotcom.tb_log (user, aksi, detail, tanggal) VALUES " +
                                     "('" + user + "', 'Tambah Stock Jenis Baru','" + logString + "','" + dateNow + "')";
 
-                                var itemPush = bandotcomConn.query(queryItemString);
-                                var kodePush = bandotcomConn.query(queryKodeString);
-                                var trxPush = bandotcomConn.query(queryTrxString);
-                                var logPush = bandotcomConn.query(queryLogString);
+                                var itemPush = tokoianConn.query(queryItemString);
+                                var kodePush = tokoianConn.query(queryKodeString);
+                                var trxPush = tokoianConn.query(queryTrxString);
+                                var logPush = tokoianConn.query(queryLogString);
 
                                 Promise.all([itemPush, kodePush, trxPush, logPush])
                                     .then(function () {
                                         string = encodeURIComponent("1");
                                     }).catch(function (error) {
-                                        //logs out the error
-                                        string = encodeURIComponent("2");
-                                        console.error(error);
-                                    });
+                                    //logs out the error
+                                    string = encodeURIComponent("2");
+                                    console.error(error);
+                                });
                             }).catch(function (error) {
                                 //logs out the error
                                 string = encodeURIComponent("2");
@@ -489,7 +500,7 @@ router.get('/recap-stock', function(req, res) {
     if(_.isUndefined(req.session.login) || req.session.login != 'loged'){
         res.redirect('/login-auth');
     }else {
-        bandotcomConn.query("select * from tb_kode " +
+        tokoianConn.query("select * from tb_kode " +
             "LEFT JOIN tb_item ON tb_kode.idkode = tb_item.idkode " +
             "order by tb_kode.kode")
             .then(function (rowItem) {
@@ -497,9 +508,9 @@ router.get('/recap-stock', function(req, res) {
                     rows: rowItem
                 });
             }).catch(function (error) {
-                //logs out the error
-                console.error(error);
-            });
+            //logs out the error
+            console.error(error);
+        });
     }
 });
 
@@ -516,16 +527,16 @@ router.get('/trxin-report', function(req, res) {
             "MONTH(tb_trx.tanggal) = '" + dateMonth + "' " +
             "AND YEAR(tb_trx.tanggal) = '" + dateYear + "' " +
             "order by tb_trx.tanggal";
-        bandotcomConn.query(queryString)
+        tokoianConn.query(queryString)
             .then(function (rowItem) {
                 res.render('trxin-report', {
                     rows: rowItem,
                     grandTotal: _.sumBy(rowItem, 'total')
                 });
             }).catch(function (error) {
-                //logs out the error
-                console.error(error);
-            });
+            //logs out the error
+            console.error(error);
+        });
     }
 });
 
@@ -552,7 +563,7 @@ router.post('/trxin-report', function(req, res) {
                 "tb_trx.tanggal between '" + startDate + "' " +
                 "AND '" + endDate + "' " +
                 "order by tb_trx.tanggal";
-            bandotcomConn.query(queryString)
+            tokoianConn.query(queryString)
                 .then(function (rowItem) {
                     if (!_.isEmpty(rowItem)) {
                         res.render('trxin-report', {
@@ -569,9 +580,9 @@ router.post('/trxin-report', function(req, res) {
                         });
                     }
                 }).catch(function (error) {
-                    //logs out the error
-                    console.error(error);
-                });
+                //logs out the error
+                console.error(error);
+            });
         }
     }
 });
@@ -589,7 +600,7 @@ router.get('/trxout-report', function(req, res) {
             "MONTH(tb_trx.tanggal) = '" + dateMonth + "' " +
             "AND YEAR(tb_trx.tanggal) = '" + dateYear + "' " +
             "order by tb_trx.tanggal";
-        bandotcomConn.query(queryString)
+        tokoianConn.query(queryString)
             .then(function (rowItem) {
                 var groupedOrderid = _.groupBy(rowItem, 'orderid');
 
@@ -600,9 +611,9 @@ router.get('/trxout-report', function(req, res) {
                 });
 
             }).catch(function (error) {
-                //logs out the error
-                console.error(error);
-            });
+            //logs out the error
+            console.error(error);
+        });
     }
 });
 
@@ -629,7 +640,7 @@ router.post('/trxout-report', function(req, res) {
                 "tb_trx.tanggal between '" + startDate + "' " +
                 "AND '" + endDate + "' " +
                 "order by tb_trx.tanggal";
-            bandotcomConn.query(queryString)
+            tokoianConn.query(queryString)
                 .then(function (rowItem) {
                     var groupedOrderid = _.groupBy(rowItem, 'orderid');
 
@@ -649,9 +660,9 @@ router.post('/trxout-report', function(req, res) {
                     }
 
                 }).catch(function (error) {
-                    //logs out the error
-                    console.error(error);
-                });
+                //logs out the error
+                console.error(error);
+            });
         }
     }
 });
@@ -673,7 +684,7 @@ router.get('/income-report', function(req, res) {
             "AND YEAR(tb_trx.tanggal) = '" + dateYear + "' " +
             "order by tb_trx.tanggal";
         //console.log(queryString);
-        bandotcomConn.query(queryString)
+        tokoianConn.query(queryString)
             .then(function (rowItem) {
                 //PEMBELIAN
                 var promisePembelian = new Promise(function (resolve, reject) {
@@ -745,7 +756,7 @@ router.post('/income-report', function(req, res) {
                 "tb_trx.tanggal between '" + startDate + "' " +
                 "AND '" + endDate + "' " +
                 "order by tb_trx.tanggal";
-            bandotcomConn.query(queryString)
+            tokoianConn.query(queryString)
                 .then(function (rowItem) {
                     //PEMBELIAN
                     var promisePembelian = new Promise(function (resolve, reject) {
@@ -805,7 +816,7 @@ router.get('/log', function(req, res) {
     }else {
         var dateMonth = moment().format("M");
         var dateYear = moment().format("YYYY");
-        bandotcomConn.query("select * from tb_log where " +
+        tokoianConn.query("select * from tb_log where " +
             "MONTH(tanggal) = '" + dateMonth + "' " +
             "AND YEAR(tanggal) = '" + dateYear + "' " +
             "order by tanggal DESC")
@@ -814,9 +825,9 @@ router.get('/log', function(req, res) {
                     rows: rowItem
                 });
             }).catch(function (error) {
-                //logs out the error
-                console.error(error);
-            });
+            //logs out the error
+            console.error(error);
+        });
     }
 });
 
@@ -835,7 +846,7 @@ router.post('/log', function(req, res) {
                 'start': moment(new Date(postDate.start)).format("DD MMMM, YYYY"),
                 'end': moment(new Date(postDate.end)).format("DD MMMM, YYYY")
             };
-            bandotcomConn.query("select * from tb_log where " +
+            tokoianConn.query("select * from tb_log where " +
                 "tanggal between '" + startDate + "' " +
                 "AND '" + endDate + "' " +
                 "order by tanggal DESC")
@@ -845,9 +856,9 @@ router.post('/log', function(req, res) {
                         filterDate: filterDate
                     });
                 }).catch(function (error) {
-                    //logs out the error
-                    console.error(error);
-                });
+                //logs out the error
+                console.error(error);
+            });
         }
     }
 });
@@ -870,7 +881,7 @@ router.get('/qty-edit', function(req, res) {
                 message = {"text": "", "color": ""};
                 break;
         }
-        bandotcomConn.query("select * from tb_kode " +
+        tokoianConn.query("select * from tb_kode " +
             "LEFT JOIN tb_item ON tb_kode.idkode = tb_item.idkode " +
             "order by tb_kode.kode")
             .then(function (rowItem) {
@@ -879,9 +890,9 @@ router.get('/qty-edit', function(req, res) {
                     message: message
                 });
             }).catch(function (error) {
-                //logs out the error
-                console.error(error);
-            });
+            //logs out the error
+            console.error(error);
+        });
     }
 });
 
@@ -903,7 +914,7 @@ router.get('/detail-edit', function(req, res) {
                 message = {"text": "", "color": ""};
                 break;
         }
-        bandotcomConn.query("select * from tb_kode " +
+        tokoianConn.query("select * from tb_kode " +
             "LEFT JOIN tb_item ON tb_kode.idkode = tb_item.idkode " +
             "order by tb_kode.kode")
             .then(function (rowItem) {
@@ -912,9 +923,9 @@ router.get('/detail-edit', function(req, res) {
                     message: message
                 });
             }).catch(function (error) {
-                //logs out the error
-                console.error(error);
-            });
+            //logs out the error
+            console.error(error);
+        });
     }
 });
 
@@ -934,7 +945,7 @@ router.post('/qty-edit', function(req, res) {
         var user = req.session.name;
         var jumlahForTrx = 0;
         var string = encodeURIComponent("1");
-        bandotcomConn.query("select * from tb_kode " +
+        tokoianConn.query("select * from tb_kode " +
             "LEFT JOIN tb_item ON tb_kode.idkode = tb_item.idkode " +
             "WHERE tb_item.iditem = '" + editId + "' " +
             "order by tb_kode.kode")
@@ -960,20 +971,20 @@ router.post('/qty-edit', function(req, res) {
                 var insertTrx = "INSERT INTO bengkelb_bandotcom.tb_trx (idkode, hargabeli, hargajual, tanggal, jenistrx, jumlah) VALUES " +
                     "('" + rowItem[0].idkode + "', '" + rowItem[0].hargabeli + "', '" + rowItem[0].hargajual + "', '" + dateNow + "', '3', '" + jumlahForTrx + "')";
 
-                var itemPush = bandotcomConn.query(updateItem);
-                var trxPush = bandotcomConn.query(insertTrx);
-                var logPush = bandotcomConn.query(insertLog);
+                var itemPush = tokoianConn.query(updateItem);
+                var trxPush = tokoianConn.query(insertTrx);
+                var logPush = tokoianConn.query(insertLog);
 
                 Promise.all([itemPush, trxPush, logPush])
                     .then(function () {
                         string = encodeURIComponent("1");
                         res.redirect('/qty-edit?respost=' + string);
                     }).catch(function (error) {
-                        //logs out the error
-                        console.error(error);
-                        string = encodeURIComponent("2");
-                        res.redirect('/qty-edit?respost=' + string);
-                    });
+                    //logs out the error
+                    console.error(error);
+                    string = encodeURIComponent("2");
+                    res.redirect('/qty-edit?respost=' + string);
+                });
             });
     }
 });
@@ -991,7 +1002,7 @@ router.post('/detail-edit', function(req, res) {
         var user = req.session.name;
         var string = encodeURIComponent("1");
 
-        bandotcomConn.query("select * from tb_kode " +
+        tokoianConn.query("select * from tb_kode " +
             "LEFT JOIN tb_item ON tb_kode.idkode = tb_item.idkode " +
             "WHERE tb_item.iditem = '" + editPost[0].id + "' " +
             "order by tb_kode.kode")
@@ -1021,20 +1032,20 @@ router.post('/detail-edit', function(req, res) {
                 var insertLog = "INSERT INTO bengkelb_bandotcom.tb_log (user, aksi, detail, tanggal) VALUES " +
                     "('" + user + "', 'Edit Jumlah Stock','" + logString + "','" + dateNow + "')";
 
-                var kodePush = bandotcomConn.query(updateKode);
-                var itemPush = bandotcomConn.query(updateItem);
-                var logPush = bandotcomConn.query(insertLog);
+                var kodePush = tokoianConn.query(updateKode);
+                var itemPush = tokoianConn.query(updateItem);
+                var logPush = tokoianConn.query(insertLog);
 
                 Promise.all([itemPush, kodePush, logPush])
                     .then(function () {
                         string = encodeURIComponent("1");
                         res.redirect('/detail-edit?respost=' + string);
                     }).catch(function (error) {
-                        //logs out the error
-                        console.error(error);
-                        string = encodeURIComponent("2");
-                        res.redirect('/detail-edit?respost=' + string);
-                    });
+                    //logs out the error
+                    console.error(error);
+                    string = encodeURIComponent("2");
+                    res.redirect('/detail-edit?respost=' + string);
+                });
             });
     }
 });

@@ -9,28 +9,28 @@ var crypto      = require('crypto');
 //source : http://stackoverflow.com/questions/20210522/nodejs-mysql-error-connection-lost-the-server-closed-the-connection
 var db_config = {
     host         : 'localhost',
-    user         : 'bengkelb_root',
-    password     : 'assholefuck123A',
+    user         : 'root',
+    password     : 'T!k3tp01nt',
     insecureAuth : 'true',
-    database     : 'bengkelb_bandotcom'
+    database     : 'tokoian_db'
 };
 
-var bandotcomConn;
+var tokoianConn;
 
 function handleDisconnect() {
-    bandotcomConn = mysql.createPool(db_config,{
+    tokoianConn = mysql.createPool(db_config,{
         multipleStatements: true //for multiple update. Source : https://stackoverflow.com/questions/25552115/updating-multiple-rows-with-node-mysql-nodejs-and-q
     }); // Recreate the connection, since
     // the old one cannot be reused.
 
-    bandotcomConn.getConnection(function(err) {              // The server is either down
+    tokoianConn.getConnection(function(err) {              // The server is either down
         if(err) {                                     // or restarting (takes a while sometimes).
             console.log('error when connecting to db:', err);
             setTimeout(handleDisconnect, 2000); // We introduce a delay before attempting to reconnect,
         }                                     // to avoid a hot loop, and to allow our node script to
     });                                     // process asynchronous requests in the meantime.
                                             // If you're also serving http, display a 503 error.
-    bandotcomConn.on('error', function(err) {
+    tokoianConn.on('error', function(err) {
         console.log('db error', err);
         if(err.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
             handleDisconnect();                         // lost due to either server restart, or a
@@ -56,7 +56,7 @@ router.post('/', function(req, res, next) {
     var postPassword = crypto.createHash('md5').update(req.body.login_password).digest('hex');
     var arrayLogQuery = [];
     //console.log(postPassword);
-    bandotcomConn.query('SELECT * FROM tb_admin').then(function(users) {
+    tokoianConn.query('SELECT * FROM user').then(function(users) {
         //console.log(users);
         var loginPromise = new Promise(function (resolve, reject) {
             resolve(_.find(users, {'username' : postUsername , 'password' : postPassword}));
@@ -76,14 +76,14 @@ router.post('/', function(req, res, next) {
                 //console.log(req.session.name );
                 var logString = "Username : "+ loginItem.username +"\n" +
                     "Nama : "+loginItem.nama;
-                var queryLogString = "INSERT INTO tb_log (user, aksi, detail, tanggal) VALUES " +
+                var queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
                     "('" + loginItem.nama + "', 'User Login','" + logString + "','" + dateNow + "')";
 
-                var logPush = bandotcomConn.query(queryLogString);
+                var logPush = tokoianConn.query(queryLogString);
 
                 Promise.all([logPush])
                     .then(function () {
-                        res.redirect('/');
+                        res.redirect(req.session.tempUrl);
                     });
             }
         }).catch(function(error){

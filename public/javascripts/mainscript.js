@@ -1,7 +1,7 @@
 var today = new Date();
 var day = today.getDate();
 day ='#tanggal' + day;
-var numFieldTrx = 2;
+var numFieldTrx = 1;
 var autocompleteData = {};
 
 $(document).ready(function() {
@@ -20,6 +20,31 @@ $(document).ready(function() {
         closeOnSelect: true // Close upon selecting a date,
     });
     $('.modal').modal();
+
+    $("#btnAddKode").click(function () {
+        $("#kodeField").append('' +
+            '<div class="row addedTrx'+ numFieldTrx +'">' +
+            '<div class="input-field col s4">' +
+            '<input id="kode-produk'+ numFieldTrx +'" name="listKode['+ numFieldTrx +'][kode]" type="text" class="validate" required>' +
+            '<label for="kode-produk'+ numFieldTrx +'">Kode Produk</label>' +
+            '</div>' +
+            '<div class="input-field col s6">' +
+                '<input id="nama-produk'+ numFieldTrx +'" name="listKode['+ numFieldTrx +'][nama]" type="text" class="validate" required>' +
+            '<label for="nama-produk'+ numFieldTrx +'">Nama Produk</label>' +
+            '</div>' +
+            '<div class="col s2 mt-10 addedTrx'+ numFieldTrx +'">' +
+            '<a class="btn-floating btn waves-effect waves-light red darken-3 btnRemTrx'+ numFieldTrx +'" name="btnRemTrx'+ numFieldTrx +'" id="'+ numFieldTrx +'" title="Hapus"><i class="material-icons">remove</i></a>' +
+            '</div>');
+        $('select').material_select();
+        numFieldTrx++;
+
+        $('[name^=btnRemTrx]').click(function () {
+            var numToRem = $(this).attr('id');
+            var elm = ".addedTrx"+ numToRem;
+
+            $(elm).remove();
+        });
+    });
 
     //================ page add-stock ==================
     var submitBtnStock = $('#addStockSubmit');

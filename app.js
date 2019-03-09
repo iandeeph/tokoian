@@ -12,6 +12,47 @@ var login = require('./routes/login');
 
 var app = express();
 
+function checkAuth (req, res, next) {
+    // you should add to this list, for each and every secure url
+    // console.log(req.url);
+    //   req.session.tempUrl = "/";
+    if (!req.session || !req.session.login) {
+        // console.log("URL before login", req.url);
+        if (req.url.substring(0, 11) === '/login-auth') {
+        }else{
+            // console.log('checkAuth ' + req.url);
+
+            req.session.tempUrl = req.url;
+            res.redirect('/login-auth');
+            return;
+        }
+    }else if(req.session || req.session.login){
+        // console.log("URL after login", req.url);
+        if (req.url.substring(0, 11) === '/login-auth'){
+            res.redirect('/');
+            return;
+        }else {
+            if (req.session.priv == 1){
+                if(req.url === '/' || req.url.substring(0, 10) === '/code-list') {
+                    // console.log("Aman");
+                }else{
+                    res.redirect('/');
+                    return;
+                }
+            }else if (req.session.priv == 2){
+                if(req.url === '/' || req.url.substring(0, 10) === '/code-list') {
+                }else{
+                    res.redirect('/');
+                    return;
+                }
+            }
+        }
+    }
+
+    next();
+}
+
+
 // view engine setup
 app.engine('handlebars', exphbs({
     defaultLayout: 'main',
@@ -36,6 +77,8 @@ app.use(function(req,res,next){
     res.locals.session = req.session;
     next();
 });
+
+app.use(checkAuth);
 
 app.use('/', index);
 app.use('/login-auth', login);

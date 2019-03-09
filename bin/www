@@ -5,7 +5,7 @@
  */
 
 var app = require('../app');
-var debug = require('debug')('bandotcom:server');
+var debug = require('debug')('tokoian:server');
 var http = require('http');
 
 /**
@@ -16,7 +16,7 @@ var http = require('http');
 // var port = normalizePort('3000');
 //=======
 
-var port = normalizePort(process.env.PORT || '62540');
+var port = normalizePort(process.env.PORT || '3300');
 //var port = normalizePort('80');
 //>>>>>>> c34c83cf4ab0db6ff2a34edc4ad99fce67f1a698
 app.set('port', port);

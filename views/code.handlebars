@@ -1,0 +1,72 @@
+{{#section 'title'}}
+    List Kode
+{{/section}}
+{{error}}
+
+<div class="row container">
+    <div class="col s12 mt-20">
+        <div class="col s12 mb-20 mt-20 center">
+            <span class="font-40">List Kode</span>
+        </div>
+        <div class="row">
+            <form action="" method="post">
+                <div class="col s12 container">
+                    <div class="row">
+                        <div class="input-field">
+                            <a class="btn-floating btn-large waves-effect waves-light green modal-trigger" href="#addCode"><i class="material-icons">add</i></a>
+                        </div>
+                    </div>
+                    <div class="col s12 mb-20">
+                        <span class="font-20 {{message.color}}-text" id="message">{{message.text}}</span>
+                    </div>
+                    <div class="home-table row">
+                        <table class="bordered">
+                            <thead>
+                                <tr class="border-bottom">
+                                    <th width="30%">Kode Produk</th>
+                                    <th width="70%">Nama Produk</th>
+                                </tr>
+                            </thead>
+                            <tbody id="addStockBlock">
+                            {{#each listCode}}
+                                <tr>
+                                    <td>{{kode}}</td>
+                                    <td>{{nama}}</td>
+                                </tr>
+                            {{/each}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="addCode" class="modal">
+                    <div class="modal-content">
+                        <div class="col s12 container">
+                            <div class="col s12 mb-20 mt-20 center">
+                                <span class="font-40">Tambah Kode Produk</span>
+                            </div>
+                            <div class="row" id="kodeField">
+                                <div class="row">
+                                    <div class="input-field col s4">
+                                        <input id="kode-produk" name="listKode[0][kode]" type="text" class="validate" required>
+                                        <label for="kode-produk">Kode Produk</label>
+                                    </div>
+                                    <div class="input-field col s6">
+                                        <input id="nama-produk" name="listKode[0][nama]" type="text" class="validate" required>
+                                        <label for="nama-produk">Nama Produk</label>
+                                    </div>
+                                    <div class="col s2 mt-10">
+                                        <a class="btn-floating btn waves-effect waves-light green darken-3" id="btnAddKode" title="Tambah Kode"><i class="material-icons">add</i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer modal-fixed-footer">
+                        <button type="submit" name="addCodeSubmit" id="addCodeSubmit-bot" class="modal-close waves-effect waves-light btn grey darken-3 left ml-10 mb-10">Submit</button>
+                        <a href="#!" class="modal-close waves-effect waves-light btn grey darken-1 left mb-10">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
