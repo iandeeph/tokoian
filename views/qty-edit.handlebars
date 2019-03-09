@@ -1,0 +1,93 @@
+{{#section 'title'}}
+    Edit Quantity
+{{/section}}
+{{error}}
+
+<div class="row almost-full">
+    <div class="col s12 mt-20">
+        <div class="col s12 mb-20 mt-20 center">
+            <span class="font-40">Edit Quantity</span>
+        </div>
+        <div class="col s12">
+            <span class="font-20 {{message.color}}-text" id="message">{{message.text}}</span>
+        </div>
+        <div class="row">
+            <div class="col s12 almost-full">
+                <div class="home-table row">
+                    <table class="bordered">
+                        <thead>
+                        <tr class="border-bottom">
+                            <th width="2%">No</th>
+                            <th width="10%">Kode Barang</th>
+                            <th width="5%">Merek</th>
+                            <th width="13%">Nama Barang</th>
+                            <th width="5%">Jenis</th>
+                            <th width="4%">Harga Beli</th>
+                            <th width="4%">Harga Jual</th>
+                            <th width="15%">Deskripsi Barang</th>
+                            <th width="2%">Jumlah</th>
+                            <th width="10%">Catatan</th>
+                            <th width="1%">Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{#each rows}}
+                            <tr>
+                                <td>{{numbyIndex @key}}</td>
+                                <td>{{kode}}</td>
+                                <td>{{merek}}</td>
+                                <td>{{nama}}</td>
+                                <td>{{jenis}}</td>
+                                <td>{{numberFormat hargabeli}}</td>
+                                <td>{{numberFormat hargajual}}</td>
+                                <td>{{deskripsi}}</td>
+                                <td>{{zeroOrNumber jumlah}}</td>
+                                <td>{{catatan}}</td>
+                                <td class="center"><a href="#modalEditQty-{{iditem}}" class="modal-trigger btn-floating btn waves-effect waves-light green darken-3" title="Edit Quantity"><i class="material-icons">edit</i></a></td>
+                            </tr>
+                        {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {{#each rows}}
+            <!-- Modal Structure -->
+            <div id="modalEditQty-{{iditem}}" class="modal modal-fixed-footer">
+                <form action="" method="post">
+                    <div class="modal-content">
+                        <h4>Quantity Edit</h4>
+                        <div class="row">
+                            <div class="col s12">
+                                <div class="input-field col s6">
+                                    <input placeholder="{{jumlah}}" id="editQty-{{iditem}}" name="edit[{{iditem}}][qty]" type="number" class="validate">
+                                    <input id="editId-{{iditem}}" name="edit[{{iditem}}][id]" type="hidden" value="{{iditem}}">
+                                    <label for="editQty-{{iditem}}">Jumlah Stock</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col s12">
+                                <div class="card-panel white">
+                                    <p>
+                                        Kode Barang : {{kode}} <br>
+                                        Merek Barang : {{merek}} <br>
+                                        Nama Barang : {{nama}} <br>
+                                        Jenis Barang : {{jenis}} <br>
+                                        Deskripsi Barang : {{deskripsi}} <br>
+                                        Catatan Barang : {{catatan}} <br>
+                                        Harga Beli : {{numberFormat hargabeli}} <br>
+                                        Harga Jual : {{numberFormat hargajual}} <br>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" href="#!" class="white-text modal-action modal-close waves-effect green darken-3 waves-green btn-flat ">Submit</button>
+                    </div>
+                </form>
+            </div>
+    {{/each}}
+    </div>
+</div>

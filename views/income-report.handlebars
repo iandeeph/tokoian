@@ -1,0 +1,118 @@
+{{#section 'title'}}
+    Laporan Rugi laba
+{{/section}}
+{{error}}
+
+<div class="row almost-full">
+    <div class="col s12 mt-20">
+        <div class="col s12 mb-20 mt-20 center">
+            <span class="font-40">Laporan Rugi Laba</span>
+        </div>
+        <div class="row">
+            <form action="" method="post">
+                <div class="col s12 almost-full">
+                    <div class="col s12">
+                        <ul class="collapsible col s12" data-collapsible="expandable">
+                            <li>
+                                <div class="collapsible-header">
+                                    <i class="material-icons">date_range</i>
+                                    Filter periode laporan
+                                </div>
+                                <div class="collapsible-body">
+                                    <div class="row">
+                                        <div class="col s12 m6 l6">
+                                            <label for="startPeriode">Dari Tanggal : </label>
+                                            <input id="startPeriode" name="periode[start]" type="text" class="datepicker" value="{{filterDate.start}}">
+                                        </div>
+                                        <div class="col s12 m6 l6">
+                                            <label for="endPeriode">Sampai Tanggal : </label>
+                                            <input id="endPeriode" name="periode[end]" type="text" class="datepicker" value="{{filterDate.end}}">
+                                        </div>
+                                        <div class="row">
+                                            <div class="input-field mt-20 col s12">
+                                                <button type="submit" name="dateFilterBtn" id="dateFilterBtn" class="waves-effect waves-light btn blue darken-3 left">Submit</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col s12">
+                        <span class="font-20 {{message.color}}-text" id="message">{{message.text}}</span>
+                    </div>
+                    <div class="home-table row">
+                        <table class="bordered">
+                            <thead>
+                            <tr class="border-bottom">
+                                <th width="1%">No</th>
+                                <th width="5%">Tanggal</th>
+                                <th width="5%">Transaksi</th>
+                                <th width="5%">Order ID</th>
+                                <th width="7%">Kode Barang</th>
+                                <th width="4%">Harga Beli</th>
+                                <th width="4%">Harga Jual</th>
+                                <th width="1%">Jumlah</th>
+                                <th width="4%">Total Beli</th>
+                                <th width="4%">Total Jual</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{#each rows}}
+                                <tr>
+                                    <td>{{numbyIndex @key}}</td>
+                                    <td>{{dateTime tanggal}}</td>
+                                    <td>{{jenisTrx jenistrx}}</td>
+                                    <td>{{stripForNull orderid}}</td>
+                                    <td>{{kode}}</td>
+                                    {{#compare jenistrx '1' operator="=="}}
+                                        <td class="center-align">{{numberFormat hargabeli}}</td>
+                                    {{else}}
+                                        {{#compare jenistrx '3' operator="=="}}
+                                            <td class="center-align">{{numberFormat hargabeli}}</td>
+                                        {{else}}
+                                            <td class="center-align">-</td>
+                                        {{/compare}}
+                                    {{/compare}}
+
+                                    {{#compare jenistrx '2' operator="=="}}
+                                        <td class="center-align">{{numberFormat hargajual}}</td>
+                                    {{else}}
+                                        <td class="center-align">-</td>
+                                    {{/compare}}
+                                    <td class="center-align">{{zeroOrNumber jumlah}}</td>
+
+                                    {{#compare jenistrx '1' operator="=="}}
+                                        <td class="center-align">{{numberFormat totalbeli}}</td>
+                                    {{else}}
+                                        {{#compare jenistrx '3' operator="=="}}
+                                            <td class="center-align">{{numberFormat totalbeli}}</td>
+                                        {{else}}
+                                            <td class="center-align">-</td>
+                                        {{/compare}}
+                                    {{/compare}}
+
+                                    {{#compare jenistrx '2' operator="=="}}
+                                        <td class="center-align">{{numberFormat totaljual}}</td>
+                                    {{else}}
+                                        <td class="center-align">-</td>
+                                    {{/compare}}
+                                </tr>
+                            {{/each}}
+                                <tr>
+                                    <td colspan="8" class="right-align">Total</td>
+                                    <td class="center-align">{{numberFormat grandTotalBeli}}</td>
+                                    <td class="center-align">{{numberFormat grandTotalJual}}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="8" class="right-align">Laba (Total Jual - Total Beli)</td>
+                                    <td colspan="2" class="center-align">{{numberFormat totalLaba}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

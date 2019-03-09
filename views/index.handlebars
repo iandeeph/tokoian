@@ -1,0 +1,87 @@
+{{#section 'title'}}
+    Transaksi Penjualan
+{{/section}}
+{{error}}
+
+<div class="row container">
+    <div class="col s12 mt-20">
+        <div class="col s12 mb-20 mt-20 center">
+            <span class="font-40">Transaksi Penjualan</span>
+        </div>
+        <div class="col s12 mb-10">
+            <span class="font-20 {{message.color}}-text" id="message">{{message.text}}</span>
+        </div>
+        <div class="row">
+            <form action="" method="post">
+                <div class="col s12 almost-full">
+                    <div class="home-table row">
+                        <table>
+                            <thead>
+                            <tr class="border-bottom">
+                                <th width="11%">Kode Barang</th>
+                                <th width="28%">Detail Barang</th>
+                                <th width="2%">Jumlah</th>
+                                <th width="7%">Harga</th>
+                                <th width="10%">Total</th>
+                                <th width="1%">Action</th>
+                            </tr>
+                            </thead>
+                            <tbody id="trxBlock">
+                            <tr class="bordered">
+                                <td><input class="inputListGroup autocompleteTrx" id="trxKode-1" name="listTrx[1][kode]" type="text" required></td>
+                                <td>
+                                    <pre id="detailTrx0" class="mt-0">
+
+                                    </pre>
+                                </td>
+                                <td><input class="inputListGroup center-align" id="trxJumlah-1" name="listTrx[1][jumlah]" type="number" required></td>
+                                <td class="center-align">
+                                    <span id="spanHarga0">
+
+                                    </span>
+                                </td>
+                                <td class="right-align">
+                                    <span id="spanTotal0">
+
+                                    </span>
+                                </td>
+                                <td class="center-align"><a class="btn waves-effect waves-light green darken-3 btn-floating" id="btnAddRowTrx" title="Tambah Barang"><i class="material-icons">add</i></a></td>
+                            </tr>
+                            </tbody>
+                            <tbody>
+                            <tr class="bordered">
+                                <td colspan="4" class="right-align">
+                                    <span>Ongkos</span>
+                                </td>
+                                <td class="right-align"><input class="inputListGroup input-short right-align" id="trxOngkos" name="other[ongkos]" type="text"></td>
+
+                                <td rowspan="3">
+                                    <button type="submit" name="trxSubmit" id="trxSubmit" class="waves-effect waves-light btn-large orange darken-3">
+                                        Cetak
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr class="bordered">
+                                <td colspan="4" class="right-align">
+                                    <span>Biaya Lain-lain</span>
+                                </td>
+                                <td class="right-align"><input class="inputListGroup input-short right-align" id="trxLain" name="other[lain]" type="text"></td>
+                            </tr>
+                            <tr class="bordered">
+                                <td colspan="4" class="right-align">
+                                    <span>Grand Total</span>
+                                </td>
+                                <td class="right-align">
+                                    <span id="spanGrandTotal">
+
+                                    </span>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

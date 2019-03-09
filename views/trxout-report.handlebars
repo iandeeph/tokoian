@@ -1,0 +1,92 @@
+{{#section 'title'}}
+    Laporan Penjualan
+{{/section}}
+{{error}}
+
+<div class="row almost-full">
+    <div class="col s12 mt-20">
+        <div class="col s12 mb-20 mt-20 center">
+            <span class="font-40">Laporan Penjualan</span>
+        </div>
+        <div class="row">
+            <form action="" method="post">
+                <div class="col s12 almost-full">
+                    <div class="col s12">
+                        <ul class="collapsible col s12" data-collapsible="expandable">
+                            <li>
+                                <div class="collapsible-header">
+                                    <i class="material-icons">date_range</i>
+                                    Filter periode laporan
+                                </div>
+                                <div class="collapsible-body">
+                                    <div class="row">
+                                        <div class="col s12 m6 l6">
+                                            <label for="startPeriode">Dari Tanggal : </label>
+                                            <input id="startPeriode" name="periode[start]" type="text" class="datepicker" value="{{filterDate.start}}">
+                                        </div>
+                                        <div class="col s12 m6 l6">
+                                            <label for="endPeriode">Sampai Tanggal : </label>
+                                            <input id="endPeriode" name="periode[end]" type="text" class="datepicker" value="{{filterDate.end}}">
+                                        </div>
+                                        <div class="row">
+                                            <div class="input-field mt-20 col s12">
+                                                <button type="submit" name="dateFilterBtn" id="dateFilterBtn" class="waves-effect waves-light btn blue darken-3 left">Submit</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col s12">
+                        <span class="font-20 {{message.color}}-text" id="message">{{message.text}}</span>
+                    </div>
+                    <div class="home-table row">
+                        <table class="bordered">
+                            <thead>
+                            <tr class="border-bottom">
+                                <th width="1%">No</th>
+                                <th width="3%">Order ID</th>
+                                <th width="8%">Tanggal</th>
+                                <th width="8%">Kode Barang</th>
+                                <th width="5%">Merek</th>
+                                <th width="5%">Jenis</th>
+                                <th width="8%">Nama Barang</th>
+                                <th width="13%">Deskripsi Barang</th>
+                                <th width="5%">Harga Jual</th>
+                                <th width="1%">Jumlah</th>
+                                <th width="3%">Total</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{#each template}}
+                                <tr>
+                                    <td rowspan="{{maxKey this}}">{{numbyIndex @index}}</td>
+                                    <td rowspan="{{maxKey this}}">{{@key}}</td>
+                                    <td rowspan="{{maxKey this}}">{{dateTime this.0.tanggal}}</td>
+                                </tr>
+                                    {{#each this}}
+                                        <tr>
+                                            <td>{{this.kode}}</td>
+                                            <td>{{this.merek}}</td>
+                                            <td>{{this.jenis}}</td>
+                                            <td>{{this.nama}}</td>
+                                            <td>{{this.deskripsi}}</td>
+                                            <td>{{numberFormat this.hargajual}}</td>
+                                            <td class="center-align">{{zeroOrNumber this.jumlah}}</td>
+                                            <td class="right-align">{{numberFormat this.total}}</td>
+                                        </tr>
+                                    {{/each}}
+                            {{/each}}
+                                <tr>
+                                    <td class="right-align" colspan="10">Total</td>
+                                    <td class="right-align">{{numberFormat grandTotal}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,57 @@
+{{#section 'title'}}
+    Tambah Jenis
+{{/section}}
+{{error}}
+
+<div class="row almost-full">
+    <div class="col s12 mt-20">
+        <div class="col s12 mb-20 mt-20 center">
+            <span class="font-40">Tambah Jenis Barang</span>
+        </div>
+        <div class="col s12">
+            <span class="font-20 {{message.color}}-text" id="message">{{message.text}}</span>
+        </div>
+        <div class="row">
+            <form action="" method="post">
+                <div class="col s12 almost-full">
+                    <div class="row">
+                        <div class="input-field">
+                            <button type="submit" name="addCodeSubmit" id="addCodeSubmit-top" class="waves-effect waves-light btn blue darken-3 left">Submit</button>
+                        </div>
+                    </div>
+                    <div class="home-table row">
+                        <table class="bordered">
+                            <thead>
+                                <tr class="border-bottom">
+                                    <th width="7%">Kode Barang</th>
+                                    <th width="7%">Merek</th>
+                                    <th width="13%">Nama Barang</th>
+                                    <th width="10%">Jenis</th>
+                                    <th width="15%">Deskripsi Barang</th>
+                                    <th width="10%">Catatan</th>
+                                    <th width="3%">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="addStockBlock">
+                                <tr>
+                                    <td><input class="inputListGroup" id="addStockKode-1" name="listStock[1][kode]" type="text" required></td>
+                                    <td><input class="inputListGroup" id="addStockMerek-1" name="listStock[1][merek]" type="text" required></td>
+                                    <td><input class="inputListGroup" id="addStockNama-1" name="listStock[1][nama]" type="text" required></td>
+                                    <td><input class="inputListGroup" id="addStockJenis-1" name="listStock[1][jenis]" type="text" required></td>
+                                    <td><textarea class="materialize-textarea inputListGroup" id="addStockDesc-1" name="listStock[1][deskripsi]"></textarea></td>
+                                    <td><textarea class="materialize-textarea inputListGroup" id="addStockDesc-1" name="listStock[1][catatan]"></textarea></td>
+                                    <td class="center"><a class="btn-floating btn waves-effect waves-light green darken-3" id="btnAddRowCode" title="Tambah Stock"><i class="material-icons">add</i></a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="row">
+                        <div class="input-field mt-20">
+                            <button type="submit" name="addCodeSubmit" id="addCodeSubmit-bot" class="waves-effect waves-light btn blue darken-3 left">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

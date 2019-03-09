@@ -1,0 +1,115 @@
+{{#section 'title'}}
+    Edit Detail
+{{/section}}
+{{error}}
+
+<div class="row almost-full">
+    <div class="col s12 mt-20">
+        <div class="col s12 mb-20 mt-20 center">
+            <span class="font-40">Edit Detail Barang</span>
+        </div>
+        <div class="col s12">
+            <span class="font-20 {{message.color}}-text" id="message">{{message.text}}</span>
+        </div>
+        <div class="row">
+            <div class="col s12 almost-full">
+                <div class="home-table row">
+                    <table class="bordered">
+                        <thead>
+                        <tr class="border-bottom">
+                            <th width="2%">No</th>
+                            <th width="10%">Kode Barang</th>
+                            <th width="5%">Merek</th>
+                            <th width="13%">Nama Barang</th>
+                            <th width="5%">Jenis</th>
+                            <th width="4%">Harga Beli</th>
+                            <th width="4%">Harga Jual</th>
+                            <th width="15%">Deskripsi Barang</th>
+                            <th width="2%">Jumlah</th>
+                            <th width="10%">Catatan</th>
+                            <th width="1%">Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{#each rows}}
+                            <tr>
+                                <td>{{numbyIndex @key}}</td>
+                                <td>{{kode}}</td>
+                                <td>{{merek}}</td>
+                                <td>{{nama}}</td>
+                                <td>{{jenis}}</td>
+                                <td>{{numberFormat hargabeli}}</td>
+                                <td>{{numberFormat hargajual}}</td>
+                                <td>{{deskripsi}}</td>
+                                <td>{{zeroOrNumber jumlah}}</td>
+                                <td>{{catatan}}</td>
+                                <td class="center"><a href="#modalEditDetail-{{iditem}}" class="modal-trigger btn-floating btn waves-effect waves-light green darken-3" title="Edit Detail"><i class="material-icons">edit</i></a></td>
+                            </tr>
+                        {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {{#each rows}}
+            <!-- Modal Structure -->
+            <div id="modalEditDetail-{{iditem}}" class="modal modal-fixed-footer">
+                <form action="" method="post">
+                    <div class="modal-content">
+                        <h4>Edit Detail</h4>
+                        <div class="row">
+                            <div class="col s12">
+                                <div class="input-field col s12 m12 l6">
+                                    <input value="{{kode}}" id="editKode-{{iditem}}" name="edit[{{iditem}}][kode]" type="text" class="validate" required>
+                                    <label for="editKode-{{iditem}}">Kode Barang</label>
+                                </div>
+                                <div class="input-field col s12 m12 l6">
+                                    <input value="{{merek}}" id="editMerek-{{iditem}}" name="edit[{{iditem}}][merek]" type="text" class="validate" required>
+                                    <label for="editMerek-{{iditem}}">Merek Barang</label>
+                                </div>
+                                <div class="input-field col s12 m12 l6">
+                                    <input value="{{nama}}" id="editNama-{{iditem}}" name="edit[{{iditem}}][nama]" type="text" class="validate" required>
+                                    <label for="editNama-{{iditem}}">Nama Barang</label>
+                                </div>
+                                <div class="input-field col s12 m12 l6">
+                                    <input value="{{jenis}}" id="editJenis-{{iditem}}" name="edit[{{iditem}}][jenis]" type="text" class="validate" required>
+                                    <label for="editJenis-{{iditem}}">Jenis Barang</label>
+                                </div>
+                                <div class="input-field col s12 m12 l6">
+                                    <input value="{{numberFormat hargabeli}}" id="editHargaBeli-{{iditem}}" name="edit[{{iditem}}][hargabeli]" type="text" class="validate" required>
+                                    <label for="editHargaBeli-{{iditem}}">Harga Beli</label>
+                                </div>
+                                <div class="input-field col s12 m12 l6">
+                                    <input value="{{numberFormat hargajual}}" id="editHargaJual-{{iditem}}" name="edit[{{iditem}}][hargajual]" type="text" class="validate" required>
+                                    <label for="editHargaJual-{{iditem}}">Harga Jual</label>
+                                </div>
+                                <div class="input-field col s12 m12 l12">
+                                    <textarea id="editDeskripsi-{{iditem}}" name="edit[{{iditem}}][deskripsi]" class="materialize-textarea" required>{{deskripsi}}</textarea>
+                                    <label for="editDeskripsi-{{iditem}}">Deskripsi Barang</label>
+                                </div>
+                                <div class="input-field col s12 m12 l12">
+                                    <textarea id="editCatatan-{{iditem}}" name="edit[{{iditem}}][catatan]" class="materialize-textarea" required>{{catatan}}</textarea>
+                                    <label for="editCatatan-{{iditem}}">Catatan</label>
+                                </div>
+                                    <input id="editId-{{iditem}}" name="edit[{{iditem}}][id]" type="hidden" value="{{iditem}}">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col s12">
+                                <div class="card-panel white">
+                                    <p>
+                                        Stock Barang : {{jumlah}} <br>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <a onclick="location.href = '/detail-edit';"  class="white-text waves-effect orange darken-3 waves-green btn-flat ">Cancel</a>
+                        <button type="submit" class="white-text modal-action modal-close waves-effect green darken-3 waves-green btn-flat ">Submit</button>
+                    </div>
+                </form>
+            </div>
+    {{/each}}
+    </div>
+</div>
