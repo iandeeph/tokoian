@@ -240,6 +240,9 @@ router.get('/code-list', function(req, res) {
                 listCode : listCode,
                 message: message
             });
+        }).catch(function (error) {
+            //logs out the error
+            console.error(error);
         });
 });
 
@@ -363,6 +366,511 @@ router.get('/status-code', function(req, res) {
         console.error(error);
     });
 });
+
+/* GET order-in page. */
+router.get('/order-in', function(req, res) {
+    var passedVariable = req.query.respost || {};
+    var dateNow = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
+    return tokoianConn.query("select orderid from trx where jenistrx = '1' order by tanggal desc limit 1")
+        .then(function (row) {
+            let getOrderId = (!_.isEmpty(row))?row[0].orderid : "00000";
+            let maxOrderId = parseInt(getOrderId.slice(-5).replace(/[^0-9]/gi, ''));
+            var orderid = "#IN-" + randomize('?Aa0',3,dateNow).concat(moment(Date.now()).format("YY"),("00000" + (maxOrderId+1)).slice(-5));
+            var message = {"text": "", "color": ""};
+                switch (passedVariable) {
+                    case '1':
+                        message = {"text": "Transaksi masuk berhasil ditambah..", "color": "green"};
+                        break;
+                    case '2':
+                        message = {"text": "Transaksi masuk gagal ditamnbah..!! "+ req.query.error, "color": "red"};
+                        break;
+                    default :
+                        message = {"text": "", "color": ""};
+                        break;
+                }
+                res.render('order-in', {
+                    orderid : orderid,
+                    message: message
+                });
+
+        }).catch(function (error) {
+            //logs out the error
+            console.error(error);
+        });
+});
+
+/* POST order-in page. */
+router.post('/order-in', function(req, res) {
+    var dateNow = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
+    var user = req.session.name;
+    let postOrder = req.body.inOrder || {};
+    let queryItemString = "";
+    let queryTrxString = "";
+    let queryLogString = "";
+    if (!_.isUndefined(req.body.ordeInSubmit)){
+        // console.log(req.body);
+        let queryStr = "select " +
+            "kode.idkode idkode, " +
+            "kode.nama nama, " +
+            "kode.kode kode, " +
+            "item.hargabeli hargabeli, " +
+            "item.jumlah jumlah " +
+            "from " +
+            "kode " +
+            "left join " +
+            "item " +
+            "on " +
+            "kode.idkode = item.idkode";
+        return tokoianConn.query(queryStr).then(function (rows) {
+            // console.log(queryStr);
+            var lists = Array.prototype.slice.call(postOrder);
+            return Promise.each(lists, function (listStock) {
+                var hargaBeli = parseInt(listStock.hargabeli.replace(/[^0-9]/gi, ''));
+                var jumlah = parseInt(listStock.jumlah.replace(/[^0-9]/gi, ''));
+                var total;
+
+                var cekNamakodePromise = new Promise(function (resolve, reject) {
+                    resolve(_.find(rows, {'kode': listStock.kode}));
+                });
+
+                cekNamakodePromise.then(function (resRows) {
+                    // console.log(resRows);
+                    if (!_.isEmpty(resRows) || !_.isUndefined(resRows)) {
+                        total = (parseInt(listStock.jumlah.replace(/[^0-9]/gi, '')) + parseInt(resRows.jumlah));
+
+                        queryItemString = "UPDATE item SET " +
+                            "hargabeli = '" + hargaBeli + "', " +
+                            "jumlah = '" + total + "' " +
+                            "where idkode = '" + resRows.idkode + "' ";
+
+
+                        queryTrxString = "INSERT INTO trx (idkode, orderid, hargabeli, tanggal, jenistrx, jumlah) VALUES " +
+                            "('" + resRows.idkode + "','" + listStock.orderid + "', '" + hargaBeli + "', '" + dateNow + "', '1', '" + jumlah + "')";
+
+                        let logString = "Order ID : " + listStock.orderid + "\n" +
+                            "Kode Barang : " + listStock.kode + "\n" +
+                            "Nama Barang : " + listStock.nama + "\n" +
+                            "Harga Beli : " + hargaBeli + "\n" +
+                            "Jumlah : " + jumlah;
+
+                        queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
+                            "('" + user + "', 'Barang Masuk','" + logString + "','" + dateNow + "')";
+
+                        var itemPush = tokoianConn.query(queryItemString);
+                        var trxPush = tokoianConn.query(queryTrxString);
+                        var logPush = tokoianConn.query(queryLogString);
+
+                        Promise.all([itemPush, trxPush, logPush])
+                            .then(function () {
+                                let string = encodeURIComponent("1");
+                                res.redirect('/order-in?respost=' + string);
+                            }).catch(function (error) {
+                            //logs out the error
+                            let string = encodeURIComponent("2");
+                            console.error(error);
+                            var errorStr = encodeURIComponent(error);
+                            res.redirect('/order-in?respost=' + string +'&error='+error);
+                        });
+                    }
+                }).catch(function (error) {
+                    //logs out the error
+                    console.error(error);
+                });
+            });
+
+        }).catch(function (error) {
+            //logs out the error
+            console.error(error);
+        });
+    }
+});
+
+/* GET get item page. */
+router.get('/get-item', function(req, res) {
+    // console.log(req.query.id);
+    if (!_.isUndefined(req.query.id)){
+        let qryString = "select " +
+            "kode.idkode idkode, " +
+            "kode.nama nama, " +
+            "kode.kode kode, " +
+            "item.hargabeli hargabeli, " +
+            "item.jumlah jumlah " +
+            "from " +
+            "kode " +
+            "left join " +
+            "item " +
+            "on " +
+            "kode.idkode = item.idkode " +
+            "where kode.status = '1' AND kode.kode = '"+ req.query.id +"'" +
+            "order by kode.nama";
+        return tokoianConn.query(qryString)
+            .then(function (listKode) {
+                // console.log(qryString);
+                res.json(listKode);
+            }).catch(function (error) {
+                //logs out the error
+                console.error(error);
+            });
+    } else {
+        return tokoianConn.query("select " +
+            "kode.idkode idkode, " +
+            "kode.nama nama, " +
+            "kode.kode kode, " +
+            "item.hargabeli hargabeli, " +
+            "item.jumlah jumlah " +
+            "from " +
+            "kode " +
+            "left join " +
+            "item " +
+            "on " +
+            "kode.idkode = item.idkode " +
+            "where kode.status = '1' " +
+            "order by kode.nama")
+            .then(function (listKode) {
+                res.json(listKode);
+            }).catch(function (error) {
+                //logs out the error
+                console.error(error);
+            });
+    }
+});
+
+/* GET recap page. */
+router.get('/recap-stock', function(req, res) {
+    tokoianConn.query("select * from kode " +
+        "LEFT JOIN item ON kode.idkode = item.idkode " +
+        "where kode.status = '1'" +
+        "order by kode.kode")
+        .then(function (rowItem) {
+            res.render('recap-stock', {
+                rows: rowItem
+            });
+        }).catch(function (error) {
+        //logs out the error
+        console.error(error);
+    });
+});
+
+/* GET trx-in page. */
+router.get('/trxin-report', function(req, res) {
+    var dateMonth = moment().format("M");
+    var dateYear = moment().format("YYYY");
+    var queryString = "select *, (hargabeli*jumlah) total from trx " +
+        "LEFT JOIN kode ON trx.idkode = kode.idkode " +
+        "where (jenistrx = '1' OR jenistrx = '3') AND " +
+        "MONTH(trx.tanggal) = '" + dateMonth + "' " +
+        "AND YEAR(trx.tanggal) = '" + dateYear + "' " +
+        "order by trx.tanggal";
+    tokoianConn.query(queryString)
+        .then(function (rowItem) {
+            var groupedOrderid = _.groupBy(rowItem, 'orderid');
+
+            res.render('trxin-report', {
+                template: groupedOrderid,
+                rows: rowItem,
+                grandTotal: _.sumBy(rowItem, 'total')
+            });
+        }).catch(function (error) {
+        //logs out the error
+        console.error(error);
+    });
+});
+
+/* POST trx-in page. */
+router.post('/trxin-report', function(req, res) {
+    var postDate = req.body.periode;
+
+    if (_.isEmpty(postDate.start)) {
+        res.redirect('/trxin-report');
+    } else {
+        var startDate = moment(new Date(postDate.start)).format("YYYY-MM-DD 00:00:00");
+        var endDate = moment(new Date(postDate.end)).format("YYYY-MM-DD 23:59:59");
+        var message = {'text': "", 'color': ""};
+        var filterDate = {
+            'start': moment(new Date(postDate.start)).format("DD MMMM, YYYY"),
+            'end': moment(new Date(postDate.end)).format("DD MMMM, YYYY")
+        };
+        var queryString = "select *, (hargabeli*jumlah) total from trx " +
+            "LEFT JOIN kode ON trx.idkode = kode.idkode " +
+            "where jenistrx = '1' AND " +
+            "trx.tanggal between '" + startDate + "' " +
+            "AND '" + endDate + "' " +
+            "order by trx.tanggal";
+        tokoianConn.query(queryString)
+            .then(function (rowItem) {
+                if (!_.isEmpty(rowItem)) {
+                    var groupedOrderid = _.groupBy(rowItem, 'orderid');
+                    res.render('trxin-report', {
+                        template: groupedOrderid,
+                        rows: rowItem,
+                        grandTotal: _.sumBy(rowItem, 'total'),
+                        filterDate: filterDate
+                    });
+                } else {
+                    message = {'text': "Tidak ada laporan di tanggal yang dipilih..", 'color': "red"};
+                    res.render('trxin-report', {
+                        message: message,
+                        grandTotal: 0,
+                        filterDate: filterDate
+                    });
+                }
+            }).catch(function (error) {
+            //logs out the error
+            console.error(error);
+        });
+    }
+});
+
+/* GET list customer page. */
+router.get('/customer-list', function(req, res) {
+    var passedVariable = req.query.respost || {};
+    var message = {"text": "", "color": ""};
+    return tokoianConn.query("select * from customer")
+        .then(function (listCust) {
+            switch (passedVariable) {
+                case '1':
+                    message = {"text": "Toko berhasil ditambah..", "color": "green"};
+                    break;
+                case '2':
+                    message = {"text": "Tambah toko gagal..!! "+ req.query.error, "color": "red"};
+                    break;
+                case '3':
+                    message = {"text": "Edit detail toko berhasil..", "color": "green"};
+                    break;
+                case '4':
+                    message = {"text": "Edit detail toko gagal..!! "+ req.query.error, "color": "red"};
+                    break;
+                default :
+                    message = {"text": "", "color": ""};
+                    break;
+            }
+            res.render('recap-customer', {
+                listCode : listCust,
+                message: message
+            });
+        }).catch(function (error) {
+            //logs out the error
+            console.error(error);
+        });
+});
+
+/* POST list customer page. */
+router.post('/customer-list', function(req, res) {
+    var dateNow = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
+    var user = req.session.name;
+    var arrayCustomerQuery = [];
+    var arrayLogQuery = [];
+    var logString = "";
+    let pushCust = "";
+    let pushLog = "";
+    if (!_.isUndefined(req.body.addTokoSubmit)){
+        var postCust = req.body.addToko;
+            // console.log(req.body);
+            arrayCustomerQuery.push([postCust.nama, postCust.pic, postCust.telp, postCust.alamat]);
+
+            logString = "Nama Toko : " + postCust.nama + "\n" +
+                "PIC : " + postCust.pic + "\n" +
+                "No Telp : " + postCust.telp + "\n" +
+                "Alamat : " + postCust.alamat + "\n";
+
+            arrayLogQuery.push([user, "Tambah Customer Baru", logString, dateNow]);
+            // console.log(arrayCustomerQuery);
+            var queryCustomerString = "INSERT INTO customer (nama, pic, telp, alamat) VALUES?";
+            var queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES?";
+
+            pushCust = tokoianConn.query(queryCustomerString, [arrayCustomerQuery]);
+            pushLog = tokoianConn.query(queryLogString, [arrayLogQuery]);
+
+            Promise.all([pushCust, pushLog])
+                .then(function (results) {
+                    // console.log(results);
+                    var string = encodeURIComponent("1");
+                    res.redirect('/customer-list?respost=' + string);
+                }).catch(function (error) {
+                //logs out the error
+                console.error(error);
+                var string = encodeURIComponent("2");
+                var errorStr = encodeURIComponent(error);
+                res.redirect('/customer-list?respost=' + string +'&error='+error);
+            });
+    }else if (!_.isUndefined(req.body.editTokoSubmit)){
+        var updateCust = "UPDATE customer SET nama =  '" + req.body.editToko.nama + "', pic =  '" + req.body.editToko.pic + "', telp =  '" + req.body.editToko.telp + "', alamat =  '" + req.body.editToko.alamat + "' where idcustomer = '" + decrypt(req.body.editTokoSubmit) + "'";
+
+        logString = "Nama Toko : " + req.body.editToko.namaOld + "\n" +
+            "PIC : " + req.body.editToko.picOld + "\n" +
+            "No Telp : " + req.body.editToko.telpOld + "\n" +
+            "Alamat : " + req.body.editToko.alamatOld + "\n" +
+            "Updated to :\n " +
+            "Nama Toko : " + req.body.editToko.nama + "\n" +
+            "PIC : " + req.body.editToko.pic + "\n" +
+            "No Telp : " + req.body.editToko.telp + "\n" +
+            "Alamat : " + req.body.editToko.alamat;
+        var insertLog = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
+            "('" + user + "', 'Edit Detail Customer','" + logString + "','" + dateNow + "')";
+        pushCust = tokoianConn.query(updateCust);
+        pushLog = tokoianConn.query(insertLog);
+        Promise.all([pushCust, pushLog])
+            .then(function () {
+                var string = encodeURIComponent("3");
+                res.redirect('/customer-list?respost=' + string);
+            }).catch(function (error) {
+            //logs out the error
+            console.error(error);
+            var string = encodeURIComponent("4");
+            var errorStr = encodeURIComponent(error);
+            res.redirect('/customer-list?respost=' + string +'&error='+error);
+        });
+    }
+});
+
+/* GET code-list page. */
+router.get('/cust-status-code', function(req, res) {
+    var user = req.session.name;
+    var dateNow = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
+    var passedVariable = req.query.changeStatus || {};
+    var id = decrypt(req.query.kode) || {};
+    var updateStatus = "UPDATE customer SET status =  '" + passedVariable + "' where idcustomer = '" + id + "'";
+    // console.log(updateStatus);
+    return tokoianConn.query("select * " +
+        "from " +
+        "customer " +
+        "where idcustomer = '" + id + "'").then(function (list) {
+            // console.log(list[0].nama);
+        var logString = "Nama Custmoer : " + list[0].nama + "\n" +
+            "Status to : " + passedVariable + "\n";
+        var insertLog = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
+            "('" + user + "', 'Edit Status Customer','" + logString + "','" + dateNow + "')";
+        var custPush = tokoianConn.query(updateStatus);
+        var logPush = tokoianConn.query(insertLog);
+        Promise.all([custPush, logPush])
+            .then(function () {
+                res.send("ok");
+            }).catch(function (error) {
+            //logs out the error
+            console.error(error);
+        });
+    }).catch(function (error) {
+        //logs out the error
+        console.error(error);
+    });
+});
+
+
+/* GET add sales order page. */
+router.get('/add-sales-order', function(req, res) {
+    var passedVariable = req.query.respost || {};
+    var message = {"text": "", "color": ""};
+    var dateNow = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
+    return tokoianConn.query("select soid from salesorder order by tanggal desc limit 1")
+        .then(function (row) {
+            let getOrderId = (!_.isEmpty(row))?row[0].soid : "00000";
+            let maxOrderId = parseInt(getOrderId.slice(-5).replace(/[^0-9]/gi, ''));
+            var orderid = "#SO-" + randomize('?Aa0', 3, dateNow).concat(moment(Date.now()).format("YY"), ("00000" + (maxOrderId + 1)).slice(-5));
+
+            switch (passedVariable) {
+                case '1':
+                    message = {"text": "Sales Order berhasil dibuat..", "color": "green"};
+                    break;
+                case '2':
+                    message = {"text": "Sales Order gagal dibuat..!! "+ req.query.error, "color": "red"};
+                    break;
+                default :
+                    message = {"text": "", "color": ""};
+                    break;
+            }
+            res.render('add-so', {
+                orderid : orderid,
+                message: message
+            });
+        }).catch(function (error) {
+            //logs out the error
+            console.error(error);
+        });
+});
+
+/* POST add sales order page. */
+router.post('/add-sales-order', function(req, res) {
+    var dateNow = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
+    var user = req.session.name;
+    let postOrder = req.body.addSo || {};
+    let querySoString = "";
+    let queryLogString = "";
+    if (!_.isUndefined(req.body.addSoSubmit)){
+        var lists = Array.prototype.slice.call(postOrder);
+        return Promise.each(lists, function (listSo) {
+    // console.log(listSo);
+            var hargaJual = parseInt(listSo.hargajual.replace(/[^0-9]/gi, ''));
+            var jumlah = parseInt(listSo.jumlah.replace(/[^0-9]/gi, ''));
+
+            querySoString = "INSERT INTO salesorder (soid, idcustomer, idkode, hargajual, tanggal, jumlah) VALUES " +
+                "('" + listSo.orderid + "','" + postOrder[0].idcustomer + "','" + listSo.idkode + "', '" + hargaJual + "', '" + dateNow + "', '" + jumlah + "')";
+            console.log(querySoString);
+
+            let logString = "Sales Order ID : " + listSo.orderid + "\n" +
+                "Nama Customer : " + postOrder[0].customer + "\n" +
+                "Kode Barang : " + listSo.kode + "\n" +
+                "Nama Barang : " + listSo.nama + "\n" +
+                "Harga Jual : " + hargaJual + "\n" +
+                "Jumlah : " + jumlah;
+
+            queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
+                "('" + user + "', 'Input Sales Order','" + logString + "','" + dateNow + "')";
+
+            var trxPush = tokoianConn.query(querySoString);
+            var logPush = tokoianConn.query(queryLogString);
+
+            Promise.all([trxPush, logPush])
+                .then(function () {
+                    let string = encodeURIComponent("1");
+                    res.redirect('/add-sales-order?respost=' + string);
+                }).catch(function (error) {
+                //logs out the error
+                let string = encodeURIComponent("2");
+                console.error(error);
+                var errorStr = encodeURIComponent(error);
+                res.redirect('/add-sales-order?respost=' + string +'&error='+error);
+            });
+        }).catch(function (error) {
+            //logs out the error
+            console.error(error);
+        });
+    }
+});
+
+/* GET ajax get cust detail. */
+router.get('/get-customer', function(req, res) {
+    // console.log(req.query.id);
+    if (!_.isUndefined(req.query.id)){
+        let qryString = "select * " +
+            "from " +
+            "customer " +
+            "where nama = '"+ req.query.id +"' and status = '1'" +
+            "order by nama";
+        return tokoianConn.query(qryString)
+            .then(function (listKode) {
+                // console.log(qryString);
+                res.json(listKode);
+            }).catch(function (error) {
+                //logs out the error
+                console.error(error);
+            });
+    }else{
+        let qryString = "select * " +
+            "from " +
+            "customer " +
+            "where status = '1'" +
+            "order by nama";
+        return tokoianConn.query(qryString)
+            .then(function (listKode) {
+                // console.log(qryString);
+                res.json(listKode);
+            }).catch(function (error) {
+                //logs out the error
+                console.error(error);
+            });
+    }
+});
+// ======================================================================================================================
 
 /* GET ajax-sending-code page. */
 router.get('/sending-code', function(req, res) {
@@ -605,97 +1113,24 @@ router.post('/add-stock', function(req, res) {
     }
 });
 
-/* GET recap page. */
-router.get('/recap-stock', function(req, res) {
-    if(_.isUndefined(req.session.login) || req.session.login != 'loged'){
-        res.redirect('/login-auth');
-    }else {
-        tokoianConn.query("select * from tb_kode " +
-            "LEFT JOIN tb_item ON tb_kode.idkode = tb_item.idkode " +
-            "order by tb_kode.kode")
-            .then(function (rowItem) {
-                res.render('recap-stock', {
-                    rows: rowItem
-                });
-            }).catch(function (error) {
-            //logs out the error
-            console.error(error);
-        });
-    }
-});
-
-/* GET trx-in page. */
-router.get('/trxin-report', function(req, res) {
-    if(_.isUndefined(req.session.login) || req.session.login != 'loged'){
-        res.redirect('/login-auth');
-    }else {
-        var dateMonth = moment().format("M");
-        var dateYear = moment().format("YYYY");
-        var queryString = "select *, (hargabeli*jumlah) total from tb_trx " +
-            "LEFT JOIN tb_kode ON tb_trx.idkode = tb_kode.idkode " +
-            "where (jenistrx = '1' OR jenistrx = '3') AND " +
-            "MONTH(tb_trx.tanggal) = '" + dateMonth + "' " +
-            "AND YEAR(tb_trx.tanggal) = '" + dateYear + "' " +
-            "order by tb_trx.tanggal";
-        tokoianConn.query(queryString)
-            .then(function (rowItem) {
-                res.render('trxin-report', {
-                    rows: rowItem,
-                    grandTotal: _.sumBy(rowItem, 'total')
-                });
-            }).catch(function (error) {
-            //logs out the error
-            console.error(error);
-        });
-    }
-});
-
-/* POST trx-in page. */
-router.post('/trxin-report', function(req, res) {
-    if(_.isUndefined(req.session.login) || req.session.login != 'loged'){
-        res.redirect('/login-auth');
-    }else {
-        var postDate = req.body.periode;
-
-        if (_.isEmpty(postDate.start)) {
-            res.redirect('/trxin-report');
-        } else {
-            var startDate = moment(new Date(postDate.start)).format("YYYY-MM-DD 00:00:00");
-            var endDate = moment(new Date(postDate.end)).format("YYYY-MM-DD 23:59:59");
-            var message = {'text': "", 'color': ""};
-            var filterDate = {
-                'start': moment(new Date(postDate.start)).format("DD MMMM, YYYY"),
-                'end': moment(new Date(postDate.end)).format("DD MMMM, YYYY")
-            };
-            var queryString = "select *, (hargabeli*jumlah) total from tb_trx " +
-                "LEFT JOIN tb_kode ON tb_trx.idkode = tb_kode.idkode " +
-                "where jenistrx = '1' AND " +
-                "tb_trx.tanggal between '" + startDate + "' " +
-                "AND '" + endDate + "' " +
-                "order by tb_trx.tanggal";
-            tokoianConn.query(queryString)
-                .then(function (rowItem) {
-                    if (!_.isEmpty(rowItem)) {
-                        res.render('trxin-report', {
-                            rows: rowItem,
-                            grandTotal: _.sumBy(rowItem, 'total'),
-                            filterDate: filterDate
-                        });
-                    } else {
-                        message = {'text': "Tidak ada laporan di tanggal yang dipilih..", 'color': "red"};
-                        res.render('trxin-report', {
-                            message: message,
-                            grandTotal: 0,
-                            filterDate: filterDate
-                        });
-                    }
-                }).catch(function (error) {
-                //logs out the error
-                console.error(error);
-            });
-        }
-    }
-});
+// /* GET recap page. */
+// router.get('/recap-stock', function(req, res) {
+//     if(_.isUndefined(req.session.login) || req.session.login != 'loged'){
+//         res.redirect('/login-auth');
+//     }else {
+//         tokoianConn.query("select * from tb_kode " +
+//             "LEFT JOIN tb_item ON tb_kode.idkode = tb_item.idkode " +
+//             "order by tb_kode.kode")
+//             .then(function (rowItem) {
+//                 res.render('recap-stock', {
+//                     rows: rowItem
+//                 });
+//             }).catch(function (error) {
+//             //logs out the error
+//             console.error(error);
+//         });
+//     }
+// });
 
 /* GET trx-out page. */
 router.get('/trxout-report', function(req, res) {

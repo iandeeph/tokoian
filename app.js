@@ -33,14 +33,14 @@ function checkAuth (req, res, next) {
             return;
         }else {
             if (req.session.priv == 1){
-                if(req.url === '/' || req.url.substring(0, 10) === '/code-list' || req.url.substring(0, 12) === '/status-code') {
+                if(req.url === '/' || req.url.substring(0, 13) === '/get-customer' || req.url.substring(0, 16) === '/add-sales-order' || req.url.substring(0, 17) === '/cust-status-code' || req.url.substring(0, 14) === '/customer-list' || req.url.substring(0, 10) === '/code-list'  || req.url.substring(0, 13) === '/trxin-report' || req.url.substring(0, 12) === '/status-code' || req.url.substring(0, 9) === '/order-in' || req.url.substring(0, 9) === '/get-item' || req.url.substring(0, 12) === '/recap-stock') {
                     // console.log("Aman");
                 }else{
                     res.redirect('/');
                     return;
                 }
             }else if (req.session.priv == 2){
-                if(req.url === '/' || req.url.substring(0, 10) === '/code-list' || req.url.substring(0, 12) === '/status-code') {
+                if(req.url === '/' || req.url.substring(0, 13) === '/get-customer' || req.url.substring(0, 16) === '/add-sales-order' || req.url.substring(0, 17) === '/cust-status-code' || req.url.substring(0, 14) === '/customer-list' || req.url.substring(0, 10) === '/code-list' || req.url.substring(0, 12) === '/status-code' || req.url.substring(0, 9) === '/order-in' || req.url.substring(0, 9) === '/get-item' || req.url.substring(0, 12) === '/recap-stock') {
                 }else{
                     res.redirect('/');
                     return;

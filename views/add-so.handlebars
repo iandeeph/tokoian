@@ -1,0 +1,81 @@
+{{#section 'title'}}
+    Input Sales Order
+{{/section}}
+{{error}}
+
+<div class="row container">
+    <div class="col s12 mt-20">
+        <div class="col s12 mb-20 mt-20 center">
+            <span class="font-40">Input Sales Order</span>
+        </div>
+        <div class="row">
+            <form action="" method="post">
+                <div class="col s12 container">
+                    <div class="row">
+                        <div class="col s12">
+                            <span class="font-20 ">Sales Order ID : {{orderid}}</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input id="customerId" name="addSo[0][idcustomer]" type="hidden">
+                            <input id="customer" name="addSo[0][customer]" type="text" class="validate autocompleteCustomerName" required>
+                            <label for="customer">Nama Customer</label>
+                        </div>
+                        <div class="row hide" id="custDetailBlock">
+                            <div class="col s12">
+                                <div class="card-panel white z-depth-0">
+                                    <span class="grey-text" id="customerDetail">
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" id="itemSoField">
+                        <div class="row">
+                            <div class="input-field col s10 m2 l2">
+                                <input id="namaBarang" name="addSo[0][nama]" type="hidden">
+                                <input id="kodeId" name="addSo[0][idkode]" type="hidden">
+                                <input id="orderId" name="addSo[0][orderid]" type="hidden" value="{{orderid}}">
+                                <input id="kode-produk" name="addSo[0][kode]" type="text" class="validate autocompleteSo" required>
+                                <label for="kode-produk">Kode Produk</label>
+                            </div>
+                            <div class="col s1 mt-10 mr-10 hide-on-med-and-up">
+                                <a class="btn-floating btn waves-effect waves-light green darken-3" id="btnAddSo-top" title="Tambah Barang"><i class="material-icons">add</i></a>
+                            </div>
+                            <div class="input-field col s12 m3 l3">
+                                <input id="nama-produk" type="text" class="validate" disabled required>
+                                <label for="nama-produk">Nama Produk</label>
+                            </div>
+                            <div class="input-field col s12 m2 l2">
+                                <input id="hargaBeli" name="addSo[0][hargabeli]" type="text" class="validate" disabled>
+                                <label for="hargaBeli">Harga Beli</label>
+                            </div>
+                            <div class="input-field col s12 m2 l2">
+                                <input id="hargaJual" name="addSo[0][hargajual]" type="text" class="validate" required>
+                                <label for="hargaJual">Harga Jual</label>
+                            </div>
+                            <div class="input-field col s12 m2 l2">
+                                <input id="jumlah" name="addSo[0][jumlah]" type="number" class="validate" required>
+                                <label for="jumlah">Jumlah</label>
+                            </div>
+                            <div class="col m1 l1 mt-10 hide-on-small-only">
+                                <a class="btn-floating btn waves-effect waves-light green darken-3" id="btnAddSo-bot" title="Tambah Barang"><i class="material-icons">add</i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col s12">
+                        <span class="font-20 {{message.color}}-text" id="message">{{message.text}}</span>
+                    </div>
+                    <div class="row">
+                        <div class="col s12">
+                            <div class="input-field mt-20">
+                                <button type="submit" name="addSoSubmit" id="addSoSubmit" class="waves-effect waves-light btn blue darken-3 right">Buat SO</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

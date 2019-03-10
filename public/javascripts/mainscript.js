@@ -47,14 +47,13 @@ $(document).ready(function() {
         });
     });
 
-    $('input[id^=status]').change(function(){
+    $('input[id^=statusKode]').change(function(){
         let idkode = $(this).attr("data-text");
         let kode = $(this).attr("data-kode");
         $.ajax({
             url: './status-code?changeStatus='+ idkode +'&kode='+kode,
             type: "GET",
             success: function (datas) {
-                console.log(datas);
                 var alertString = "Jumlah stock tidak kosong!!";
                 if(datas === "Not Empty"){
                     alert(alertString);
@@ -63,6 +62,268 @@ $(document).ready(function() {
             }
         });
     });
+
+    //================ page order in ==================
+    function autoFillOrderIn(){
+        $("[id^=kode-produk]").change(function () {
+            let parentForm = $(this).closest('.row');
+            let parentDivNama =
+            $.ajax({
+                url: './get-item?id='+ $(this).val(),
+                type: "GET",
+                dataType: "json",
+                success: function (datas) {
+                    // console.log(datas);
+                    if(datas.length > 0){
+                        $(parentForm).find('input[id^=nama-produk]').val(datas[0].nama);
+                        $(parentForm).find('input[id^=nama-produk]').closest('div').find('label').addClass("active");
+                        $(parentForm).find('input[id^=hargaBeli]').val(datas[0].hargabeli);
+                        $(parentForm).find('input[id^=hargaBeli]').closest('div').find('label').addClass("active");
+                    }
+                }
+            });
+        });
+    }
+
+
+    var btnOrderIn = $('#ordeInSubmit');
+    if($(btnOrderIn).length > 0){
+        $.ajax({
+            url: './get-item',
+            type: "GET",
+            dataType: "json",
+            success: function (datas) {
+                for (var keyDatas in datas) {
+                    if (!datas.hasOwnProperty(keyDatas)) continue;
+                    var resDatas = datas[keyDatas];
+                    autocompleteData[resDatas.kode] = null;
+                }
+                // console.log(autocompleteData);
+                $('input.autocompleteOrderIn').autocomplete({
+                    data: autocompleteData
+                });
+
+                $("[id^=btnAddOrderIn]").click(function () {
+                    let orderid = $("#orderId").val();
+                    $("#orderInField").append('' +
+                        '<div class="row addedTrx'+ numFieldTrx +'">' +
+                        '<div class="input-field col s10 m3 l3">' +
+                        '<input id="orderId'+ numFieldTrx +'" name="inOrder['+ numFieldTrx +'][orderid]" type="hidden" value="'+ orderid +'">' +
+                        '<input id="kode-produk'+ numFieldTrx +'" name="inOrder['+ numFieldTrx +'][kode]" type="text" class="validate autocompleteOrderIn" required>' +
+                        '<label for="kode-produk'+ numFieldTrx +'">Kode Produk</label>' +
+                        '</div>' +
+                        '<div class="col s1 mt-10 mr-10 hide-on-med-and-up">' +
+                        '<a class="btn-floating btn waves-effect waves-light red darken-3 btnRemTrx'+ numFieldTrx +'" name="btnRemTrx'+ numFieldTrx +'" id="'+ numFieldTrx +'" title="Hapus"><i class="material-icons">remove</i></a>' +
+                        '</div>' +
+                        '<div class="input-field col s12 m4 l4">' +
+                        '<input id="nama-produk'+ numFieldTrx +'" name="inOrder['+ numFieldTrx +'][nama]" type="text" class="validate" disabled>' +
+                        '<label for="nama-produk'+ numFieldTrx +'">Nama Produk</label>' +
+                        '</div>' +
+                        '<div class="input-field col s12 m2 l2">' +
+                        '<input id="hargaBeli'+ numFieldTrx +'" name="inOrder['+ numFieldTrx +'][hargabeli]" type="text" class="validate" required>' +
+                        '<label for="hargaBeli'+ numFieldTrx +'">Harga Beli</label>' +
+                        '</div>' +
+                        '<div class="input-field col s12 m2 l2">' +
+                        '<input id="jumlah'+ numFieldTrx +'" name="inOrder['+ numFieldTrx +'][jumlah]" type="number" class="validate" required>' +
+                        '<label for="jumlah'+ numFieldTrx +'">Jumlah</label>' +
+                        '</div>' +
+                        '<div class="col m1 l1 mt-10 hide-on-small-only">' +
+                        '<a class="btn-floating btn waves-effect waves-light red darken-3 btnRemTrx'+ numFieldTrx +'" name="btnRemTrx'+ numFieldTrx +'" id="'+ numFieldTrx +'" title="Hapus"><i class="material-icons">remove</i></a>' +
+                        '</div>' +
+                        '</div>');
+
+                    $('input.autocompleteOrderIn').autocomplete({
+                        data: autocompleteData
+                    });
+
+                    autoFillOrderIn();
+                    numFieldTrx++;
+
+                    $('[name^=btnRemTrx]').click(function () {
+                        var numToRem = $(this).attr('id');
+                        var elm = ".addedTrx"+ numToRem;
+
+                        $(elm).remove();
+                    });
+                });
+            }
+        });
+        autoFillOrderIn();
+        $('input[id^=hargaBeli], input[id^=jumlah]').each(function(){
+            $(this).keyup(function(){
+                var number = ($(this).val() != '' && $(this).val() != 'NaN') ? parseInt($(this).val().replace(/[^0-9]/gi, '')) : 0;
+                $(this).val(Intl.NumberFormat('en-IND').format(number))
+            });
+        });
+    }
+
+    //================ page sales order ==================
+    function autoFillSo(){
+        $("[id^=kode-produk]").change(function () {
+            let parentForm = $(this).closest('.row');
+                $.ajax({
+                    url: './get-item?id='+ $(this).val(),
+                    type: "GET",
+                    dataType: "json",
+                    success: function (datas) {
+                        // console.log(datas);
+                        if(datas.length > 0){
+                            $(parentForm).find('input[id^=nama-produk]').val(datas[0].nama);
+                            $(parentForm).find('input[id^=namaBarang]').val(datas[0].nama);
+                            $(parentForm).find('input[id^=kodeId]').val(datas[0].idkode);
+                            $(parentForm).find('input[id^=nama-produk]').closest('div').find('label').addClass("active");
+                            $(parentForm).find('input[id^=hargaBeli]').val(Intl.NumberFormat('en-IND').format(datas[0].hargabeli));
+                            $(parentForm).find('input[id^=hargaBeli]').closest('div').find('label').addClass("active");
+                        }else{
+                            $(parentForm).find('input[id^=nama-produk]').val("");
+                            $(parentForm).find('input[id^=namaBarang]').val("");
+                            $(parentForm).find('input[id^=kodeId]').val("");
+                            $(parentForm).find('input[id^=nama-produk]').closest('div').find('label').removeClass("active");
+                            $(parentForm).find('input[id^=hargaBeli]').val("");
+                            $(parentForm).find('input[id^=hargaBeli]').closest('div').find('label').removeClass("active");
+                        }
+                    }
+                });
+        });
+    }
+
+    var btnSumbitSo = $('#addSoSubmit');
+    if($(btnSumbitSo).length > 0){
+        let autocompleteDataSO = {};
+        $.ajax({
+            url: './get-customer',
+            type: "GET",
+            dataType: "json",
+            success: function (datas) {
+                if(datas.length > 0){
+                    for (var keyDatas in datas) {
+                        if (!datas.hasOwnProperty(keyDatas)) continue;
+                        var resDatas = datas[keyDatas];
+                        autocompleteDataSO[resDatas.nama] = null;
+                    }
+                    // console.log(autocompleteData);
+                    $('input.autocompleteCustomerName').autocomplete({
+                        data: autocompleteDataSO
+                    });
+                }
+            }
+        });
+        $("[id^=customer]").change(function () {
+            let custBlock = $('#custDetailBlock');
+            let curVal = $(this).val();
+            $.ajax({
+                url: './get-customer?id='+ curVal,
+                type: "GET",
+                dataType: "json",
+                success: function (datas) {
+                    // console.log(datas);
+                    if(datas.length > 0){
+                        let custStr = datas[0].nama +"<br/>" + datas[0].pic +" - "+ datas[0].telp +"<br/>Alamat : <br/>" + datas[0].alamat;
+                        $('.card-panel').removeClass("z-depth-0");
+                        $(custBlock).removeClass("hide");
+                        $('#customerDetail').html(custStr);
+                        $('#customerId').val(datas[0].idcustomer);
+                    }else{
+                        $(custBlock).addClass("hide");
+                    }
+                }
+            });
+        });
+        $.ajax({
+            url: './get-item',
+            type: "GET",
+            dataType: "json",
+            success: function (datas) {
+                for (var keyDatas in datas) {
+                    if (!datas.hasOwnProperty(keyDatas)) continue;
+                    var resDatas = datas[keyDatas];
+                    autocompleteData[resDatas.kode] = null;
+                }
+                // console.log(autocompleteData);
+                $('input.autocompleteSo').autocomplete({
+                    data: autocompleteData
+                });
+
+                $("[id^=btnAddSo]").click(function () {
+                    let orderid = $("#orderId").val();
+                    $("#itemSoField").append('' +
+                        '<div class="row addedTrx'+ numFieldTrx +'">' +
+                            '<div class="input-field col s10 m2 l2">' +
+                                '<input id="kodeId'+ numFieldTrx +'" name="addSo['+ numFieldTrx +'][idkode]" type="hidden">' +
+                                '<input id="orderId'+ numFieldTrx +'" name="addSo['+ numFieldTrx +'][orderid]" type="hidden" value="'+ orderid +'">' +
+                                '<input id="kode-produk'+ numFieldTrx +'" name="addSo['+ numFieldTrx +'][kode]" type="text" class="validate autocompleteSo" required>' +
+                                '<label for="kode-produk'+ numFieldTrx +'">Kode Produk</label>' +
+                            '</div>' +
+                            '<div class="col s1 mt-10 mr-10 hide-on-med-and-up">' +
+                                '<a class="btn-floating btn waves-effect waves-light red darken-3 btnRemTrx'+ numFieldTrx +'" name="btnRemTrx'+ numFieldTrx +'" id="'+ numFieldTrx +'" title="Hapus"><i class="material-icons">remove</i></a>' +
+                            '</div>' +
+                            '<div class="input-field col s12 m3 l3">' +
+                                '<input id="nama-produk'+ numFieldTrx +'" name="addSo['+ numFieldTrx +'][nama]" type="text" class="validate" disabled>' +
+                                '<label for="nama-produk'+ numFieldTrx +'">Nama Produk</label>' +
+                            '</div>' +
+                            '<div class="input-field col s12 m2 l2">' +
+                                '<input id="hargaBeli'+ numFieldTrx +'" name="addSo['+ numFieldTrx +'][hargabeli]" type="text" class="validate" disabled>' +
+                                '<label for="hargaBeli'+ numFieldTrx +'">Harga Beli</label>' +
+                            '</div>' +
+                            '<div class="input-field col s12 m2 l2">' +
+                                '<input id="hargaJual'+ numFieldTrx +'" name="addSo['+ numFieldTrx +'][hargajual]" type="text" class="validate" required>' +
+                                '<label for="hargaJual'+ numFieldTrx +'">Harga Jual</label>' +
+                            '</div>' +
+                            '<div class="input-field col s12 m2 l2">' +
+                                '<input id="jumlah'+ numFieldTrx +'" name="addSo['+ numFieldTrx +'][jumlah]" type="number" class="validate" required>' +
+                                '<label for="jumlah'+ numFieldTrx +'">Jumlah</label>' +
+                            '</div>' +
+                            '<div class="col m1 l1 mt-10 hide-on-small-only">' +
+                                '<a class="btn-floating btn waves-effect waves-light red darken-3 btnRemTrx'+ numFieldTrx +'" name="btnRemTrx'+ numFieldTrx +'" id="'+ numFieldTrx +'" title="Hapus"><i class="material-icons">remove</i></a>' +
+                            '</div>' +
+                        '</div>');
+
+                    $('input.autocompleteSo').autocomplete({
+                        data: autocompleteData
+                    });
+
+                    $('input[id^=hargaBeli],input[id^=hargaJual], input[id^=jumlah]').each(function(){
+                        $(this).keyup(function(){
+                            var number = ($(this).val() != '' && $(this).val() != 'NaN') ? parseInt($(this).val().replace(/[^0-9]/gi, '')) : 0;
+                            $(this).val(Intl.NumberFormat('en-IND').format(number))
+                        });
+                    });
+
+                    autoFillSo();
+                    numFieldTrx++;
+
+                    $('[name^=btnRemTrx]').click(function () {
+                        var numToRem = $(this).attr('id');
+                        var elm = ".addedTrx"+ numToRem;
+
+                        $(elm).remove();
+                    });
+                });
+            }
+        });
+        autoFillSo();
+        $('input[id^=hargaBeli],input[id^=hargaJual], input[id^=jumlah]').each(function(){
+            $(this).keyup(function(){
+                var number = ($(this).val() != '' && $(this).val() != 'NaN') ? parseInt($(this).val().replace(/[^0-9]/gi, '')) : 0;
+                $(this).val(Intl.NumberFormat('en-IND').format(number))
+            });
+        });
+    }
+
+//================ page customer list ==================
+    $('input[id^=statusCustomer]').change(function(){
+        let status = $(this).attr("data-text");
+        let id = $(this).attr("data-kode");
+        $.ajax({
+            url: './cust-status-code?changeStatus='+ status +'&kode='+id,
+            type: "GET",
+            success: function (datas) {
+            }
+        });
+    });
+
+    // ================================================================================================================================================
+
 
     //================ page add-stock ==================
     var submitBtnStock = $('#addStockSubmit');
@@ -77,9 +338,8 @@ $(document).ready(function() {
                     var resDatas = datas[keyDatas];
                     autocompleteData[resDatas.kode] = null;
                 }
-                $('input.autocompleteStock').autocomplete({
+                $('input.autocompleteOrderIn').autocomplete({
                     data: autocompleteData
-
                 });
             }
         });

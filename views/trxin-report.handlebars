@@ -46,37 +46,35 @@
                             <thead>
                             <tr class="border-bottom">
                                 <th width="1%">No</th>
+                                <th width="7%">Order ID</th>
                                 <th width="4%">Tanggal</th>
                                 <th width="5%">Kode Barang</th>
-                                <th width="5%">Merek</th>
                                 <th width="10%">Nama Barang</th>
-                                <th width="7%">Jenis</th>
-                                <th width="13%">Deskripsi Barang</th>
-                                <th width="10%">Catatan</th>
                                 <th width="5%">Harga Beli</th>
                                 <th width="3%">Jumlah</th>
                                 <th width="7%">Total</th>
                             </tr>
                             </thead>
                             <tbody>
-                            {{#each rows}}
+                            {{#each template}}
                                 <tr>
-                                    <td>{{numbyIndex @key}}</td>
-                                    <td>{{dateTime tanggal}}</td>
-                                    <td>{{kode}}</td>
-                                    <td>{{merek}}</td>
-                                    <td>{{nama}}</td>
-                                    <td>{{jenis}}</td>
-                                    <td>{{deskripsi}}</td>
-                                    <td>{{catatan}}</td>
-                                    <td>{{numberFormat hargabeli}}</td>
-                                    <td>{{zeroOrNumber jumlah}}</td>
-                                    <td>{{numberFormat total}}</td>
+                                    <td rowspan="{{maxKey this}}">{{numbyIndex @index}}</td>
+                                    <td rowspan="{{maxKey this}}">{{@key}}</td>
+                                    <td rowspan="{{maxKey this}}">{{dateTime this.0.tanggal}}</td>
                                 </tr>
+                                {{#each this}}
+                                    <tr>
+                                        <td>{{this.kode}}</td>
+                                        <td>{{this.nama}}</td>
+                                        <td>{{numberFormat this.hargabeli}}</td>
+                                        <td class="center-align">{{zeroOrNumber this.jumlah}}</td>
+                                        <td class="right-align">{{numberFormat this.total}}</td>
+                                    </tr>
+                                {{/each}}
                             {{/each}}
                                 <tr>
-                                    <td colspan="10">Total</td>
-                                    <td>{{numberFormat grandTotal}}</td>
+                                    <td colspan="7">Total</td>
+                                    <td class="right-align">{{numberFormat grandTotal}}</td>
                                 </tr>
                             </tbody>
                         </table>

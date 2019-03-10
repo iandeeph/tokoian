@@ -18,29 +18,21 @@
                         <table class="bordered">
                             <thead>
                             <tr class="border-bottom">
-                                <th width="2%">No</th>
+                                <th width="1%">No</th>
                                 <th width="5%">Kode Barang</th>
                                 <th width="13%">Nama Barang</th>
-                                <th width="10%">Jenis</th>
                                 <th width="5%">Harga Beli</th>
-                                <th width="5%">Harga Jual</th>
-                                <th width="15%">Deskripsi Barang</th>
                                 <th width="3%">Jumlah</th>
-                                <th width="10%">Catatan</th>
                             </tr>
                             </thead>
                             <tbody>
                             {{#each rows}}
                                 <tr>
-                                    <td>{{numbyIndex @key}}</td>
+                                    <td class="center">{{numbyIndex @key}}</td>
                                     <td>{{kode}}</td>
                                     <td>{{nama}}</td>
-                                    <td>{{jenis}}</td>
                                     <td>{{numberFormat hargabeli}}</td>
-                                    <td>{{numberFormat hargajual}}</td>
-                                    <td>{{deskripsi}}</td>
                                     <td>{{zeroOrNumber jumlah}}</td>
-                                    <td>{{catatan}}</td>
                                 </tr>
                             {{/each}}
                             </tbody>
