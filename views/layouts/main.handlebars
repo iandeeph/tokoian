@@ -7,8 +7,10 @@
     <link href='https://fonts.googleapis.com/css?family=Lato:400,300,700' rel='stylesheet' type='text/css'>
 
     <!--Import materialize.css-->
-    <link type="text/css" rel="stylesheet" href="/stylesheets/materialize.css"  media="screen,projection"/>
-    <link rel="stylesheet" href="/stylesheets/style.css">
+    <link type="text/css" rel="stylesheet" href="/stylesheets/materialize.css"  media="screen,projection, print"/>
+    <link type="text/css" rel="stylesheet" href="/stylesheets/materialize-print.css"  media="screen,projection, print"/>
+    <link rel="stylesheet" href="/stylesheets/style.css" media="screen,projection, print">
+    <link rel="stylesheet" href="/stylesheets/style-print.css" media="screen,projection, print">
     <!-- favicon -->
     <link rel="apple-touch-icon" sizes="57x57" href="/icon/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="/icon/apple-icon-60x60.png">
@@ -44,37 +46,32 @@
         </nav>
     </div>
     <ul id="left-menu" class="side-nav">
-        <li><a href="/" class="pdl-20 pdr-20">Transaksi</a></li>
+        <li><a href="/" class="pdl-20 pdr-20">Dashboard</a></li>
+        <li><a href="/customer-list" class="pdl-20 pdr-20">Customer List</a></li>
         <li class="no-padding">
             <ul class="collapsible collapsible-accordion">
                 <li>
-                    <a class="collapsible-header pdl-20 pdr-20">Stock Barang<i class="material-icons right">arrow_drop_down</i></a>
+                    <a class="collapsible-header pdl-20 pdr-20">Transaksi<i class="material-icons right">arrow_drop_down</i></a>
                     <div class="collapsible-body">
                         <ul>
-                            <li><a class="hide" href="/add-code">Tambah Jenis</a></li>
-                            <li><a href="/add-stock">Tambah Stock</a></li>
+                            <li><a href="/order-in">Input Barang Masuk</a></li>
+                            <li><a href="/add-sales-order">Input Sales Order</a></li>
+                            <li><a href="/recap-sales-order">Rekap Sales Order</a></li>
+                            <li><a href="/add-expense">Input Pengeluaran</a></li>
+                            <li><a href="/recap-expense">Rekap Pengeluaran</a></li>
+                        </ul>
+                    </div>
+                </li>
+                <li>
+                    <a class="collapsible-header pdl-20 pdr-20">Item Management<i class="material-icons right">arrow_drop_down</i></a>
+                    <div class="collapsible-body">
+                        <ul>
+                            <li><a href="/code-list">List Kode Barang</a></li>
                             <li><a href="/recap-stock">Rekap Stock</a></li>
                         </ul>
                     </div>
                 </li>
-            </ul>
-        </li>
-        <li class="no-padding">
-            <ul class="collapsible collapsible-accordion">
-                <li>
-                    <a class="collapsible-header pdl-20 pdr-20">Edit Stock<i class="material-icons right">arrow_drop_down</i></a>
-                    <div class="collapsible-body">
-                        <ul>
-                            <li><a href="/qty-edit">Edit Quantity</a></li>
-                            <li><a href="/detail-edit">Edit Detail & Harga Barang</a></li>
-                        </ul>
-                    </div>
-                </li>
-            </ul>
-        </li>
         {{#compare session.priv 1 operator="=="}}
-            <li class="no-padding">
-                <ul class="collapsible collapsible-accordion">
                     <li>
                         <a class="collapsible-header pdl-20 pdr-20">Laporan<i class="material-icons right">arrow_drop_down</i></a>
                         <div class="collapsible-body">
@@ -87,7 +84,7 @@
                     </li>
                 </ul>
             </li>
-            <!--<li><a href="/user-manager" class="pdl-20 pdr-20">Daftar User</a></li>-->
+            <li><a href="/user-manager" class="pdl-20 pdr-20">Daftar User</a></li>
             <li><a href="/log" class="pdl-20 pdr-20">Catatan Aktivitas</a></li>
         {{/compare}}
         <li><a href="/logout" class="pdl-20 pdr-20">Log Out</a></li>
@@ -98,6 +95,7 @@
 </main>
 </body>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
 <script type="text/javascript" src="/javascripts/materialize.js"></script>
 <script type="text/javascript" src="/javascripts/mainscript.js"></script>
 </html>

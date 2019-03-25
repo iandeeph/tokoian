@@ -45,8 +45,7 @@
                         <table class="bordered">
                             <thead>
                             <tr class="border-bottom">
-                                <th width="1%">No</th>
-                                <th width="2%">Tanggal</th>
+                                <th width="5%">Tanggal</th>
                                 <th width="5%">User</th>
                                 <th width="5%">Aktivitas</th>
                                 <th width="15%">Detail</th>
@@ -55,8 +54,7 @@
                             <tbody>
                             {{#each rows}}
                                 <tr>
-                                    <td class="center">{{numbyIndex @key}}</td>
-                                    <td>{{dateTime tanggal}}</td>
+                                    <td>{{readableDate tanggal}}</td>
                                     <td>{{user}}</td>
                                     <td>{{aksi}}</td>
                                     <td>{{breakLine detail}}</td>
@@ -67,6 +65,15 @@
                     </div>
                 </div>
             </form>
+            <div class="col s12 center">
+                <ul class="pagination">
+                    <li class="{{prevLink.disabled}} {{prevLink.waves}}" {{prevLink.disabled}}><a class="{{prevLink.disabled}}"{{{prevLink.link}}} {{prevLink.disabled}}><i class="material-icons">chevron_left</i></a></li>
+                    {{#each pagination}}
+                        <li class="{{active}}"><a href="{{link}}">{{value}}</a></li>
+                    {{/each}}
+                    <li class="{{nextLink.disabled}} {{nextLink.waves}}" {{nextLink.disabled}}><a class="{{nextLink.disabled}}" {{{nextLink.link}}} {{nextLink.disabled}}><i class="material-icons">chevron_right</i></a></li>
+                </ul>
+            </div>
         </div>
     </div>
 </div>

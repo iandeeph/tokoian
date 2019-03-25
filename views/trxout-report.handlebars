@@ -46,42 +46,64 @@
                             <thead>
                             <tr class="border-bottom">
                                 <th width="1%">No</th>
-                                <th width="3%">Order ID</th>
-                                <th width="8%">Tanggal</th>
-                                <th width="8%">Kode Barang</th>
-                                <th width="5%">Merek</th>
-                                <th width="5%">Jenis</th>
-                                <th width="8%">Nama Barang</th>
-                                <th width="13%">Deskripsi Barang</th>
+                                <th width="7%">Order ID</th>
+                                <th width="4%">Tanggal</th>
+                                <th width="5%">Jenis Transaksi</th>
+                                <th width="5%">Kode Barang</th>
+                                <th width="10%">Nama Barang</th>
                                 <th width="5%">Harga Jual</th>
-                                <th width="1%">Jumlah</th>
-                                <th width="3%">Total</th>
+                                <th width="3%">Jumlah</th>
+                                <th width="7%">Total</th>
                             </tr>
                             </thead>
                             <tbody>
                             {{#each template}}
-                                <tr>
-                                    <td rowspan="{{maxKey this}}">{{numbyIndex @index}}</td>
-                                    <td rowspan="{{maxKey this}}">{{@key}}</td>
-                                    <td rowspan="{{maxKey this}}">{{dateTime this.0.tanggal}}</td>
-                                </tr>
+                                {{#compare (maxKey this) 2 operator=">"}}
+                                    <tr>
+                                        <td rowspan="{{maxKey this}}">{{numbyIndex @index}}</td>
+                                        <td rowspan="{{maxKey this}}">{{@key}}</td>
+                                        <td rowspan="{{maxKey this}}">{{readableDate this.0.tanggal}}</td>
+                                        <td rowspan="{{maxKey this}}">{{jenisTrx this.0.jenistrx}}</td>
+                                    </tr>
                                     {{#each this}}
                                         <tr>
-                                            <td>{{this.kode}}</td>
-                                            <td>{{this.merek}}</td>
-                                            <td>{{this.jenis}}</td>
-                                            <td>{{this.nama}}</td>
-                                            <td>{{this.deskripsi}}</td>
+                                            {{#compare this.jenistrx 5 operator="=="}}
+                                                <td>-</td>
+                                                <td>{{this.expense}}</td>
+                                            {{else}}
+                                                <td>{{this.kode}}</td>
+                                                <td>{{this.nama}}</td>
+                                            {{/compare}}
                                             <td>{{numberFormat this.hargajual}}</td>
                                             <td class="center-align">{{zeroOrNumber this.jumlah}}</td>
                                             <td class="right-align">{{numberFormat this.total}}</td>
                                         </tr>
                                     {{/each}}
+                                {{else}}
+                                    {{#each this}}
+                                        <tr>
+                                            <td>{{numbyIndex @../index}}</td>
+                                            <td>{{@../key}}</td>
+                                            <td>{{readableDate tanggal}}</td>
+                                            <td>{{jenisTrx jenistrx}}</td>
+                                            {{#compare this.jenistrx 5 operator="=="}}
+                                                <td>-</td>
+                                                <td>{{this.expense}}</td>
+                                            {{else}}
+                                                <td>{{this.kode}}</td>
+                                                <td>{{this.nama}}</td>
+                                            {{/compare}}
+                                            <td>{{numberFormat this.hargajual}}</td>
+                                            <td class="center-align">{{zeroOrNumber this.jumlah}}</td>
+                                            <td class="right-align">{{numberFormat this.total}}</td>
+                                        </tr>
+                                    {{/each}}
+                                {{/compare}}
                             {{/each}}
-                                <tr>
-                                    <td class="right-align" colspan="10">Total</td>
-                                    <td class="right-align">{{numberFormat grandTotal}}</td>
-                                </tr>
+                            <tr>
+                                <td colspan="8">Total</td>
+                                <td class="right-align">{{numberFormat grandTotal}}</td>
+                            </tr>
                             </tbody>
                         </table>
                     </div>

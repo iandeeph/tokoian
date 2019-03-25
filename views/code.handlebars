@@ -24,8 +24,10 @@
                             <tr class="border-bottom">
                                 <th width="30%">Kode Produk</th>
                                 <th width="50%">Nama Produk</th>
-                                <th width="20%">Status</th>
-                                <th></th>
+                                {{#compare priv "1" operator="=="}}
+                                    <th width="20%">Status</th>
+                                    <th></th>
+                                {{/compare}}
                             </tr>
                         </thead>
                         <tbody id="addStockBlock">
@@ -33,49 +35,51 @@
                             <tr>
                                 <td>{{kode}}</td>
                                 <td>{{nama}}</td>
-                                <td class="center">
-                                    <div class="switch">
-                                        <label>
-                                            Non Aktif
-                                            <input type="checkbox" id="statusKode{{idkode}}" data-text="{{invertStatus status}}" data-kode="{{encrypt idkode}}" {{#compare status "1" operators="=="}}checked{{/compare}}>
-                                            <span class="lever"></span>
-                                            Aktif
-                                        </label>
-                                    </div>
-                                </td>
-                                <td>
-                                    <a class="btn-floating btn waves-effect waves-light blue modal-trigger" href="#editKode{{idkode}}" ><i class="material-icons">edit</i></a>
+                                {{#compare ../priv "1" operator="=="}}
+                                    <td class="center">
+                                        <div class="switch">
+                                            <label>
+                                                Non Aktif
+                                                <input type="checkbox" id="statusKode{{idkode}}" data-text="{{invertStatus status}}" data-kode="{{encrypt idkode}}" {{#compare status "1" operator="=="}}checked{{/compare}}>
+                                                <span class="lever"></span>
+                                                Aktif
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <a class="btn-floating btn waves-effect waves-light blue modal-trigger" href="#editKode{{idkode}}" ><i class="material-icons">edit</i></a>
 
-                                    <div id="editKode{{idkode}}" class="modal">
-                                        <form action="" method="post">
-                                            <div class="modal-content">
-                                                <div class="col s12 container">
-                                                    <div class="col s12 mb-20 mt-20 center">
-                                                        <span class="font-40">Edit Kode Produk</span>
-                                                    </div>
-                                                    <div class="row" id="kodeField">
-                                                        <div class="row">
-                                                            <div class="input-field col s4">
-                                                                <input name="editKode[kodeOld]" type="hidden" value="{{kode}}" >
-                                                                <input id="kode-produk" name="editKode[kode]" type="text" class="validate" value="{{kode}}" required>
-                                                                <label for="kode-produk">Kode Produk</label>
-                                                            </div>
-                                                            <div class="input-field col s6">
-                                                                <input name="editKode[namaOld]" type="hidden" value="{{nama}}" >
-                                                                <input id="nama-produk" name="editKode[nama]" type="text" class="validate" value="{{nama}}" required>
-                                                                <label for="nama-produk">Nama Produk</label>
+                                        <div id="editKode{{idkode}}" class="modal">
+                                            <form action="" method="post">
+                                                <div class="modal-content">
+                                                    <div class="col s12 container">
+                                                        <div class="col s12 mb-20 mt-20 center">
+                                                            <span class="font-40">Edit Kode Produk</span>
+                                                        </div>
+                                                        <div class="row" id="kodeField">
+                                                            <div class="row">
+                                                                <div class="input-field col s4">
+                                                                    <input name="editKode[kodeOld]" type="hidden" value="{{kode}}" >
+                                                                    <input id="kode-produk" name="editKode[kode]" type="text" class="validate" value="{{kode}}" required>
+                                                                    <label for="kode-produk">Kode Produk</label>
+                                                                </div>
+                                                                <div class="input-field col s6">
+                                                                    <input name="editKode[namaOld]" type="hidden" value="{{nama}}" >
+                                                                    <input id="nama-produk" name="editKode[nama]" type="text" class="validate" value="{{nama}}" required>
+                                                                    <label for="nama-produk">Nama Produk</label>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="modal-footer modal-fixed-footer">
-                                                <button type="submit" name="editCodeSubmit" id="editCodeSubmit" value="{{encrypt idkode}}" class="modal-close waves-effect waves-light btn grey darken-3 left ml-10 mb-10">Submit</button>
-                                                <a href="#!" class="modal-close waves-effect waves-light btn grey darken-1 left mb-10">Cancel</a>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </td>
+                                                <div class="modal-footer modal-fixed-footer">
+                                                    <button type="submit" name="editCodeSubmit" id="editCodeSubmit" value="{{encrypt idkode}}" class="modal-close waves-effect waves-light btn grey darken-3 left ml-10 mb-10">Submit</button>
+                                                    <a href="#!" class="modal-close waves-effect waves-light btn grey darken-1 left mb-10">Cancel</a>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </td>
+                                {{/compare}}
                             </tr>
                         {{/each}}
                         </tbody>

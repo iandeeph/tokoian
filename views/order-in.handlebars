@@ -16,11 +16,21 @@
                             <span class="font-20 ">Order ID : {{orderid}}</span>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col s12">
+                            <span class="font-20 {{message.color}}-text" id="message">{{message.text}}</span>
+                        </div>
+                    </div>
                     <div class="row" id="orderInField">
                         <div class="row">
                             <div class="input-field col s10 m3 l3">
                                 <input id="orderId" name="inOrder[0][orderid]" type="hidden" value="{{orderid}}">
-                                <input id="kode-produk" name="inOrder[0][kode]" type="text" class="validate autocompleteOrderIn" required>
+                                <select id="kode-produk" name="inOrder[0][kode]" class="validate" required>
+                                    <option value="" disabled selected>Pilih Kode Produk</option>
+                                    {{#each kodeRow}}
+                                        <option value="{{kode}}">{{kode}}</option>
+                                    {{/each}}
+                                </select>
                                 <label for="kode-produk">Kode Produk</label>
                             </div>
                             <div class="col s1 mt-10 mr-10 hide-on-med-and-up">
@@ -48,11 +58,6 @@
                             <div class="input-field mt-20">
                                 <button type="submit" name="ordeInSubmit" id="ordeInSubmit" class="waves-effect waves-light btn blue darken-3 right">Submit</button>
                             </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col s12">
-                            <span class="font-20 {{message.color}}-text" id="message">{{message.text}}</span>
                         </div>
                     </div>
                 </div>

@@ -9,9 +9,11 @@
             <span class="font-40">List Customer</span>
         </div>
         <div class="row">
-            <div class="input-field">
-                <a class="btn-floating btn-large waves-effect waves-light green modal-trigger" href="#addToko"><i class="material-icons">add</i></a>
-            </div>
+            {{#compare priv '1' operator="=="}}
+                <div class="input-field">
+                    <a class="btn-floating btn-large waves-effect waves-light green modal-trigger" href="#addToko"><i class="material-icons">add</i></a>
+                </div>
+            {{/compare}}
             <div class="col s12">
                 <span class="font-20 {{message.color}}-text" id="message">{{message.text}}</span>
             </div>
@@ -62,8 +64,10 @@
                             <th width="5%">PIC</th>
                             <th width="5%">No Telp</th>
                             <th width="15%">Alamat Toko</th>
-                            <th width="5%">Status</th>
-                            <th width="1%">
+                            {{#compare priv '1' operator="=="}}
+                                <th width="5%">Status</th>
+                            {{/compare}}
+                            <th width="4%">
                             </th>
                         </tr>
                         </thead>
@@ -75,18 +79,24 @@
                                 <td>{{pic}}</td>
                                 <td>{{telp}}</td>
                                 <td>{{breakLine alamat}}</td>
-                                <td class="center">
-                                    <div class="switch">
-                                        <label>
-                                            Non Aktif
-                                            <input type="checkbox" id="statusCustomer{{idcustomer}}" data-text="{{invertStatus status}}" data-kode="{{encrypt idcustomer}}" {{#compare status "1" operators="=="}}checked{{/compare}}>
-                                            <span class="lever"></span>
-                                            Aktif
-                                        </label>
-                                    </div>
-                                </td>
+                                {{#compare priv '1' operator="=="}}
+                                    <td class="center">
+                                        <div class="switch">
+                                            <label>
+                                                Non Aktif
+                                                <input type="checkbox" id="statusCustomer{{idcustomer}}" data-text="{{invertStatus status}}" data-kode="{{encrypt idcustomer}}" {{#compare status "1" operators="=="}}checked{{/compare}}>
+                                                <span class="lever"></span>
+                                                Aktif
+                                            </label>
+                                        </div>
+                                    </td>
+                                {{/compare}}
                                 <td>
-                                    <a class="btn-floating btn waves-effect waves-light blue modal-trigger" href="#editToko{{idcustomer}}" ><i class="material-icons">edit</i></a>
+                                {{#compare priv '1' operator="=="}}
+                                    <a class="btn-floating btn waves-effect waves-light blue modal-trigger" title="Edit DetaiL custerm" href="#editToko{{idcustomer}}" ><i class="material-icons">edit</i></a>
+                                {{/compare}}
+                                    <a class="btn-floating btn waves-effect waves-light orange" title="Lihat SO" target="_blank" href="/so-customer-list?so={{encrypt idcustomer}}" ><i class="material-icons">search</i></a>
+                                    <a class="btn-floating btn waves-effect waves-light yellow" title="Edit Price List" target="_blank" href="/pl-customer-list?so={{encrypt idcustomer}}" ><i class="material-icons">attach_money</i></a>
 
                                     <div id="editToko{{idcustomer}}" class="modal">
                                         <form action="" method="post">

@@ -1,0 +1,152 @@
+{{#section 'title'}}
+    List User
+{{/section}}
+{{error}}
+
+<div class="row almost-full">
+    <div class="col s12 mt-20">
+        <div class="col s12 mb-20 mt-20 center">
+            <span class="font-40">List User</span>
+        </div>
+        <div class="row">
+            <div class="col s12 almost-full">
+                <div class="row">
+                    <div class="input-field">
+                        <a class="btn-floating btn-large waves-effect waves-light green modal-trigger" href="#addUser"><i class="material-icons">add</i></a>
+                    </div>
+                </div>
+                <div class="col s12 mb-20">
+                    <span class="font-20 {{message.color}}-text" id="message">{{message.text}}</span>
+                </div>
+                <div class="home-table row">
+                    <table class="bordered">
+                        <thead>
+                            <tr class="border-bottom">
+                                <th width="20%">Username</th>
+                                <th width="20%">Nama Lengkap</th>
+                                <th width="20%">Password</th>
+                                <th width="15%">Privilege</th>
+                                <th width="15%">Status</th>
+                                <th width="5%"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="addStockBlock">
+                        {{#each listUser}}
+                            <tr>
+                                <td>{{username}}</td>
+                                <td>{{nama}}</td>
+                                <td>{{decrypt password}}</td>
+                                <td class="center">
+                                    <div class="switch">
+                                        <label>
+                                            Operator
+                                            <input type="checkbox" id="userPriv{{iduser}}" data-text="{{invertPriv priv}}" data-kode="{{encrypt iduser}}" {{#compare priv "1" operator="=="}}checked{{/compare}}>
+                                            <span class="lever"></span>
+                                            Administrator
+                                        </label>
+                                    </div>
+                                </td>
+                                <td class="center">
+                                    <div class="switch">
+                                        <label>
+                                            Active
+                                            <input type="checkbox" id="userStatus{{iduser}}" data-text="{{invertStatus status}}" data-kode="{{iduser}}" {{#compare status "1" operator="=="}}checked{{/compare}}>
+                                            <span class="lever"></span>
+                                            Inactive
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a class="btn-floating btn waves-effect waves-light blue modal-trigger" href="#editUser{{iduser}}" ><i class="material-icons">edit</i></a>
+
+                                    <div id="editUser{{iduser}}" class="modal">
+                                        <form action="" method="post">
+                                            <div class="modal-content">
+                                                <div class="col s12 container">
+                                                    <div class="col s12 mb-20 mt-20 center">
+                                                        <span class="font-40">Edit Detail User</span>
+                                                    </div>
+                                                    <div class="row" id="userField{{iduser}}">
+                                                        <div class="row">
+                                                            <div class="input-field col col s12">
+                                                                <input name="editUser[namaOld]" type="hidden" value="{{nama}}" >
+                                                                <input id="nama{{iduser}}" name="editUser[nama]" type="text" class="validate" value="{{nama}}" required>
+                                                                <label for="nama{{iduser}}">Nama Lengkap</label>
+                                                            </div>
+                                                            <div class="input-field col s12 l6 m6">
+                                                                <input name="editUser[usernameOld]" type="hidden" value="{{username}}" >
+                                                                <input id="username{{iduser}}" name="editUser[username]" type="text" class="validate" value="{{username}}" required>
+                                                                <label for="username{{iduser}}">Username</label>
+                                                            </div>
+                                                            <div class="input-field col col s12 l6 m6">
+                                                                <input name="editUser[passwordOld]" type="hidden" value="{{decrypt password}}" >
+                                                                <input id="password{{iduser}}" name="editUser[password]" type="text" class="validate" value="{{decrypt password}}" required>
+                                                                <label for="password{{iduser}}">Password</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer modal-fixed-footer">
+                                                <button type="submit" name="editUserSubmit" id="editUserSubmit{{iduser}}" value="{{encrypt iduser}}" class="modal-close waves-effect waves-light btn grey darken-3 left ml-10 mb-10">Submit</button>
+                                                <a href="#!" class="modal-close waves-effect waves-light btn grey darken-1 left ml-10 mb-10">Cancel</a>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div id="addUser" class="modal">
+                <form action="" method="post">
+                    <div class="modal-content">
+                        <div class="col s12 container">
+                            <div class="col s12 mb-20 mt-20 center">
+                                <span class="font-40">Tambah User</span>
+                            </div>
+                            <div class="row" id="kodeField">
+                                <div class="row">
+                                    <div class="input-field col col s12">
+                                        <input id="nama" name="addUser[nama]" type="text" class="validate" required>
+                                        <label for="nama">Nama Lengkap</label>
+                                    </div>
+                                    <div class="input-field col s12 l6 m6">
+                                        <input id="username" name="addUser[username]" type="text" class="validate" required>
+                                        <label for="username">Username</label>
+                                    </div>
+                                    <div class="input-field col col s12 l6 m6">
+                                        <input id="password" name="addUser[password]" type="text" class="validate" required>
+                                        <label for="password">Password</label>
+                                    </div>
+                                    <div class="input-field col col s12 l6 m6">
+                                        <select id="priv" name="addUser[priv]" class="validate" required>
+                                            <option value="" disabled selected>Privilege</option>
+                                                <option value="1">Administrator</option>
+                                                <option value="2" selected>Operator</option>
+                                        </select>
+                                        <label for="priv">Privilege</label>
+                                    </div>
+                                    <div class="input-field col col s12 l6 m6">
+                                        <select id="status" name="addUser[status]" class="validate" required>
+                                            <option value="" disabled selected>Status</option>
+                                                <option value="1" selected>Active</option>
+                                                <option value="0">Inactive</option>
+                                        </select>
+                                        <label for="status">Status</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer modal-fixed-footer">
+                        <button type="submit" name="addUserSubmit" id="addUserSubmit-bot" class="modal-close waves-effect waves-light btn grey darken-3 left ml-10 mb-10">Submit</button>
+                        <a href="#!" class="modal-close waves-effect waves-light btn grey darken-1 left mb-10 ml-10">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

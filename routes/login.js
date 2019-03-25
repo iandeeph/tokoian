@@ -84,30 +84,38 @@ router.post('/', function(req, res, next) {
     var postPassword = req.body.login_password;
     let users = {};
     // console.log(postPassword);
-    tokoianConn.query('SELECT * FROM user where username = "'+ postUsername +'" limit 1').then(function(users) {
-        // console.log(decrypt(users[0].password));
-            if (decrypt(users[0].password) !== postPassword){
+    tokoianConn.query('SELECT * FROM user where username = "'+ postUsername +'" and status = "1" limit 1')
+        .then(function(users) {
+            // console.log(decrypt(users[0].password));
+            if (!_.isEmpty(users)){
+                if (decrypt(users[0].password) !== postPassword){
+                    res.render('login',{
+                        layout: 'login',
+                        message : 'Username atau Password Salah..!!'
+                    });
+                }else{
+                    req.session.login       = 'loged';
+                    req.session.username    = users[0].username;
+                    req.session.name        = users[0].nama;
+                    req.session.priv        = users[0].priv;
+                    //console.log(req.session.name );
+                    var logString = "Username : "+ users[0].username +"\n" +
+                        "Nama : "+users[0].nama;
+                    var queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
+                        "('" + users[0].nama + "', 'User Login','" + logString + "','" + dateNow + "')";
+
+                    var logPush = tokoianConn.query(queryLogString);
+
+                    Promise.all([logPush])
+                        .then(function () {
+                            res.redirect(req.session.tempUrl);
+                        });
+                }
+            } else {
                 res.render('login',{
                     layout: 'login',
-                    message : 'Username atau Password Salah..!!'
+                    message : 'Account tidak ada..!!'
                 });
-            }else{
-                req.session.login       = 'loged';
-                req.session.username    = users[0].username;
-                req.session.name        = users[0].nama;
-                req.session.priv        = users[0].priv;
-                //console.log(req.session.name );
-                var logString = "Username : "+ users[0].username +"\n" +
-                    "Nama : "+users[0].nama;
-                var queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
-                    "('" + users[0].nama + "', 'User Login','" + logString + "','" + dateNow + "')";
-
-                var logPush = tokoianConn.query(queryLogString);
-
-                Promise.all([logPush])
-                    .then(function () {
-                        res.redirect(req.session.tempUrl);
-                    });
             }
         }).catch(function(error){
             //logs out the error

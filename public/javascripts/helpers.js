@@ -7,6 +7,39 @@ const key = process.env.KEY || 'b2df428b9929d3ace7c598bbf4e496b2';
 const inputEncoding = 'utf8';
 const outputEncoding = 'hex';
 
+exports.readableDate = function (date) {
+    var parse = "";
+    if(_.isDate(date)){
+        parse = moment(date).format("D-MMM-YYYY HH:mm:ss");
+    }else{
+        parse = "-";
+    }
+
+    return parse;
+};
+
+exports.readableFullDate = function (date) {
+    var parse = "";
+    if(_.isDate(date)){
+        parse = moment(date).format("D-MMM-YYYY");
+    }else{
+        parse = "-";
+    }
+
+    return parse;
+};
+
+exports.bulanTahun = function (date) {
+    var parse = "";
+    if(_.isDate(date)){
+        parse = moment(date).format("MMMM-YYYY");
+    }else{
+        parse = "-";
+    }
+
+    return parse;
+};
+
 exports.fullDate = function (date) {
     var parse = "";
     if(_.isDate(date)){
@@ -102,6 +135,9 @@ exports.stripForNull = function (string) {
 
 exports.numberFormat = function (number) {
     var parse = 0;
+    if(_.isNull(number)){
+        number = 0;
+    }
     number = parseInt(number);
     //console.log(number);
     if(_.isNumber(number)){
@@ -142,7 +178,33 @@ exports.jenisTrx = function (num) {
             break;
 
         case 3 :
-            parse = "Edit Inventory";
+            parse = "Reopen SO";
+            break;
+
+        case 4 :
+            parse = "Expense";
+            break;
+
+        case 5 :
+            parse = "Delete Expense";
+            break;
+
+        default:
+            parse = "error";
+            break;
+    }
+    return parse;
+};
+
+exports.expenseStatus = function (num) {
+    var parse;
+    switch (num){
+        case 1 :
+            parse = "Done";
+            break;
+
+        case 0 :
+            parse = "Dihapus";
             break;
 
         default:
@@ -155,11 +217,11 @@ exports.jenisTrx = function (num) {
 exports.statusParser = function (status) {
     var parse;
     switch (status){
-        case 1 :
+        case '1' :
             parse = "Aktif";
             break;
 
-        case 2 :
+        case '2' :
             parse = "Non Aktif";
             break;
 
@@ -173,16 +235,86 @@ exports.statusParser = function (status) {
 exports.invertStatus = function (status) {
     var parse;
     switch (status){
-        case "1" :
+        case '1' :
             parse = "0";
             break;
 
-        case "0" :
+        case '0' :
             parse = "1";
             break;
 
         default:
             parse = status;
+            break;
+    }
+
+    // console.log(parse);
+    return parse;
+};
+
+exports.invertPriv = function (status) {
+    var parse;
+    switch (status){
+        case '1' :
+            parse = "2";
+            break;
+
+        case '2' :
+            parse = "1";
+            break;
+
+        default:
+            parse = status;
+            break;
+    }
+
+    // console.log(parse);
+    return parse;
+};
+
+exports.parsePriv = function (status) {
+    var parse;
+    switch (status){
+        case '1' :
+            parse = "Administrator";
+            break;
+
+        case '2' :
+            parse = "Operator";
+            break;
+
+        default:
+            parse = status;
+            break;
+    }
+
+    // console.log(parse);
+    return parse;
+};
+
+exports.toUppercase = function (str) {
+    var parse;
+    parse = str.toUpperCase();
+    return parse;
+};
+
+exports.soStatusParser = function (str) {
+    var parse;
+    switch (str){
+        case "Open" :
+            parse = "green-text darken-2";
+            break;
+
+        case "Deleted" :
+            parse = "red-text darken-2";
+            break;
+
+        case "Done" :
+            parse = "blue-text darken-2";
+            break;
+
+        default:
+            parse = "";
             break;
     }
     return parse;
@@ -242,4 +374,21 @@ exports.decrypt = function(value) {
     let decrypted = decipher.update(encryptedText,  outputEncoding, inputEncoding);
     decrypted += decipher.final(inputEncoding);
     return decrypted.toString();
+};
+
+exports.formatRupiah = function(angka){
+    var number_string = angka.toString(),
+        split   		= number_string.split(','),
+        sisa     		= split[0].length % 3,
+        rupiah     		= split[0].substr(0, sisa),
+        ribuan     		= split[0].substr(sisa).match(/\d{3}/gi);
+
+    // tambahkan titik jika yang di input sudah menjadi angka ribuan
+    if(ribuan){
+        separator = sisa ? '.' : '';
+        rupiah += separator + ribuan.join('.');
+    }
+
+    rupiah = !_.isUndefined(split[1]) ? rupiah + ',' + split[1] : rupiah;
+    return 'Rp. ' + rupiah +',-';
 };

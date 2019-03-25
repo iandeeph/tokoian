@@ -46,68 +46,92 @@
                             <thead>
                             <tr class="border-bottom">
                                 <th width="1%">No</th>
-                                <th width="5%">Tanggal</th>
-                                <th width="5%">Transaksi</th>
-                                <th width="5%">Order ID</th>
-                                <th width="7%">Kode Barang</th>
-                                <th width="4%">Harga Beli</th>
-                                <th width="4%">Harga Jual</th>
+                                <th width="6%">Order ID</th>
+                                <th width="7%">Tanggal</th>
+                                <th width="1%">Transaksi</th>
+                                <th width="10%">Kode Barang / Deskripsi</th>
+                                <th width="3%">Harga Beli</th>
+                                <th width="3%">Harga Jual</th>
                                 <th width="1%">Jumlah</th>
-                                <th width="4%">Total Beli</th>
-                                <th width="4%">Total Jual</th>
+                                <th width="3%">Total Beli</th>
+                                <th width="3%">Total Jual</th>
                             </tr>
                             </thead>
                             <tbody>
-                            {{#each rows}}
+                            {{#each template}}
                                 <tr>
-                                    <td>{{numbyIndex @key}}</td>
-                                    <td>{{dateTime tanggal}}</td>
-                                    <td>{{jenisTrx jenistrx}}</td>
-                                    <td>{{stripForNull orderid}}</td>
-                                    <td>{{kode}}</td>
-                                    {{#compare jenistrx '1' operator="=="}}
-                                        <td class="center-align">{{numberFormat hargabeli}}</td>
-                                    {{else}}
-                                        {{#compare jenistrx '3' operator="=="}}
-                                            <td class="center-align">{{numberFormat hargabeli}}</td>
-                                        {{else}}
-                                            <td class="center-align">-</td>
-                                        {{/compare}}
-                                    {{/compare}}
-
-                                    {{#compare jenistrx '2' operator="=="}}
-                                        <td class="center-align">{{numberFormat hargajual}}</td>
-                                    {{else}}
-                                        <td class="center-align">-</td>
-                                    {{/compare}}
-                                    <td class="center-align">{{zeroOrNumber jumlah}}</td>
-
-                                    {{#compare jenistrx '1' operator="=="}}
-                                        <td class="center-align">{{numberFormat totalbeli}}</td>
-                                    {{else}}
-                                        {{#compare jenistrx '3' operator="=="}}
-                                            <td class="center-align">{{numberFormat totalbeli}}</td>
-                                        {{else}}
-                                            <td class="center-align">-</td>
-                                        {{/compare}}
-                                    {{/compare}}
-
-                                    {{#compare jenistrx '2' operator="=="}}
-                                        <td class="center-align">{{numberFormat totaljual}}</td>
-                                    {{else}}
-                                        <td class="center-align">-</td>
-                                    {{/compare}}
+                                    <td rowspan="{{maxKey this}}">{{numbyIndex @index}}</td>
+                                    <td rowspan="{{maxKey this}}">{{@key}}</td>
                                 </tr>
+                                {{#each this}}
+                                    <tr>
+                                        <td>{{readableDate tanggal}}</td>
+                                        <td>{{jenisTrx jenistrx}}</td>
+                                        {{#compare jenistrx 3 operator=">"}}
+                                            <td>{{expense}}</td>
+                                        {{else}}
+                                            <td>{{kode}}</td>
+                                        {{/compare}}
+                                        {{#compare jenistrx '1' operator="=="}}
+                                            <td class="right-align">{{numberFormat hargabeli}}</td>
+                                        {{else}}
+                                            {{#compare jenistrx '3' operator="=="}}
+                                                <td class="right-align">{{numberFormat hargabeli}}</td>
+                                            {{else}}
+                                                {{#compare jenistrx '4' operator="=="}}
+                                                    <td class="right-align">{{numberFormat hargabeli}}</td>
+                                                {{else}}
+                                                    <td class="right-align">-</td>
+                                                {{/compare}}
+                                            {{/compare}}
+                                        {{/compare}}
+
+                                        {{#compare jenistrx '2' operator="=="}}
+                                            <td class="right-align">{{numberFormat hargajual}}</td>
+                                        {{else}}
+                                            {{#compare jenistrx '5' operator="=="}}
+                                                <td class="right-align">{{numberFormat hargajual}}</td>
+                                            {{else}}
+                                                <td class="right-align">-</td>
+                                            {{/compare}}
+                                        {{/compare}}
+                                        <td class="center-align">{{zeroOrNumber jumlah}}</td>
+
+                                        {{#compare jenistrx '1' operator="=="}}
+                                            <td class="right-align">{{numberFormat totalbeli}}</td>
+                                        {{else}}
+                                            {{#compare jenistrx '3' operator="=="}}
+                                                <td class="right-align">{{numberFormat totalbeli}}</td>
+                                            {{else}}
+                                                {{#compare jenistrx '4' operator="=="}}
+                                                    <td class="right-align">{{numberFormat totalbeli}}</td>
+                                                {{else}}
+                                                    <td class="right-align">-</td>
+                                                {{/compare}}
+                                            {{/compare}}
+                                        {{/compare}}
+
+                                        {{#compare jenistrx '2' operator="=="}}
+                                            <td class="right-align">{{numberFormat totaljual}}</td>
+                                        {{else}}
+                                            {{#compare jenistrx '5' operator="=="}}
+                                                <td class="right-align">{{numberFormat totaljual}}</td>
+                                            {{else}}
+                                                <td class="right-align">-</td>
+                                            {{/compare}}
+                                        {{/compare}}
+                                    </tr>
+                                {{/each}}
                             {{/each}}
-                                <tr>
-                                    <td colspan="8" class="right-align">Total</td>
-                                    <td class="center-align">{{numberFormat grandTotalBeli}}</td>
-                                    <td class="center-align">{{numberFormat grandTotalJual}}</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="8" class="right-align">Laba (Total Jual - Total Beli)</td>
-                                    <td colspan="2" class="center-align">{{numberFormat totalLaba}}</td>
-                                </tr>
+                            <tr>
+                                <td colspan="8" class="right-align">Total</td>
+                                <td class="right-align">{{numberFormat grandTotalBeli}}</td>
+                                <td class="right-align">{{numberFormat grandTotalJual}}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="8" class="right-align">Laba (Total Jual - Total Beli)</td>
+                                <td colspan="2" class="center-align">{{numberFormat totalLaba}}</td>
+                            </tr>
                             </tbody>
                         </table>
                     </div>

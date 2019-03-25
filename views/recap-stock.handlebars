@@ -21,8 +21,12 @@
                                 <th width="1%">No</th>
                                 <th width="5%">Kode Barang</th>
                                 <th width="13%">Nama Barang</th>
-                                <th width="5%">Harga Beli</th>
-                                <th width="3%">Jumlah</th>
+                                {{#compare priv '1' operator='=='}}
+                                    <th width="5%">Harga Beli</th>
+                                {{/compare}}
+                                <th width="3%">Actual Stock</th>
+                                <th width="3%">Kebutuhan SO</th>
+                                <th width="3%">Sisa Stock</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -31,8 +35,12 @@
                                     <td class="center">{{numbyIndex @key}}</td>
                                     <td>{{kode}}</td>
                                     <td>{{nama}}</td>
-                                    <td>{{numberFormat hargabeli}}</td>
-                                    <td>{{zeroOrNumber jumlah}}</td>
+                                    {{#compare ../priv '1' operator='=='}}
+                                        <td>{{numberFormat hargabeli}}</td>
+                                    {{/compare}}
+                                    <td>{{zeroOrNumber stock}}</td>
+                                    <td>{{zeroOrNumber totalso}}</td>
+                                    <td>{{zeroOrNumber resstock}}</td>
                                 </tr>
                             {{/each}}
                             </tbody>

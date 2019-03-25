@@ -413,6 +413,12 @@ td {
     }
 }
 
+@media only screen and (max-width: 1200px) {
+    .modal {
+        width: 80%;
+    }
+}
+
 @media only screen and (max-width: 992px) {
     nav .nav-wrapper {
         height: 84px;
@@ -617,8 +623,20 @@ td {
     border: 1px solid grey;
 }
 
+.border-top{
+    border-top: 2px solid #3b3b3b;
+}
+
 .border-bottom{
     border-bottom: 1px solid grey;
+}
+
+.border-right{
+    border-right: 1px solid grey;
+}
+
+.border-left{
+    border-left: 1px solid grey;
 }
 
 .side-menu:hover, .top-menu:hover{
@@ -903,4 +921,12 @@ div .freeze {
 .input-short{
     height: 1rem !important;
     margin: 0 0 0px 0 !important;
+}
+
+.pagination li.active a {
+    color: #fff;
+}
+
+.pagination li.active {
+    background-color: #616161;
 }
