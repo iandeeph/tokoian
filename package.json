@@ -6,9 +6,8 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
-    "bluebird": "latest",
     "body-parser": "~1.18.2",
-    "chart.js": "^2.8.0",
+    "mime": ">=1.4.1",
     "cookie-parser": "~1.4.3",
     "crypto": "^1.0.1",
     "debug": "~2.6.9",
@@ -22,6 +21,7 @@
     "promise-mysql": "^3.2.0",
     "querystring": "^0.2.0",
     "randomatic": "^3.0.0",
-    "serve-favicon": "~2.4.5"
+    "serve-favicon": "~2.4.5",
+    "bluebird": "latest"
   }
 }
