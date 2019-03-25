@@ -6,8 +6,9 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "bluebird": "latest",
     "body-parser": "~1.18.2",
-    "mime": ">=1.4.1",
+    "chart.js": "^2.8.0",
     "cookie-parser": "~1.4.3",
     "crypto": "^1.0.1",
     "debug": "~2.6.9",
@@ -16,12 +17,12 @@
     "express-session": "^1.15.6",
     "forever": "^0.15.3",
     "lodash": ">=4.17.11",
+    "mime": ">=1.4.1",
     "moment": "^2.20.1",
     "morgan": "~1.9.0",
     "promise-mysql": "^3.2.0",
     "querystring": "^0.2.0",
     "randomatic": "^3.0.0",
-    "serve-favicon": "~2.4.5",
-    "bluebird": "latest"
+    "serve-favicon": "~2.4.5"
   }
 }
