@@ -7,7 +7,7 @@
     <div class="row">
         <div class="col s12 border-bottom mt-20 valign-wrapper">
             <div class="col s6" id="logoframe">
-                <img class="mt-10 ml-10 logo-print" title="" alt="" src="images/logo.png">
+                <img class="mt-10 ml-10" title="" alt="" src="images/logo.png">
             </div>
             <div class="col s6 right-align mt-20 mb-20">
                 {{#each company}}
@@ -48,6 +48,8 @@
                         <th width="3%">Code</th>
                         <th width="10%">Item</th>
                         <th width="3%">Qty</th>
+                        <th width="5%">Price</th>
+                        <th width="5%">Total</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -58,9 +60,21 @@
                                     <td class="center">{{kode}}</td>
                                     <td>{{nama}}</td>
                                     <td class="center">{{jumlah}}</td>
+                                    <td class="right-align">{{formatRupiah hargajual}}</td>
+                                    <td class="right-align">{{formatRupiah total}}</td>
                                 </tr>
                             {{/compare}}
                         {{/each}}
+                        <tr>
+                            <td colspan="4">Grand Total</td>
+                            <td class="right-align">
+                                {{#each this}}
+                                    {{#compare grandTotal NULL operator="!="}}
+                                        {{formatRupiah grandTotal}}
+                                    {{/compare}}
+                                {{/each}}
+                            </td>
+                        </tr>
                     {{/each}}
                     </tbody>
                 </table>
