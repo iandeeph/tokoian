@@ -951,6 +951,7 @@ router.get('/recap-sales-order', function(req, res) {
             // console.log(groupBySoid);
             res.render('recap-sales-order', {
                 rows: groupBySoid,
+                priv: req.session.priv,
                 grandTotal: grandTotal,
                 message: message
 
@@ -1712,7 +1713,7 @@ router.get('/income-report', function(req, res) {
     tokoianConn.query(queryString)
         .then(function (rowItem) {
             var groupedOrderid = _.groupBy(rowItem, 'orderid');
-            //PEMBELIAN
+            //PEMBELIAN = minus
             var promisePembelian = new Promise(function (resolve, reject) {
                 resolve(_.filter(rowItem, {'jenistrx': 1}));
             });
@@ -1721,7 +1722,7 @@ router.get('/income-report', function(req, res) {
                 grandTotalBeli = (_.isNumber(_.sumBy(rowPembelian, 'totalbeli'))) ? _.sumBy(rowPembelian, 'totalbeli') : 0;
 
             }).then(function () {
-                //PENJUALAN
+                //PENJUALAN = plus
                 var promisePenjualan = new Promise(function (resolve, reject) {
                     resolve(_.filter(rowItem, {'jenistrx': 2}));
                 });
@@ -1730,7 +1731,7 @@ router.get('/income-report', function(req, res) {
                     grandTotalJual = (_.isNumber(_.sumBy(rowPenjualan, 'totaljual'))) ? _.sumBy(rowPenjualan, 'totaljual') : 0;
 
                 }).then(function () {
-                    //EDIT STOCK
+                    //REOPEN SO = minus
                     var promiseEditStock = new Promise(function (resolve, reject) {
                         resolve(_.filter(rowItem, {'jenistrx': 3}));
                     });
@@ -1740,7 +1741,7 @@ router.get('/income-report', function(req, res) {
                         //console.log(grandTotalEdit);
 
                     }).then(function () {
-                        //ADD EXPENSE
+                        //ADD EXPENSE = minus
                         var promiseAddExp = new Promise(function (resolve, reject) {
                             resolve(_.filter(rowItem, {'jenistrx': 4}));
                         });
@@ -1750,13 +1751,13 @@ router.get('/income-report', function(req, res) {
                             //console.log(grandTotalEdit);
 
                         }).then(function () {
-                            //delete EXPENSE
+                            //delete EXPENSE = plus
                             var promiseDeleteExp = new Promise(function (resolve, reject) {
                                 resolve(_.filter(rowItem, {'jenistrx': 5}));
                             });
 
                             promiseDeleteExp.then(function (rowDeleteExp) {
-                                grandTotalExp = (_.isNumber(_.sumBy(rowDeleteExp, 'totalbeli'))) ? _.sumBy(rowDeleteExp, 'totalbeli') : 0;
+                                grandTotalDelExp = (_.isNumber(_.sumBy(rowDeleteExp, 'totalbeli'))) ? _.sumBy(rowDeleteExp, 'totalbeli') : 0;
                                 //console.log(grandTotalEdit);
 
                             }).then(function () {
@@ -1764,9 +1765,9 @@ router.get('/income-report', function(req, res) {
                                 res.render('income-report', {
                                     rows: rowItem,
                                     template: groupedOrderid,
-                                    grandTotalJual: grandTotalJual,
-                                    grandTotalBeli: (grandTotalBeli + grandTotalEdit),
-                                    totalLaba: (grandTotalJual - (grandTotalBeli + grandTotalEdit))
+                                    grandTotalJual: (grandTotalJual + grandTotalDelExp),
+                                    grandTotalBeli: (grandTotalBeli + grandTotalEdit + grandTotalExp),
+                                    totalLaba: ((grandTotalJual + grandTotalDelExp) - (grandTotalBeli + grandTotalEdit + grandTotalExp))
                                 });
 
                             }).catch(function (error) {
@@ -2550,6 +2551,7 @@ router.get('/pl-customer-list', function(req, res) {
                         customer = {"nama": customers[0].nama, "alamat": customers[0].alamat, "id": customers[0].idcustomer};
                         res.render('pl-customer', {
                             rows: row,
+                            priv: req.session.priv,
                             customer: customer,
                             message: message
 

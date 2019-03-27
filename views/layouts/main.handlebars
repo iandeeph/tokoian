@@ -39,13 +39,13 @@
         <nav>
             <div class="nav-wrapper grey lighten-5">
                 <a href="/" class="brand-logo center grey-text">
-                    <img class="mt-10 ml-10" title="ban.com" alt="ban.com" src="images/logo.png" height="64px">
+                    <img class="mt-10 ml-10" title="erp.izdihartirtadjaya.id" alt="erp.izdihartirtadjaya.id" src="images/logo.png" height="64px">
                 </a>
-                <a href="#" data-activates="left-menu" class="button-collapse grey-text left show-on-large mt-10 "><i class="material-icons">menu</i></a>
+                <a href="#" data-target="left-menu" class="sidenav-trigger grey-text left show-on-large mt-10 "><i class="material-icons">menu</i></a>
             </div>
         </nav>
     </div>
-    <ul id="left-menu" class="side-nav">
+    <ul id="left-menu" class="sidenav">
         <li><a href="/" class="pdl-20 pdr-20">Dashboard</a></li>
         <li><a href="/customer-list" class="pdl-20 pdr-20">Customer List</a></li>
         <li class="no-padding">
@@ -54,7 +54,9 @@
                     <a class="collapsible-header pdl-20 pdr-20">Transaksi<i class="material-icons right">arrow_drop_down</i></a>
                     <div class="collapsible-body">
                         <ul>
-                            <li><a href="/order-in">Input Barang Masuk</a></li>
+                            {{#compare session.priv 1 operator="=="}}
+                                <li><a href="/order-in">Input Barang Masuk</a></li>
+                            {{/compare}}
                             <li><a href="/add-sales-order">Input Sales Order</a></li>
                             <li><a href="/recap-sales-order">Rekap Sales Order</a></li>
                             <li><a href="/add-expense">Input Pengeluaran</a></li>
@@ -71,22 +73,24 @@
                         </ul>
                     </div>
                 </li>
-        {{#compare session.priv 1 operator="=="}}
-                    <li>
-                        <a class="collapsible-header pdl-20 pdr-20">Laporan<i class="material-icons right">arrow_drop_down</i></a>
-                        <div class="collapsible-body">
-                            <ul>
-                                <li><a href="/trxin-report">Laporan Pembelian</a></li>
-                                <li><a href="/trxout-report">Laporan Penjualan</a></li>
-                                <li><a href="/income-report">Laporan Laba Rugi</a></li>
-                            </ul>
-                        </div>
-                    </li>
+                    {{#compare session.priv 1 operator="=="}}
+                        <li>
+                            <a class="collapsible-header pdl-20 pdr-20">Laporan<i class="material-icons right">arrow_drop_down</i></a>
+                            <div class="collapsible-body">
+                                <ul>
+                                    <li><a href="/trxin-report">Laporan Pembelian</a></li>
+                                    <li><a href="/trxout-report">Laporan Penjualan</a></li>
+                                    <li><a href="/income-report">Laporan Laba Rugi</a></li>
+                                </ul>
+                            </div>
+                        </li>
+                    {{/compare}}
                 </ul>
             </li>
-            <li><a href="/user-manager" class="pdl-20 pdr-20">Daftar User</a></li>
-            <li><a href="/log" class="pdl-20 pdr-20">Catatan Aktivitas</a></li>
-        {{/compare}}
+            {{#compare session.priv 1 operator="=="}}
+                <li><a href="/user-manager" class="pdl-20 pdr-20">Daftar User</a></li>
+                <li><a href="/log" class="pdl-20 pdr-20">Catatan Aktivitas</a></li>
+            {{/compare}}
         <li><a href="/logout" class="pdl-20 pdr-20">Log Out</a></li>
     </ul>
 </header>

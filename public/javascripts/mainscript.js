@@ -3,21 +3,24 @@ var day = today.getDate();
 day ='#tanggal' + day;
 var numFieldTrx = 1;
 var autocompleteData = {};
+let datepickerElm = $('.datepicker');
 
 $(document).ready(function() {
-    $(".button-collapse").sideNav();
+    $(".sidenav").sidenav();
     $('.collapsible').collapsible(
         {hover: false}
     );
-    $('select').material_select();
+    $('select').formSelect();
+    $('#customer').formSelect();
     $('.tooltipped').tooltip({delay: 50});
-    $('.datepicker').pickadate({
-        selectMonths: true, // Creates a dropdown to control month
-        selectYears: 15, // Creates a dropdown of 15 years to control year,
-        today: 'Today',
-        clear: 'Clear',
-        close: 'Ok',
-        closeOnSelect: true // Close upon selecting a date,
+    $(datepickerElm).datepicker();
+    $(datepickerElm).click(function(){
+        $(".datepicker-day-button").click(function(){
+            // using timeout so it doesn't seem sudden to user
+            setTimeout(function(){
+                $('.datepicker-done').click()
+            }, 200)
+        });
     });
     $('.modal').modal();
 
@@ -126,7 +129,7 @@ $(document).ready(function() {
             '<div class="col s2 mt-10 addedTrx'+ numFieldTrx +'">' +
             '<a class="btn-floating btn waves-effect waves-light red darken-3 btnRemTrx'+ numFieldTrx +'" name="btnRemTrx'+ numFieldTrx +'" id="'+ numFieldTrx +'" title="Hapus"><i class="material-icons">remove</i></a>' +
             '</div>');
-        $('select').material_select();
+        $('select').formSelect();
         numFieldTrx++;
 
         $('[name^=btnRemTrx]').click(function () {
@@ -328,12 +331,12 @@ $(document).ready(function() {
                 $("#kode-produk"+ numFieldTrx).append('<option value=' + resDatas.kode + '>' + resDatas.kode + '</option>');
             }
 
-            $('select').material_select();
+            $('select').formSelect();
 
             $('input[id^=hargaBeli],input[id^=hargaJual], input[id^=jumlah]').each(function(){
                 $(this).keyup(function(){
                     var number = ($(this).val() != '' && $(this).val() != 'NaN') ? parseInt($(this).val().replace(/[^0-9]/gi, '')) : 0;
-                    $(this).val(Intl.NumberFormat('en-IND').format(number))
+                    $(this).val(Intl.NumberFormat('en-IND').format(number));
 
                     $('input[id^=hargaJual]').each(function () {
                         if($(this).val() === "0"){
@@ -430,7 +433,7 @@ $(document).ready(function() {
                         $("#kode-produk"+ numFieldTrx).append('<option value=' + resDatas.kode + '>' + resDatas.kode + '</option>');
                     }
 
-                    $('select').material_select();
+                    $('select').formSelect();
 
                     $('input[id^=hargaBeli],input[id^=hargaJual], input[id^=jumlah]').each(function(){
                         $(this).keyup(function(){

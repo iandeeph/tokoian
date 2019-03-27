@@ -19,8 +19,8 @@
                     </div>
                     <div class="row">
                         <div class="input-field col s12">
-                            <input id="customerId" name="customer[idcustomer]" type="hidden" {{orderid}}>
-                            <select id="customer" name="customer[nama]" class="validate" required>
+                            <input id="customerId" name="customer[idcustomer]" type="hidden">
+                            <select id="customer" name="customer[nama]" required>
                                 <option value="" disabled selected>Pilih Customer</option>
                                 {{#each custRow}}
                                     <option value="{{nama}}">{{nama}}</option>

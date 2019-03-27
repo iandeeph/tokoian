@@ -40,7 +40,9 @@
                                 <td>
                                     <a class="btn-floating btn waves-effect waves-light blue modal-trigger" title="Lihat" href="#viewSo{{this.0.idsalesorder}}" ><i class="material-icons">search</i></a>
                                 {{#compare this.0.status "Open" operator="=="}}
-                                    <a class="btn-floating btn waves-effect waves-light red modal-trigger" title="Hapus" href="#deleteSo{{this.0.idsalesorder}}" ><i class="material-icons">delete</i></a>
+                                    {{#compare ../priv "1" operator="=="}}
+                                        <a class="btn-floating btn waves-effect waves-light red modal-trigger" title="Hapus" href="#deleteSo{{this.0.idsalesorder}}" ><i class="material-icons">delete</i></a>
+                                    {{/compare}}
                                 {{/compare}}
 
                                     <div id="viewSo{{this.0.idsalesorder}}" class="modal">
@@ -253,35 +255,45 @@
                                                 {{#compare this.0.status "Done" operator="=="}}
                                                     <input name="prosesSoid" type="hidden" value="{{this.0.soid}}">
                                                     <button type="button" value="{{encrypt this.0.soid}}" id="printInvoice{{this.0.idsalesorder}}" class="modal-close waves-effect waves-light btn green darken-3 left ml-10 mb-10">Print Invoice</button>
-                                                    <button type="submit" name="printSoBtn"  value="{{encrypt this.0.soid}}" id="printDo{{this.0.idsalesorder}}" class="modal-close waves-effect waves-light btn orange darken-3 left ml-10 mb-10">Print DO</button>
-                                                    <button type="submit" name="reopenSoBtn" value="{{this.0.idsalesorder}}" id="reopenSo{{this.0.idsalesorder}}" class="modal-close waves-effect waves-light btn red darken-3 left ml-10 mb-10">Reopen</button>
+                                                    {{#compare this.0.printed "1" operator="=="}}
+                                                        {{#compare ../priv '1' operator="=="}}
+                                                            <button type="submit" name="printSoBtn"  value="{{encrypt this.0.soid}}" id="printDo{{this.0.idsalesorder}}" class="modal-close waves-effect waves-light btn orange darken-3 left ml-10 mb-10">Print DO</button>
+                                                        {{/compare}}
+                                                    {{else}}
+                                                        <button type="submit" name="printSoBtn"  value="{{encrypt this.0.soid}}" id="printDo{{this.0.idsalesorder}}" class="modal-close waves-effect waves-light btn orange darken-3 left ml-10 mb-10">Print DO</button>
+                                                    {{/compare}}
+                                                    {{#compare ../priv '1' operator="=="}}
+                                                        <button type="submit" name="reopenSoBtn" value="{{this.0.idsalesorder}}" id="reopenSo{{this.0.idsalesorder}}" class="modal-close waves-effect waves-light btn red darken-3 left ml-10 mb-10">Reopen</button>
+                                                    {{/compare}}
                                                 {{/compare}}
                                                 <a href="#!" class="modal-close waves-effect waves-light btn grey darken-1 left mb-10 ml-10">Tutup</a>
                                             </div>
                                         </form>
                                     </div>
 
-                                    <div id="deleteSo{{this.0.idsalesorder}}" class="modal">
-                                        <form action="" method="post">
-                                            <div class="modal-content">
-                                                <div class="col s12 container">
-                                                    <div class="col s12 center">
-                                                        <span class="font-20 hide-on-med-and-up">Konfirmasi Hapus Sales Order</span>
-                                                        <span class="font-40 hide-on-small-only">Konfirmasi Hapus Sales Order</span>
-                                                    </div>
-                                                    <div class="col s12 mb-20">
-                                                        <p class="hide-on-med-and-up">Apakah anda yakin ingin menghapus SO ini ?</p>
-                                                        <p class="font-20 hide-on-small-only">Apakah anda yakin ingin menghapus SO ini ?</p>
+                                    {{#compare ../priv '1' operator="=="}}
+                                        <div id="deleteSo{{this.0.idsalesorder}}" class="modal">
+                                            <form action="" method="post">
+                                                <div class="modal-content">
+                                                    <div class="col s12 container">
+                                                        <div class="col s12 center">
+                                                            <span class="font-20 hide-on-med-and-up">Konfirmasi Hapus Sales Order</span>
+                                                            <span class="font-40 hide-on-small-only">Konfirmasi Hapus Sales Order</span>
+                                                        </div>
+                                                        <div class="col s12 mb-20">
+                                                            <p class="hide-on-med-and-up">Apakah anda yakin ingin menghapus SO ini ?</p>
+                                                            <p class="font-20 hide-on-small-only">Apakah anda yakin ingin menghapus SO ini ?</p>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="modal-footer modal-fixed-footer">
-                                                <input name="deletedSoid" type="hidden" value="{{this.0.soid}}">
-                                                <button type="submit" name="hapusSoBtn" value="{{this.0.idsalesorder}}" id="hapusSoBtn" class="modal-close waves-effect waves-light btn red darken-3 left ml-10 mb-10">Hapus</button>
-                                                <a href="#!" class="modal-close waves-effect waves-light btn grey darken-1 left mb-10">Cancel</a>
-                                            </div>
-                                        </form>
-                                    </div>
+                                                <div class="modal-footer modal-fixed-footer">
+                                                    <input name="deletedSoid" type="hidden" value="{{this.0.soid}}">
+                                                    <button type="submit" name="hapusSoBtn" value="{{this.0.idsalesorder}}" id="hapusSoBtn" class="modal-close waves-effect waves-light btn red darken-3 left ml-10 mb-10">Hapus</button>
+                                                    <a href="#!" class="modal-close waves-effect waves-light btn grey darken-1 left mb-10">Cancel</a>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    {{/compare}}
                                 </td>
                             </tr>
                         {{/each}}
