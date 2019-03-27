@@ -207,6 +207,7 @@ router.post('/code-list', function(req, res) {
     var arrayItemQuery = [];
     var arrayLogQuery = [];
     var num = 1;
+    let maxid = "";
     if (!_.isUndefined(req.body.addCodeSubmit)){
         var lists = Array.prototype.slice.call(req.body.listKode);
 
@@ -214,7 +215,7 @@ router.post('/code-list', function(req, res) {
             .then(function (maxId) {
                 // console.log(maxId);
                 return Promise.each(lists, function (listStock) {
-                    var maxIdCode = (parseInt(maxId[0].maxid) + num);
+                    var maxIdCode = (parseInt(maxId[0].maxid || 0) + num);
                     // console.log(maxIdCode);
                     arrayKodeQuery.push([listStock.kode, listStock.nama]);
                     arrayItemQuery.push([maxIdCode]);
