@@ -231,9 +231,27 @@ router.post('/code-list', function(req, res) {
                     var queryItemString = "INSERT INTO item (idkode) VALUES?";
                     var queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES?";
 
-                    var pushKode = tokoianConn.query(queryKodeString, [arrayKodeQuery]);
-                    var pushItem = tokoianConn.query(queryItemString, [arrayItemQuery]);
-                    var pushLog = tokoianConn.query(queryLogString, [arrayLogQuery]);
+                    var pushKode = tokoianConn.query(queryKodeString, [arrayKodeQuery]).catch(function (error) {
+                        //logs out the error
+                        console.error(error);
+                        var string = encodeURIComponent("2");
+                        var errorStr = encodeURIComponent(error);
+                        res.redirect('/code-list?respost=' + string +'&error='+error);
+                    });
+                    var pushItem = tokoianConn.query(queryItemString, [arrayItemQuery]).catch(function (error) {
+                        //logs out the error
+                        console.error(error);
+                        var string = encodeURIComponent("2");
+                        var errorStr = encodeURIComponent(error);
+                        res.redirect('/code-list?respost=' + string +'&error='+error);
+                    });
+                    var pushLog = tokoianConn.query(queryLogString, [arrayLogQuery]).catch(function (error) {
+                        //logs out the error
+                        console.error(error);
+                        var string = encodeURIComponent("2");
+                        var errorStr = encodeURIComponent(error);
+                        res.redirect('/code-list?respost=' + string +'&error='+error);
+                    });
 
                     Promise.all([pushKode, pushItem, pushLog])
                         .then(function (results) {
@@ -259,8 +277,20 @@ router.post('/code-list', function(req, res) {
             "Nama Barang : " + req.body.editKode.nama;
         var insertLog = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
             "('" + user + "', 'Edit Detail Kode','" + logString + "','" + dateNow + "')";
-        var kodePush = tokoianConn.query(updateKode);
-        var logPush = tokoianConn.query(insertLog);
+        var kodePush = tokoianConn.query(updateKode).catch(function (error) {
+            //logs out the error
+            console.error(error);
+            var string = encodeURIComponent("4");
+            var errorStr = encodeURIComponent(error);
+            res.redirect('/code-list?respost=' + string +'&error='+error);
+        });
+        var logPush = tokoianConn.query(insertLog).catch(function (error) {
+            //logs out the error
+            console.error(error);
+            var string = encodeURIComponent("4");
+            var errorStr = encodeURIComponent(error);
+            res.redirect('/code-list?respost=' + string +'&error='+error);
+        });
         Promise.all([kodePush, logPush])
             .then(function () {
                 var string = encodeURIComponent("3");
@@ -305,8 +335,14 @@ router.get('/status-code', function(req, res) {
                 "Status to : " + passedVariable + "\n";
             var insertLog = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
                 "('" + user + "', 'Edit Status','" + logString + "','" + dateNow + "')";
-            var kodePush = tokoianConn.query(updateStatus);
-            var logPush = tokoianConn.query(insertLog);
+            var kodePush = tokoianConn.query(updateStatus).catch(function (error) {
+                //logs out the error
+                console.error(error);
+            });
+            var logPush = tokoianConn.query(insertLog).catch(function (error) {
+                //logs out the error
+                console.error(error);
+            });
             Promise.all([kodePush, logPush])
                 .then(function () {
                     res.send("ok");
@@ -410,15 +446,33 @@ router.post('/order-in', function(req, res) {
                         let logString = "Order ID : " + listStock.orderid + "\n" +
                             "Kode Barang : " + listStock.kode + "\n" +
                             "Nama Barang : " + listStock.nama + "\n" +
-                            "Harga Beli : " + hargaBeli + "\n" +
+                            "Harga Beli : " + Intl.NumberFormat('en-IND').format(hargaBeli) + "\n" +
                             "Jumlah : " + jumlah;
 
                         queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
                             "('" + user + "', 'Barang Masuk','" + logString + "','" + dateNow + "')";
 
-                        var itemPush = tokoianConn.query(queryItemString);
-                        var trxPush = tokoianConn.query(queryTrxString);
-                        var logPush = tokoianConn.query(queryLogString);
+                        var itemPush = tokoianConn.query(queryItemString).catch(function (error) {
+                            //logs out the error
+                            let string = encodeURIComponent("2");
+                            console.error(error);
+                            var errorStr = encodeURIComponent(error);
+                            res.redirect('/order-in?respost=' + string +'&error='+error);
+                        });
+                        var trxPush = tokoianConn.query(queryTrxString).catch(function (error) {
+                            //logs out the error
+                            let string = encodeURIComponent("2");
+                            console.error(error);
+                            var errorStr = encodeURIComponent(error);
+                            res.redirect('/order-in?respost=' + string +'&error='+error);
+                        });
+                        var logPush = tokoianConn.query(queryLogString).catch(function (error) {
+                            //logs out the error
+                            let string = encodeURIComponent("2");
+                            console.error(error);
+                            var errorStr = encodeURIComponent(error);
+                            res.redirect('/order-in?respost=' + string +'&error='+error);
+                        });
 
                         Promise.all([itemPush, trxPush, logPush])
                             .then(function () {
@@ -678,8 +732,20 @@ router.post('/customer-list', function(req, res) {
             var queryCustomerString = "INSERT INTO customer (nama, pic, telp, alamat) VALUES?";
             var queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES?";
 
-            pushCust = tokoianConn.query(queryCustomerString, [arrayCustomerQuery]);
-            pushLog = tokoianConn.query(queryLogString, [arrayLogQuery]);
+            pushCust = tokoianConn.query(queryCustomerString, [arrayCustomerQuery]).catch(function (error) {
+                //logs out the error
+                console.error(error);
+                var string = encodeURIComponent("2");
+                var errorStr = encodeURIComponent(error);
+                res.redirect('/customer-list?respost=' + string +'&error='+error);
+            });
+            pushLog = tokoianConn.query(queryLogString, [arrayLogQuery]).catch(function (error) {
+                //logs out the error
+                console.error(error);
+                var string = encodeURIComponent("2");
+                var errorStr = encodeURIComponent(error);
+                res.redirect('/customer-list?respost=' + string +'&error='+error);
+            });
 
             Promise.all([pushCust, pushLog])
                 .then(function (results) {
@@ -707,8 +773,20 @@ router.post('/customer-list', function(req, res) {
             "Alamat : " + req.body.editToko.alamat;
         var insertLog = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
             "('" + user + "', 'Edit Detail Customer','" + logString + "','" + dateNow + "')";
-        pushCust = tokoianConn.query(updateCust);
-        pushLog = tokoianConn.query(insertLog);
+        pushCust = tokoianConn.query(updateCust).catch(function (error) {
+            //logs out the error
+            console.error(error);
+            var string = encodeURIComponent("4");
+            var errorStr = encodeURIComponent(error);
+            res.redirect('/customer-list?respost=' + string +'&error='+error);
+        });
+        pushLog = tokoianConn.query(insertLog).catch(function (error) {
+            //logs out the error
+            console.error(error);
+            var string = encodeURIComponent("4");
+            var errorStr = encodeURIComponent(error);
+            res.redirect('/customer-list?respost=' + string +'&error='+error);
+        });
         Promise.all([pushCust, pushLog])
             .then(function () {
                 var string = encodeURIComponent("3");
@@ -740,8 +818,14 @@ router.get('/cust-status-code', function(req, res) {
             "Status to : " + passedVariable + "\n";
         var insertLog = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
             "('" + user + "', 'Edit Status Customer','" + logString + "','" + dateNow + "')";
-        var custPush = tokoianConn.query(updateStatus);
-        var logPush = tokoianConn.query(insertLog);
+        var custPush = tokoianConn.query(updateStatus).catch(function (error) {
+            //logs out the error
+            console.error(error);
+        });
+        var logPush = tokoianConn.query(insertLog).catch(function (error) {
+            //logs out the error
+            console.error(error);
+        });
         Promise.all([custPush, logPush])
             .then(function () {
                 res.send("ok");
@@ -810,22 +894,23 @@ router.post('/add-sales-order', function(req, res) {
     let customer = req.body.customer || {};
     let querySoArray = [];
     let querylogArray = [];
-    let checkerArray = [];
     let querySoString = "";
     let queryLogString = "";
     let trxPush = [];
     let logPush = [];
     if (!_.isUndefined(req.body.addSoSubmit)){
         return Promise.each(postOrder, function (listSo) {
-            console.log(listSo);
-            var hargaJual = parseInt(listSo.hargajual.replace(/[^0-9]/gi, ''));
-            var jumlah = parseInt(listSo.jumlah.replace(/[^0-9]/gi, ''));
+            // console.log(listSo);
+            let postHargaJual = listSo.hargajual || "0";
+            let postJumlah = listSo.jumlah || "0";
+            var hargaJual = parseInt(postHargaJual.replace(/[^0-9]/gi, ''));
+            var jumlah = parseInt(postJumlah.replace(/[^0-9]/gi, ''));
 
             let logString = "Sales Order ID : " + orderid + "\n" +
                 "Nama Customer : " + customer.nama + "\n" +
                 "Kode Barang : " + listSo.kode + "\n" +
                 "Nama Barang : " + listSo.nama + "\n" +
-                "Harga Jual : " + hargaJual + "\n" +
+                "Harga Jual : " + Intl.NumberFormat('en-IND').format(hargaJual) + "\n" +
                 "Jumlah : " + jumlah;
 
             querySoArray.push([orderid, customer.idcustomer, listSo.idkode, hargaJual, dateNow, jumlah]);
@@ -834,8 +919,16 @@ router.post('/add-sales-order', function(req, res) {
             querySoString = "INSERT INTO salesorder (soid, idcustomer, idkode, hargajual, tanggal, jumlah) VALUES?";
             queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES?";
 
-            trxPush.push(tokoianConn.query(querySoString, [querySoArray]));
-            logPush.push(tokoianConn.query(queryLogString, [querylogArray]));
+            trxPush.push(tokoianConn.query(querySoString, [querySoArray])
+                .catch(function (error) {
+                    //logs out the error
+                    console.error(error);
+                }));
+            logPush.push(tokoianConn.query(queryLogString, [querylogArray])
+                .catch(function (error) {
+                    //logs out the error
+                    console.error(error);
+                }));
             Promise.all([trxPush, logPush])
                 .then(function () {
                     let string = encodeURIComponent("1");
@@ -979,8 +1072,20 @@ router.post('/recap-sales-order', function(req, res) {
         queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
             "('" + user + "', 'Sales Order Dihapus','" + logString + "','" + dateNow + "')";
 
-        trxPush = tokoianConn.query(querySoString);
-        logPush = tokoianConn.query(queryLogString);
+        trxPush = tokoianConn.query(querySoString).catch(function (error) {
+            //logs out the error
+            let string = encodeURIComponent("2");
+            console.error(error);
+            var errorStr = encodeURIComponent(error);
+            res.redirect('/recap-sales-order?respost=' + string +'&error='+error);
+        });
+        logPush = tokoianConn.query(queryLogString).catch(function (error) {
+            //logs out the error
+            let string = encodeURIComponent("2");
+            console.error(error);
+            var errorStr = encodeURIComponent(error);
+            res.redirect('/recap-sales-order?respost=' + string +'&error='+error);
+        });
 
         Promise.all([trxPush, logPush])
             .then(function () {
@@ -1064,10 +1169,34 @@ router.post('/recap-sales-order', function(req, res) {
                             queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
                                 "('" + user + "', 'Proses SO to DO','" + logString + "','" + dateNow + "')";
 
-                            var itemPush = tokoianConn.query(queryItemString);
-                            var soPush = tokoianConn.query(querySoString);
-                            var trxPush = tokoianConn.query(queryTrxString);
-                            var logPush = tokoianConn.query(queryLogString);
+                            var itemPush = tokoianConn.query(queryItemString).catch(function (error) {
+                                //logs out the error
+                                let string = encodeURIComponent("4");
+                                console.error(error);
+                                var errorStr = encodeURIComponent(error);
+                                res.redirect('/recap-sales-order?respost=' + string +'&error='+error);
+                            });
+                            var soPush = tokoianConn.query(querySoString).catch(function (error) {
+                                //logs out the error
+                                let string = encodeURIComponent("4");
+                                console.error(error);
+                                var errorStr = encodeURIComponent(error);
+                                res.redirect('/recap-sales-order?respost=' + string +'&error='+error);
+                            });
+                            var trxPush = tokoianConn.query(queryTrxString).catch(function (error) {
+                                //logs out the error
+                                let string = encodeURIComponent("4");
+                                console.error(error);
+                                var errorStr = encodeURIComponent(error);
+                                res.redirect('/recap-sales-order?respost=' + string +'&error='+error);
+                            });
+                            var logPush = tokoianConn.query(queryLogString).catch(function (error) {
+                                //logs out the error
+                                let string = encodeURIComponent("4");
+                                console.error(error);
+                                var errorStr = encodeURIComponent(error);
+                                res.redirect('/recap-sales-order?respost=' + string +'&error='+error);
+                            });
 
                             Promise.all([itemPush, soPush, trxPush, logPush])
                                 .then(function () {
@@ -1157,10 +1286,34 @@ router.post('/recap-sales-order', function(req, res) {
                     queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
                         "('" + user + "', 'Reopen PO','" + logString + "','" + dateNow + "')";
 
-                    var itemPush = tokoianConn.query(queryItemString);
-                    var soPush = tokoianConn.query(querySoString);
-                    var trxPush = tokoianConn.query(queryTrxString);
-                    var logPush = tokoianConn.query(queryLogString);
+                    var itemPush = tokoianConn.query(queryItemString).catch(function (error) {
+                        //logs out the error
+                        let string = encodeURIComponent("6");
+                        console.error(error);
+                        var errorStr = encodeURIComponent(error);
+                        res.redirect('/recap-sales-order?respost=' + string +'&error='+error);
+                    });
+                    var soPush = tokoianConn.query(querySoString).catch(function (error) {
+                        //logs out the error
+                        let string = encodeURIComponent("6");
+                        console.error(error);
+                        var errorStr = encodeURIComponent(error);
+                        res.redirect('/recap-sales-order?respost=' + string +'&error='+error);
+                    });
+                    var trxPush = tokoianConn.query(queryTrxString).catch(function (error) {
+                        //logs out the error
+                        let string = encodeURIComponent("6");
+                        console.error(error);
+                        var errorStr = encodeURIComponent(error);
+                        res.redirect('/recap-sales-order?respost=' + string +'&error='+error);
+                    });
+                    var logPush = tokoianConn.query(queryLogString).catch(function (error) {
+                        //logs out the error
+                        let string = encodeURIComponent("6");
+                        console.error(error);
+                        var errorStr = encodeURIComponent(error);
+                        res.redirect('/recap-sales-order?respost=' + string +'&error='+error);
+                    });
 
                     Promise.all([itemPush, soPush, trxPush, logPush])
                         .then(function () {
@@ -1228,8 +1381,20 @@ router.post('/recap-sales-order', function(req, res) {
                     queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
                         "('" + user + "', 'Print DO','" + logString + "','" + dateNow + "')";
 
-                    var soPush = tokoianConn.query(querySoString);
-                    logPush = tokoianConn.query(queryLogString);
+                    var soPush = tokoianConn.query(querySoString).catch(function (error) {
+                        //logs out the error
+                        let string = encodeURIComponent("4");
+                        console.error(error);
+                        var errorStr = encodeURIComponent(error);
+                        res.redirect('/recap-sales-order?respost=' + string +'&error='+error);
+                    });
+                    logPush = tokoianConn.query(queryLogString).catch(function (error) {
+                        //logs out the error
+                        let string = encodeURIComponent("4");
+                        console.error(error);
+                        var errorStr = encodeURIComponent(error);
+                        res.redirect('/recap-sales-order?respost=' + string +'&error='+error);
+                    });
 
                     Promise.all([soPush, logPush])
                         .then(function () {
@@ -1350,9 +1515,22 @@ router.post('/so-customer-list', function(req, res) {
         queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
             "('" + user + "', 'Sales Order Dihapus','" + logString + "','" + dateNow + "')";
 
-        trxPush = tokoianConn.query(querySoString);
-        logPush = tokoianConn.query(queryLogString);
-
+        trxPush = tokoianConn.query(querySoString)
+            .catch(function (error) {
+                //logs out the error
+                let string = encodeURIComponent("2");
+                console.error(error);
+                var errorStr = encodeURIComponent(error);
+                res.redirect('/recap-sales-order?respost=' + string +'&error='+error);
+            });
+        logPush = tokoianConn.query(queryLogString)
+            .catch(function (error) {
+                //logs out the error
+                let string = encodeURIComponent("2");
+                console.error(error);
+                var errorStr = encodeURIComponent(error);
+                res.redirect('/recap-sales-order?respost=' + string +'&error='+error);
+            });
         Promise.all([trxPush, logPush])
             .then(function () {
                 let string = encodeURIComponent("1");
@@ -1435,10 +1613,34 @@ router.post('/so-customer-list', function(req, res) {
                             queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
                                 "('" + user + "', 'Proses SO to DO','" + logString + "','" + dateNow + "')";
 
-                            var itemPush = tokoianConn.query(queryItemString);
-                            var soPush = tokoianConn.query(querySoString);
-                            var trxPush = tokoianConn.query(queryTrxString);
-                            var logPush = tokoianConn.query(queryLogString);
+                            var itemPush = tokoianConn.query(queryItemString).catch(function (error) {
+                                //logs out the error
+                                let string = encodeURIComponent("4");
+                                console.error(error);
+                                var errorStr = encodeURIComponent(error);
+                                res.redirect('/recap-sales-order?respost=' + string +'&error='+error);
+                            });
+                            var soPush = tokoianConn.query(querySoString).catch(function (error) {
+                                //logs out the error
+                                let string = encodeURIComponent("4");
+                                console.error(error);
+                                var errorStr = encodeURIComponent(error);
+                                res.redirect('/recap-sales-order?respost=' + string +'&error='+error);
+                            });
+                            var trxPush = tokoianConn.query(queryTrxString).catch(function (error) {
+                                //logs out the error
+                                let string = encodeURIComponent("4");
+                                console.error(error);
+                                var errorStr = encodeURIComponent(error);
+                                res.redirect('/recap-sales-order?respost=' + string +'&error='+error);
+                            });
+                            var logPush = tokoianConn.query(queryLogString).catch(function (error) {
+                                //logs out the error
+                                let string = encodeURIComponent("4");
+                                console.error(error);
+                                var errorStr = encodeURIComponent(error);
+                                res.redirect('/recap-sales-order?respost=' + string +'&error='+error);
+                            });
 
                             Promise.all([itemPush, soPush, trxPush, logPush])
                                 .then(function () {
@@ -1528,10 +1730,34 @@ router.post('/so-customer-list', function(req, res) {
                     queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
                         "('" + user + "', 'Reopen PO','" + logString + "','" + dateNow + "')";
 
-                    var itemPush = tokoianConn.query(queryItemString);
-                    var soPush = tokoianConn.query(querySoString);
-                    var trxPush = tokoianConn.query(queryTrxString);
-                    var logPush = tokoianConn.query(queryLogString);
+                    var itemPush = tokoianConn.query(queryItemString).catch(function (error) {
+                        //logs out the error
+                        let string = encodeURIComponent("6");
+                        console.error(error);
+                        var errorStr = encodeURIComponent(error);
+                        res.redirect('/recap-sales-order?respost=' + string +'&error='+error);
+                    });
+                    var soPush = tokoianConn.query(querySoString).catch(function (error) {
+                        //logs out the error
+                        let string = encodeURIComponent("6");
+                        console.error(error);
+                        var errorStr = encodeURIComponent(error);
+                        res.redirect('/recap-sales-order?respost=' + string +'&error='+error);
+                    });
+                    var trxPush = tokoianConn.query(queryTrxString).catch(function (error) {
+                        //logs out the error
+                        let string = encodeURIComponent("6");
+                        console.error(error);
+                        var errorStr = encodeURIComponent(error);
+                        res.redirect('/recap-sales-order?respost=' + string +'&error='+error);
+                    });
+                    var logPush = tokoianConn.query(queryLogString).catch(function (error) {
+                        //logs out the error
+                        let string = encodeURIComponent("6");
+                        console.error(error);
+                        var errorStr = encodeURIComponent(error);
+                        res.redirect('/recap-sales-order?respost=' + string +'&error='+error);
+                    });
 
                     Promise.all([itemPush, soPush, trxPush, logPush])
                         .then(function () {
@@ -1599,8 +1825,20 @@ router.post('/so-customer-list', function(req, res) {
                     queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
                         "('" + user + "', 'Print DO','" + logString + "','" + dateNow + "')";
 
-                    var soPush = tokoianConn.query(querySoString);
-                    logPush = tokoianConn.query(queryLogString);
+                    var soPush = tokoianConn.query(querySoString).catch(function (error) {
+                        //logs out the error
+                        let string = encodeURIComponent("4");
+                        console.error(error);
+                        var errorStr = encodeURIComponent(error);
+                        res.redirect('/recap-sales-order?respost=' + string +'&error='+error);
+                    });
+                    logPush = tokoianConn.query(queryLogString).catch(function (error) {
+                        //logs out the error
+                        let string = encodeURIComponent("4");
+                        console.error(error);
+                        var errorStr = encodeURIComponent(error);
+                        res.redirect('/recap-sales-order?respost=' + string +'&error='+error);
+                    });
 
                     Promise.all([soPush, logPush])
                         .then(function () {
@@ -1747,7 +1985,7 @@ router.get('/income-report', function(req, res) {
                         });
 
                         promiseAddExp.then(function (rowAddExp) {
-                            grandTotalExp = (_.isNumber(_.sumBy(rowAddExp, 'totaljual'))) ? _.sumBy(rowAddExp, 'totaljual') : 0;
+                            grandTotalExp = (_.isNumber(_.sumBy(rowAddExp, 'totalbeli'))) ? _.sumBy(rowAddExp, 'totalbeli') : 0;
                             //console.log(grandTotalEdit);
 
                         }).then(function () {
@@ -1757,7 +1995,7 @@ router.get('/income-report', function(req, res) {
                             });
 
                             promiseDeleteExp.then(function (rowDeleteExp) {
-                                grandTotalDelExp = (_.isNumber(_.sumBy(rowDeleteExp, 'totalbeli'))) ? _.sumBy(rowDeleteExp, 'totalbeli') : 0;
+                                grandTotalDelExp = (_.isNumber(_.sumBy(rowDeleteExp, 'totaljual'))) ? _.sumBy(rowDeleteExp, 'totaljual') : 0;
                                 //console.log(grandTotalEdit);
 
                             }).then(function () {
@@ -2381,9 +2619,27 @@ router.post('/add-expense', function(req, res) {
             queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
                 "('" + user + "', 'Input Pengeluaran','" + logString + "','" + dateNow + "')";
 
-            itemPush = tokoianConn.query(queryItemString);
-            trxPush = tokoianConn.query(queryTrxString);
-            logPush = tokoianConn.query(queryLogString);
+            itemPush = tokoianConn.query(queryItemString).catch(function (error) {
+                //logs out the error
+                let string = encodeURIComponent("2");
+                console.error(error);
+                var errorStr = encodeURIComponent(error);
+                res.redirect('/add-expense?respost=' + string +'&error='+error);
+            });
+            trxPush = tokoianConn.query(queryTrxString).catch(function (error) {
+                //logs out the error
+                let string = encodeURIComponent("2");
+                console.error(error);
+                var errorStr = encodeURIComponent(error);
+                res.redirect('/add-expense?respost=' + string +'&error='+error);
+            });
+            logPush = tokoianConn.query(queryLogString).catch(function (error) {
+                //logs out the error
+                let string = encodeURIComponent("2");
+                console.error(error);
+                var errorStr = encodeURIComponent(error);
+                res.redirect('/add-expense?respost=' + string +'&error='+error);
+            });
         }).then(function () {
             Promise.all([itemPush, trxPush, logPush])
                 .then(function () {
@@ -2475,9 +2731,27 @@ router.post('/recap-expense', function(req, res) {
                     queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
                         "('" + user + "', 'Expense Dihapus','" + logString + "','" + dateNow + "')";
 
-                    trxPush = tokoianConn.query(queryTrxStr, [arrayTrxQry]);
-                    logPush = tokoianConn.query(queryLogString);
-                    expPush = tokoianConn.query(queryExpStr);
+                    trxPush = tokoianConn.query(queryTrxStr, [arrayTrxQry]).catch(function (error) {
+                        //logs out the error
+                        let string = encodeURIComponent("2");
+                        console.error(error);
+                        var errorStr = encodeURIComponent(error);
+                        res.redirect('/recap-expense?respost=' + string +'&error='+error);
+                    });
+                    logPush = tokoianConn.query(queryLogString).catch(function (error) {
+                        //logs out the error
+                        let string = encodeURIComponent("2");
+                        console.error(error);
+                        var errorStr = encodeURIComponent(error);
+                        res.redirect('/recap-expense?respost=' + string +'&error='+error);
+                    });
+                    expPush = tokoianConn.query(queryExpStr).catch(function (error) {
+                        //logs out the error
+                        let string = encodeURIComponent("2");
+                        console.error(error);
+                        var errorStr = encodeURIComponent(error);
+                        res.redirect('/recap-expense?respost=' + string +'&error='+error);
+                    });
 
                     Promise.all([trxPush, logPush, expPush])
                         .then(function () {
@@ -2595,13 +2869,27 @@ router.post('/pl-customer-list', function(req, res) {
                 }
                 let logString = "Nama Toko : " + postPl.namatoko + "\n" +
                     "Kode Barang : " + postPl.namabarang + "\n" +
-                    "Nama Barang : " + postPl.kodebarang;
+                    "Nama Barang : " + postPl.kodebarang + "\n" +
+                    "Harga Jual Lama : " + Intl.NumberFormat('en-IND').format(postPl.hargajuallama)+ "\n" +
+                    "Harga Jual Baru : " + Intl.NumberFormat('en-IND').format(postPl.hargajual);
 
                 let queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
                     "('" + user + "', 'Edit Pricelist','" + logString + "','" + dateNow + "')";
 
-                var plPush = tokoianConn.query(queryPlString);
-                var logPush = tokoianConn.query(queryLogString);
+                var plPush = tokoianConn.query(queryPlString).catch(function (error) {
+                    //logs out the error
+                    let string = encodeURIComponent("2");
+                    console.error(error);
+                    var errorStr = encodeURIComponent(error);
+                    res.redirect('/pl-customer-list?respost=' + string + '&so=' + encrypt(postPl.customer) +'&error='+error);
+                });
+                var logPush = tokoianConn.query(queryLogString).catch(function (error) {
+                    //logs out the error
+                    let string = encodeURIComponent("2");
+                    console.error(error);
+                    var errorStr = encodeURIComponent(error);
+                    res.redirect('/pl-customer-list?respost=' + string + '&so=' + encrypt(postPl.customer) +'&error='+error);
+                });
 
                 Promise.all([plPush, logPush])
                     .then(function () {
@@ -2674,8 +2962,20 @@ router.post('/user-manager', function(req, res) {
         var queryUserString = "INSERT INTO user (username, nama, password, priv, status) VALUES?";
         var queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES?";
 
-        var pushKode = tokoianConn.query(queryUserString, [arrayUserQuery]);
-        var pushLog = tokoianConn.query(queryLogString, [arrayLogQuery]);
+        var pushKode = tokoianConn.query(queryUserString, [arrayUserQuery]).catch(function (error) {
+            //logs out the error
+            console.error(error);
+            var string = encodeURIComponent("2");
+            var errorStr = encodeURIComponent(error);
+            res.redirect('/user-manager?respost=' + string +'&error='+error);
+        });
+        var pushLog = tokoianConn.query(queryLogString, [arrayLogQuery]).catch(function (error) {
+            //logs out the error
+            console.error(error);
+            var string = encodeURIComponent("2");
+            var errorStr = encodeURIComponent(error);
+            res.redirect('/user-manager?respost=' + string +'&error='+error);
+        });
 
         Promise.all([pushKode, pushLog])
             .then(function (results) {
@@ -2699,8 +2999,20 @@ router.post('/user-manager', function(req, res) {
             "Nama : " + req.body.editUser.namaOld;
         var insertLog = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
             "('" + user + "', 'Edit Detail User','" + logString + "','" + dateNow + "')";
-        var UserPush = tokoianConn.query(updateUser);
-        var logPush = tokoianConn.query(insertLog);
+        var UserPush = tokoianConn.query(updateUser).catch(function (error) {
+            //logs out the error
+            console.error(error);
+            var string = encodeURIComponent("4");
+            var errorStr = encodeURIComponent(error);
+            res.redirect('/user-manager?respost=' + string +'&error='+error);
+        });
+        var logPush = tokoianConn.query(insertLog).catch(function (error) {
+            //logs out the error
+            console.error(error);
+            var string = encodeURIComponent("4");
+            var errorStr = encodeURIComponent(error);
+            res.redirect('/user-manager?respost=' + string +'&error='+error);
+        });
         Promise.all([UserPush, logPush])
             .then(function () {
                 var string = encodeURIComponent("3");
@@ -2731,8 +3043,14 @@ router.get('/priv-user', function(req, res) {
             "Privilege to : " + (passedVariable === '1')? "Administrator" : "Operator" + "\n";
         var insertLog = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
             "('" + user + "', 'Edit Privilege','" + logString + "','" + dateNow + "')";
-        var userPush = tokoianConn.query(updatePriv);
-        var logPush = tokoianConn.query(insertLog);
+        var userPush = tokoianConn.query(updatePriv).catch(function (error) {
+            //logs out the error
+            console.error(error);
+        });
+        var logPush = tokoianConn.query(insertLog).catch(function (error) {
+            //logs out the error
+            console.error(error);
+        });
         Promise.all([userPush, logPush])
             .then(function () {
                 res.send("ok");
