@@ -1254,16 +1254,11 @@ router.post('/recap-sales-order', function(req, res) {
             "where so.soid = '"+ req.body.prosesSoid +"'")
             .then(function (row) {
                 // console.log(row);
-                var cekStock = new Promise(function (resolve, reject) {
-                    resolve(_.find(row, function (r) {
-                        return r.sisastock < 0;
-                    }))
-                });
                 return Promise.each(row, function (itemRow) {
                     // console.log(typeof itemRow.jumlah);
                     var jumlah = parseInt(itemRow.jumlah);
                     var stock = parseInt(itemRow.stock);
-                    var hargaBeli = parseInt(itemRow.hargabeli);
+                    var hargaJual = parseInt(itemRow.hargajual);
                     var sisaStock;
 
                     sisaStock = (stock + jumlah);
@@ -1277,14 +1272,14 @@ router.post('/recap-sales-order', function(req, res) {
                         "where soid = '" + itemRow.soid + "' ";
 
                     queryTrxString = "INSERT INTO trx (idkode, orderid, hargabeli, tanggal, jenistrx, jumlah) VALUES " +
-                        "('" + itemRow.idkode + "','" + itemRow.soid + "', '" + hargaBeli + "', '" + dateNow + "', '3', '" + jumlah + "')";
+                        "('" + itemRow.idkode + "','" + itemRow.soid + "', '" + hargaJual + "', '" + dateNow + "', '3', '" + jumlah + "')";
 
                     let logString = "Sales Order ID : " + itemRow.soid + "\n" +
                         "Nama Toko : " + itemRow.customer + "\n" +
                         "Alamat Toko : " + itemRow.alamat;
 
                     queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
-                        "('" + user + "', 'Reopen PO','" + logString + "','" + dateNow + "')";
+                        "('" + user + "', 'Reopen SO','" + logString + "','" + dateNow + "')";
 
                     var itemPush = tokoianConn.query(queryItemString).catch(function (error) {
                         //logs out the error
@@ -1707,7 +1702,7 @@ router.post('/so-customer-list', function(req, res) {
                     // console.log(typeof itemRow.jumlah);
                     var jumlah = parseInt(itemRow.jumlah);
                     var stock = parseInt(itemRow.stock);
-                    var hargaBeli = parseInt(itemRow.hargabeli);
+                    var hargaJual = parseInt(itemRow.hargajual);
                     var sisaStock;
 
                     sisaStock = (stock + jumlah);
@@ -1721,14 +1716,14 @@ router.post('/so-customer-list', function(req, res) {
                         "where soid = '" + itemRow.soid + "' ";
 
                     queryTrxString = "INSERT INTO trx (idkode, orderid, hargabeli, tanggal, jenistrx, jumlah) VALUES " +
-                        "('" + itemRow.idkode + "','" + itemRow.soid + "', '" + hargaBeli + "', '" + dateNow + "', '3', '" + jumlah + "')";
+                        "('" + itemRow.idkode + "','" + itemRow.soid + "', '" + hargaJual + "', '" + dateNow + "', '3', '" + jumlah + "')";
 
                     let logString = "Sales Order ID : " + itemRow.soid + "\n" +
                         "Nama Toko : " + itemRow.customer + "\n" +
                         "Alamat Toko : " + itemRow.alamat;
 
                     queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
-                        "('" + user + "', 'Reopen PO','" + logString + "','" + dateNow + "')";
+                        "('" + user + "', 'Reopen SO','" + logString + "','" + dateNow + "')";
 
                     var itemPush = tokoianConn.query(queryItemString).catch(function (error) {
                         //logs out the error
