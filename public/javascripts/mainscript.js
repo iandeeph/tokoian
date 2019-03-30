@@ -74,7 +74,7 @@ $(document).ready(function() {
         $(doPage).click(function () { setTimeout(function () { window.location.replace("./recap-sales-order"); }, 500); });
     }
 
-    // ================== HOME PAGE ======================
+    // ================== HOME PAGE =====================
     var topChart = $('#topSaleChart');
     if($(topChart).length > 0){
         function random_rgba(jumlah = 1, trans = 1) {
