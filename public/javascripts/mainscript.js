@@ -286,6 +286,8 @@ $(document).ready(function() {
                             $(parentForm).find('input[id^=harga-Jual]').val("");
                             $(parentForm).find('input[id^=kodeId]').val("");
                             $(parentForm).find('input[id^=nama-produk]').closest('div').find('label').removeClass("active");
+                            $(btnSoSubmit).addClass('disabled');
+                            $(btnSoSubmit).prop('disabled', true);
                         }
                     }
                 });
@@ -430,7 +432,7 @@ $(document).ready(function() {
                     for (var keyDatas in datas) {
                         if (!datas.hasOwnProperty(keyDatas)) continue;
                         var resDatas = datas[keyDatas];
-                        $("#kode-produk"+ numFieldTrx).append('<option value=' + resDatas.kode + '>' + resDatas.kode + '</option>');
+                        $("#kode-produk"+ numFieldTrx).append('<option value="' + resDatas.kode + '">' + resDatas.kode + '</option>');
                     }
 
                     $('select').formSelect();
