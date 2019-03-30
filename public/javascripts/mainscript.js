@@ -60,8 +60,10 @@ $(document).ready(function() {
     $('[id^=printInvoice]').click(function () {
         let so = $(this).val();
         var printWindow = window.open('./print-so?so='+ so);
-        printWindow.print();
-        printWindow.onfocus = function () { setTimeout(function () { printWindow.close(); }, 0); }
+        printWindow.onload = function(e){
+            printWindow.print();
+            printWindow.onfocus = function () { setTimeout(function () { printWindow.close(); }, 0); };
+        };
     });
 
     // ======== print DO ==================
