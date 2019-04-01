@@ -2858,7 +2858,7 @@ router.post('/pl-customer-list', function(req, res) {
                         "hargajual = '" + postPl.hargajual + "' " +
                         "where " +
                         "idcustomer = '"+ rows[0].idcustomer +"' and " +
-                        "idkode = '"+ rows[0].idkode;
+                        "idkode = '"+ rows[0].idkode +"'";
                 }else {
                     queryPlString = "INSERT INTO pricelist (idcustomer, idkode, hargajual) VALUES " +
                         "('" + postPl.customer + "','" + idkode + "', '" + hargajual + "')";
