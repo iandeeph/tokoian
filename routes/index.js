@@ -2856,6 +2856,7 @@ router.post('/pl-customer-list', function(req, res) {
                 if (!_.isEmpty(rows)) {
                     queryPlString = "UPDATE pricelist SET " +
                         "hargajual = '" + postPl.hargajual + "' " +
+                        "where " +
                         "idcustomer = '"+ rows[0].idcustomer +"' and " +
                         "idkode = '"+ rows[0].idkode;
                 }else {
