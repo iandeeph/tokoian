@@ -403,6 +403,9 @@ router.post('/order-in', function(req, res) {
     let queryItemString = "";
     let queryTrxString = "";
     let queryLogString = "";
+    var itemPush = [];
+    var trxPush = [];
+    var logPush = [];
     if (!_.isUndefined(req.body.ordeInSubmit)){
         // console.log(req.body);
         let queryStr = "select " +
@@ -445,53 +448,52 @@ router.post('/order-in', function(req, res) {
 
                         let logString = "Order ID : " + listStock.orderid + "\n" +
                             "Kode Barang : " + listStock.kode + "\n" +
-                            "Nama Barang : " + listStock.nama + "\n" +
+                            "Nama Barang : " + resRows.nama + "\n" +
                             "Harga Beli : " + Intl.NumberFormat('en-IND').format(hargaBeli) + "\n" +
                             "Jumlah : " + jumlah;
 
                         queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
                             "('" + user + "', 'Barang Masuk','" + logString + "','" + dateNow + "')";
 
-                        var itemPush = tokoianConn.query(queryItemString).catch(function (error) {
-                            //logs out the error
-                            let string = encodeURIComponent("2");
-                            console.error(error);
-                            var errorStr = encodeURIComponent(error);
-                            res.redirect('/order-in?respost=' + string +'&error='+error);
-                        });
-                        var trxPush = tokoianConn.query(queryTrxString).catch(function (error) {
-                            //logs out the error
-                            let string = encodeURIComponent("2");
-                            console.error(error);
-                            var errorStr = encodeURIComponent(error);
-                            res.redirect('/order-in?respost=' + string +'&error='+error);
-                        });
-                        var logPush = tokoianConn.query(queryLogString).catch(function (error) {
-                            //logs out the error
-                            let string = encodeURIComponent("2");
-                            console.error(error);
-                            var errorStr = encodeURIComponent(error);
-                            res.redirect('/order-in?respost=' + string +'&error='+error);
-                        });
-
-                        Promise.all([itemPush, trxPush, logPush])
-                            .then(function () {
-                                let string = encodeURIComponent("1");
-                                res.redirect('/order-in?respost=' + string);
-                            }).catch(function (error) {
-                            //logs out the error
-                            let string = encodeURIComponent("2");
-                            console.error(error);
-                            var errorStr = encodeURIComponent(error);
-                            res.redirect('/order-in?respost=' + string +'&error='+error);
-                        });
+                        itemPush.push(tokoianConn.query(queryItemString));
+                        trxPush.push(tokoianConn.query(queryTrxString));
+                        logPush.push(tokoianConn.query(queryLogString));
                     }
                 }).catch(function (error) {
                     //logs out the error
                     console.error(error);
                 });
-            });
-
+            }).then(function () {
+                Promise.all(temPush)
+                    .then(function () {
+                        Promise.all(trxPush)
+                            .then(function () {
+                                Promise.all(logPush)
+                                    .then(function () {
+                                        let string = encodeURIComponent("1");
+                                        res.redirect('/order-in?respost=' + string);
+                                    }).catch(function (error) {
+                                    //logs out the error
+                                        let string = encodeURIComponent("2");
+                                        console.error(error);
+                                        var errorStr = encodeURIComponent(error);
+                                        res.redirect('/order-in?respost=' + string +'&error='+error);
+                                    });
+                        }).catch(function (error) {
+                            //logs out the error
+                            let string = encodeURIComponent("2");
+                            console.error(error);
+                            var errorStr = encodeURIComponent(error);
+                            res.redirect('/order-in?respost=' + string +'&error='+error);
+                        });
+                }).catch(function (error) {
+                    //logs out the error
+                    let string = encodeURIComponent("2");
+                    console.error(error);
+                    var errorStr = encodeURIComponent(error);
+                    res.redirect('/order-in?respost=' + string +'&error='+error);
+                });
+            })
         }).catch(function (error) {
             //logs out the error
             console.error(error);
