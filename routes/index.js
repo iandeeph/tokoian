@@ -407,7 +407,7 @@ router.post('/order-in', function(req, res) {
     var trxPush = [];
     var logPush = [];
     if (!_.isUndefined(req.body.ordeInSubmit)){
-        // console.log(req.body);
+        console.log(req.body);
         let queryStr = "select " +
             "kode.idkode idkode, " +
             "kode.nama nama, " +
@@ -433,7 +433,7 @@ router.post('/order-in', function(req, res) {
                 });
 
                 cekNamakodePromise.then(function (resRows) {
-                    console.log(resRows);
+                    // console.log(resRows);
                     if (!_.isEmpty(resRows) || !_.isUndefined(resRows)) {
                         total = (parseInt(listStock.jumlah.replace(/[^0-9]/gi, '')) + parseInt(resRows.jumlah));
 
