@@ -436,7 +436,7 @@ router.post('/order-in', function(req, res) {
                 cekNamakodePromise.then(function (resRows) {
                     // console.log(resRows);
                     if (!_.isEmpty(resRows) || !_.isUndefined(resRows)) {
-                        total = (parseInt(listStock.jumlah.replace(/[^0-9]/gi, '')) + parseInt(resRows.jumlah));
+                        total = (parseInt(listStock.jumlah.replace(/[^0-9]/gi, '')) + resRows.jumlah);
 
                         queryItemString = "UPDATE item SET " +
                             "hargabeli = '" + hargaBeli + "', " +
