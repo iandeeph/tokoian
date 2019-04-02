@@ -307,7 +307,7 @@ $(document).ready(function() {
                 '<select id="kode-produk'+ numFieldTrx +'" name="addSo['+ numFieldTrx +'][kode]" class="validate" required>' +
                 '<option value="" disabled selected>Pilih Kode Produk</option>' +
                 '</select>' +
-                '<label for="kode-produk">Kode Produk</label>' +
+                '<label for="kode-produk'+ numFieldTrx +'">Kode Produk</label>' +
                 '</div>' +
                 '<div class="col s1 mt-10 mr-10 hide-on-med-and-up">' +
                 '<a class="btn-floating btn waves-effect waves-light red darken-3 btnRemTrx'+ numFieldTrx +'" name="btnRemTrx'+ numFieldTrx +'" id="'+ numFieldTrx +'" title="Hapus"><i class="material-icons">remove</i></a>' +
