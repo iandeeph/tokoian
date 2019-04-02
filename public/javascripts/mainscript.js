@@ -118,19 +118,20 @@ $(document).ready(function() {
     }
     //================ page add kode ==================
     $("#btnAddKode").click(function () {
-        $("#kodeField").append('' +
+        let newInput = $('' +
             '<div class="row addedTrx'+ numFieldTrx +'">' +
             '<div class="input-field col s4">' +
             '<input id="kode-produk'+ numFieldTrx +'" name="listKode['+ numFieldTrx +'][kode]" type="text" class="validate" required>' +
             '<label for="kode-produk'+ numFieldTrx +'">Kode Produk</label>' +
             '</div>' +
             '<div class="input-field col s6">' +
-                '<input id="nama-produk'+ numFieldTrx +'" name="listKode['+ numFieldTrx +'][nama]" type="text" class="validate" required>' +
+            '<input id="nama-produk'+ numFieldTrx +'" name="listKode['+ numFieldTrx +'][nama]" type="text" class="validate" required>' +
             '<label for="nama-produk'+ numFieldTrx +'">Nama Produk</label>' +
             '</div>' +
             '<div class="col s2 mt-10 addedTrx'+ numFieldTrx +'">' +
             '<a class="btn-floating btn waves-effect waves-light red darken-3 btnRemTrx'+ numFieldTrx +'" name="btnRemTrx'+ numFieldTrx +'" id="'+ numFieldTrx +'" title="Hapus"><i class="material-icons">remove</i></a>' +
             '</div>');
+        $("#kodeField").append(newInput);
         $('select').formSelect();
         numFieldTrx++;
 
@@ -332,7 +333,7 @@ $(document).ready(function() {
             for (var keyDatas in datas) {
                 if (!datas.hasOwnProperty(keyDatas)) continue;
                 var resDatas = datas[keyDatas];
-                $("#kode-produk"+ numFieldTrx).append('<option value=' + resDatas.kode + '>' + resDatas.kode + '</option>');
+                $("#kode-produk"+ numFieldTrx).append('<option value="' + resDatas.kode + '">' + resDatas.kode + '</option>');
             }
 
             $('select').formSelect();
