@@ -464,7 +464,7 @@ router.post('/order-in', function(req, res) {
                     console.error(error);
                 });
             }).then(function () {
-                Promise.all(temPush)
+                Promise.all(itemPush)
                     .then(function () {
                         Promise.all(trxPush)
                             .then(function () {
@@ -479,20 +479,20 @@ router.post('/order-in', function(req, res) {
                                         var errorStr = encodeURIComponent(error);
                                         res.redirect('/order-in?respost=' + string +'&error='+error);
                                     });
-                        }).catch(function (error) {
-                            //logs out the error
-                            let string = encodeURIComponent("2");
-                            console.error(error);
-                            var errorStr = encodeURIComponent(error);
-                            res.redirect('/order-in?respost=' + string +'&error='+error);
-                        });
-                }).catch(function (error) {
-                    //logs out the error
-                    let string = encodeURIComponent("2");
-                    console.error(error);
-                    var errorStr = encodeURIComponent(error);
-                    res.redirect('/order-in?respost=' + string +'&error='+error);
-                });
+                            }).catch(function (error) {
+                                //logs out the error
+                                let string = encodeURIComponent("2");
+                                console.error(error);
+                                var errorStr = encodeURIComponent(error);
+                                res.redirect('/order-in?respost=' + string +'&error='+error);
+                            });
+                    }).catch(function (error) {
+                        //logs out the error
+                        let string = encodeURIComponent("2");
+                        console.error(error);
+                        var errorStr = encodeURIComponent(error);
+                        res.redirect('/order-in?respost=' + string +'&error='+error);
+                    });
             })
         }).catch(function (error) {
             //logs out the error
