@@ -424,7 +424,7 @@ router.post('/order-in', function(req, res) {
             // console.log(queryStr);
             var lists = Array.prototype.slice.call(postOrder);
             return Promise.each(lists, function (listStock) {
-                console.log(listStock);
+                // console.log(listStock);
                 var hargaBeli = parseInt(listStock.hargabeli.replace(/[^0-9]/gi, ''));
                 var jumlah = parseInt(listStock.jumlah.replace(/[^0-9]/gi, ''));
                 var total;
@@ -446,6 +446,8 @@ router.post('/order-in', function(req, res) {
 
                         queryTrxString = "INSERT INTO trx (idkode, orderid, hargabeli, tanggal, jenistrx, jumlah) VALUES " +
                             "('" + resRows.idkode + "','" + listStock.orderid + "', '" + hargaBeli + "', '" + dateNow + "', '1', '" + jumlah + "')";
+
+                        console.log(queryItemString);
 
                         let logString = "Order ID : " + listStock.orderid + "\n" +
                             "Kode Barang : " + listStock.kode + "\n" +
