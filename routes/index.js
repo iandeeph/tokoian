@@ -407,7 +407,7 @@ router.post('/order-in', function(req, res) {
     var trxPush = [];
     var logPush = [];
     if (!_.isUndefined(req.body.ordeInSubmit)){
-        console.log(req.body);
+        // console.log(req.body);
         let queryStr = "select " +
             "kode.idkode idkode, " +
             "kode.nama nama, " +
@@ -424,6 +424,7 @@ router.post('/order-in', function(req, res) {
             // console.log(queryStr);
             var lists = Array.prototype.slice.call(postOrder);
             return Promise.each(lists, function (listStock) {
+                console.log(listStock);
                 var hargaBeli = parseInt(listStock.hargabeli.replace(/[^0-9]/gi, ''));
                 var jumlah = parseInt(listStock.jumlah.replace(/[^0-9]/gi, ''));
                 var total;
