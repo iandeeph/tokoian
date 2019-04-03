@@ -11,8 +11,41 @@
         <div class="row">
             <div class="col s12 container">
                 <div class="row">
-                    <div class="input-field">
+                    <div class="col s12">
                         <a class="btn-floating btn-large waves-effect waves-light green modal-trigger" href="#addCode"><i class="material-icons">add</i></a>
+                    </div>
+
+                    <div id="addCode" class="modal">
+                        <form action="" method="post">
+                            <div class="modal-content">
+                                <div class="col s12 container">
+                                    <div class="row">
+                                        <div class="col s12 mb-20 mt-20 center">
+                                            <span class="font-40">Tambah Kode Produk</span>
+                                        </div>
+                                    </div>
+                                    <div class="row" id="kodeField">
+                                        <div class="row">
+                                            <div class="input-field col s4">
+                                                <input id="kode-produk" name="listKode[0][kode]" type="text" class="validate" required>
+                                                <label for="kode-produk">Kode Produk</label>
+                                            </div>
+                                            <div class="input-field col s6">
+                                                <input id="nama-produk" name="listKode[0][nama]" type="text" class="validate" required>
+                                                <label for="nama-produk">Nama Produk</label>
+                                            </div>
+                                            <div class="col s2 mt-10">
+                                                <a class="btn-floating btn waves-effect waves-light green darken-3" id="btnAddKode" title="Tambah Kode"><i class="material-icons">add</i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer modal-fixed-footer">
+                                <button type="submit" name="addCodeSubmit" id="addCodeSubmit-bot" class="modal-close waves-effect waves-light btn grey darken-3 left ml-10 mb-10">Submit</button>
+                                <a href="#!" class="modal-close waves-effect waves-light btn grey darken-1 left mb-10">Cancel</a>
+                            </div>
+                        </form>
                     </div>
                 </div>
                 <div class="col s12 mb-20">
@@ -85,38 +118,6 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
-            <div id="addCode" class="modal">
-                <form action="" method="post">
-                    <div class="modal-content">
-                        <div class="col s12 container">
-                            <div class="row">
-                                <div class="col s12 mb-20 mt-20 center">
-                                    <span class="font-40">Tambah Kode Produk</span>
-                                </div>
-                            </div>
-                            <div class="row" id="kodeField">
-                                <div class="row">
-                                    <div class="input-field col s4">
-                                        <input id="kode-produk" name="listKode[0][kode]" type="text" class="validate" required>
-                                        <label for="kode-produk">Kode Produk</label>
-                                    </div>
-                                    <div class="input-field col s6">
-                                        <input id="nama-produk" name="listKode[0][nama]" type="text" class="validate" required>
-                                        <label for="nama-produk">Nama Produk</label>
-                                    </div>
-                                    <div class="col s2 mt-10">
-                                        <a class="btn-floating btn waves-effect waves-light green darken-3" id="btnAddKode" title="Tambah Kode"><i class="material-icons">add</i></a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer modal-fixed-footer">
-                        <button type="submit" name="addCodeSubmit" id="addCodeSubmit-bot" class="modal-close waves-effect waves-light btn grey darken-3 left ml-10 mb-10">Submit</button>
-                        <a href="#!" class="modal-close waves-effect waves-light btn grey darken-1 left mb-10">Cancel</a>
-                    </div>
-                </form>
             </div>
         </div>
     </div>

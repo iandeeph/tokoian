@@ -118,6 +118,7 @@ $(document).ready(function() {
     }
     //================ page add kode ==================
     $("#btnAddKode").click(function () {
+        let kodeField = $("#kodeField");
         let newInput = $('' +
             '<div class="row addedTrx'+ numFieldTrx +'">' +
             '<div class="input-field col s4">' +
@@ -131,7 +132,7 @@ $(document).ready(function() {
             '<div class="col s2 mt-10 addedTrx'+ numFieldTrx +'">' +
             '<a class="btn-floating btn waves-effect waves-light red darken-3 btnRemTrx'+ numFieldTrx +'" name="btnRemTrx'+ numFieldTrx +'" id="'+ numFieldTrx +'" title="Hapus"><i class="material-icons">remove</i></a>' +
             '</div>');
-        $("#kodeField").append(newInput);
+        $(kodeField).append(newInput);
         $('select').formSelect();
         numFieldTrx++;
 
