@@ -314,7 +314,7 @@ router.get('/status-code', function(req, res) {
                 "Status to : " + passedVariable + "\n";
             var insertLog = "INSERT INTO log (user, aksi, detail, tanggal) VALUES ?";
             return tokoianConn.query(updateStatus, [passedVariable, idkode]).then(function () {
-                return tokoianConn.query(insertLog, [user, 'Edit Status', logString, dateNow]).then(function () {
+                return tokoianConn.query(insertLog, [[[user, 'Edit Status', logString, dateNow]]]).then(function () {
                     res.send("ok");
                 }).catch(function (error) {
                     //logs out the error
@@ -1025,7 +1025,7 @@ router.post('/recap-sales-order', function(req, res) {
 
         trxPush = tokoianConn.query(querySoString, [req.body.deletedSoid])
             .then(function () {
-                tokoianConn.query(queryLogString, [user, 'Sales Order Dihapus', logString, dateNow])
+                tokoianConn.query(queryLogString, [[[user, 'Sales Order Dihapus', logString, dateNow]]])
                     .then(function () {
                         var message = {"text": "", "color": ""};
                         return tokoianConn.query("select *, " +
