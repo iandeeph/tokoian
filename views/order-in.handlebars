@@ -25,13 +25,13 @@
                         <div class="row">
                             <div class="input-field col s10 m3 l3">
                                 <input id="orderId" name="inOrder[0][orderid]" type="hidden" value="{{orderid}}">
-                                <select id="kode-produk" name="inOrder[0][kode]" class="validate" required>
+                                <select id="kode-produk-orderin" name="inOrder[0][kode]" class="validate" required>
                                     <option value="" disabled selected>Pilih Kode Produk</option>
                                     {{#each kodeRow}}
                                         <option value="{{kode}}">{{kode}}</option>
                                     {{/each}}
                                 </select>
-                                <label for="kode-produk">Kode Produk</label>
+                                <label for="kode-produk-orderin">Kode Produk</label>
                             </div>
                             <div class="col s1 mt-10 mr-10 hide-on-med-and-up">
                                 <a class="btn-floating btn waves-effect waves-light green darken-3" id="btnAddOrderIn-top" title="Tambah Barang"><i class="material-icons">add</i></a>

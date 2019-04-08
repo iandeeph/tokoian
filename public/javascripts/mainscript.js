@@ -162,7 +162,7 @@ $(document).ready(function() {
 
     //================ page order in ==================
     function autoFillOrderIn(){
-        $("[id^=kode-produk]").change(function () {
+        $("[id^=kode-produk-orderin]").change(function () {
             let parentForm = $(this).closest('.row');
             let parentDivNama =
             $.ajax({
@@ -171,7 +171,7 @@ $(document).ready(function() {
                 dataType: "json",
                 success: function (datas) {
                     // console.log(datas);
-                    if(datas.length > 0){
+                    if (datas.length > 0) {
                         $(parentForm).find('input[id^=nama-produk]').val(datas[0].nama);
                         $(parentForm).find('input[id^=nama-produk]').closest('div').find('label').addClass("active");
                         $(parentForm).find('input[id^=hargaBeli]').val(Intl.NumberFormat('en-IND').format(datas[0].hargabeli));
@@ -206,9 +206,11 @@ $(document).ready(function() {
                         '<div class="row addedTrx'+ numFieldTrx +'">' +
                         '<div class="input-field col s10 m3 l3">' +
                         '<input id="orderId'+ numFieldTrx +'" name="inOrder['+ numFieldTrx +'][orderid]" type="hidden" value="'+ orderid +'">' +
-                        '<input id="kode-produk'+ numFieldTrx +'" name="inOrder['+ numFieldTrx +'][kode]" type="text" class="validate autocompleteOrderIn" required>' +
-                        '<label for="kode-produk'+ numFieldTrx +'">Kode Produk</label>' +
-                        '</div>' +
+                        '<select id="kode-produk-orderin'+ numFieldTrx +'" name="inOrder['+ numFieldTrx +'][kode]" class="validate" required>' +
+                            '<option value="" disabled selected>Pilih Kode Produk</option>' +
+                            '</select>' +
+                            '<label for="kode-produk-orderin'+ numFieldTrx +'">Kode Produk</label>' +
+                            '</div>' +
                         '<div class="col s1 mt-10 mr-10 hide-on-med-and-up">' +
                         '<a class="btn-floating btn waves-effect waves-light red darken-3 btnRemTrx'+ numFieldTrx +'" name="btnRemTrx'+ numFieldTrx +'" id="'+ numFieldTrx +'" title="Hapus"><i class="material-icons">remove</i></a>' +
                         '</div>' +
@@ -229,11 +231,26 @@ $(document).ready(function() {
                         '</div>' +
                         '</div>');
 
+                    for (var keyDatas in datas) {
+                        if (!datas.hasOwnProperty(keyDatas)) continue;
+                        var resDatas = datas[keyDatas];
+                        $("#kode-produk-orderin"+ numFieldTrx).append('<option value="' + resDatas.kode + '">' + resDatas.kode + '</option>');
+                    }
+
+                    $('select').formSelect();
+
                     $('input.autocompleteOrderIn').autocomplete({
                         data: autocompleteData
                     });
 
                     autoFillOrderIn();
+                    $('input[id^=hargaBeli], input[id^=jumlah]').each(function(){
+                        $(this).keyup(function(){
+                            var number = ($(this).val() != '' && $(this).val() != 'NaN') ? parseInt($(this).val().replace(/[^0-9]/gi, '')) : 0;
+                            $(this).val(Intl.NumberFormat('en-IND').format(number))
+                        });
+                    });
+
                     numFieldTrx++;
 
                     $('[name^=btnRemTrx]').click(function () {

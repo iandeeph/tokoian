@@ -75,7 +75,7 @@
                         {{#each listCode}}
                             <tr>
                                 <td class="center">{{numbyIndex @key}}</td>
-                                <td>{{nama}}</td>
+                                <td>{{nama}}{{#compare idcustsales null operator="=="}} <span class="red-text">(Customer belum punya SO..!)</span>{{/compare}}</td>
                                 <td>{{pic}}</td>
                                 <td>{{telp}}</td>
                                 <td>{{breakLine alamat}}</td>
@@ -95,8 +95,8 @@
                                 {{#compare priv '1' operator="=="}}
                                     <a class="btn-floating btn waves-effect waves-light blue modal-trigger" title="Edit DetaiL custerm" href="#editToko{{idcustomer}}" ><i class="material-icons">edit</i></a>
                                 {{/compare}}
-                                    <a class="btn-floating btn waves-effect waves-light orange" title="Lihat SO" target="_blank" href="/so-customer-list?so={{encrypt idcustomer}}" ><i class="material-icons">search</i></a>
-                                    <a class="btn-floating btn waves-effect waves-light yellow" title="Edit Price List" target="_blank" href="/pl-customer-list?so={{encrypt idcustomer}}" ><i class="material-icons">attach_money</i></a>
+                                    <a class="btn-floating btn waves-effect waves-light orange" {{#compare idcustsales null operator="=="}}disabled title="Customer belum punya SO" {{else}}title="Lihat SO" href="/so-customer-list?so={{encrypt idcustomer}}"{{/compare}}  ><i class="material-icons">search</i></a>
+                                    <a class="btn-floating btn waves-effect waves-light yellow" title="Edit Price List"  href="/pl-customer-list?so={{encrypt idcustomer}}" ><i class="material-icons">attach_money</i></a>
 
                                     <div id="editToko{{idcustomer}}" class="modal">
                                         <form action="" method="post">

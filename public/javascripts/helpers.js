@@ -235,11 +235,11 @@ exports.statusParser = function (status) {
 exports.invertStatus = function (status) {
     var parse;
     switch (status){
-        case '1' :
+        case 1 :
             parse = "0";
             break;
 
-        case '0' :
+        case 0 :
             parse = "1";
             break;
 
