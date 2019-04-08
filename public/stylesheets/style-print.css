@@ -35,7 +35,7 @@
         padding: 0;
         width: 100%;
         font-weight: 100;
-        font-family: 'Lato', sans-serif;
+        font-family : Georgia, "Times New Roman", Times, serif;
         display: flex;
         min-height: 100vh;
         flex-direction: column;
@@ -80,7 +80,7 @@
     .home-table table tr th, #simulation-table table tr th
     {
         background: #6d6c6d;
-        color:#fff;
+        /*color:#fff;*/
         padding:10px 20px;
         vertical-align:middle;
     }
