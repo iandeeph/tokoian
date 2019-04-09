@@ -151,6 +151,7 @@ $(document).ready(function() {
             url: './status-code?changeStatus='+ idkode +'&kode='+kode,
             type: "GET",
             success: function (datas) {
+                console.log(datas);
                 var alertString = "Jumlah stock tidak kosong!!";
                 if(datas === "Not Empty"){
                     alert(alertString);
@@ -223,7 +224,7 @@ $(document).ready(function() {
                         '<label for="hargaBeli'+ numFieldTrx +'">Harga Beli</label>' +
                         '</div>' +
                         '<div class="input-field col s12 m2 l2">' +
-                        '<input id="jumlah'+ numFieldTrx +'" name="inOrder['+ numFieldTrx +'][jumlah]" type="number" class="validate" required>' +
+                        '<input id="jumlah'+ numFieldTrx +'" name="inOrder['+ numFieldTrx +'][jumlah]" type="text" class="validate" required>' +
                         '<label for="jumlah'+ numFieldTrx +'">Jumlah</label>' +
                         '</div>' +
                         '<div class="col m1 l1 mt-10 hide-on-small-only">' +
@@ -234,7 +235,7 @@ $(document).ready(function() {
                     for (var keyDatas in datas) {
                         if (!datas.hasOwnProperty(keyDatas)) continue;
                         var resDatas = datas[keyDatas];
-                        $("#kode-produk-orderin"+ numFieldTrx).append('<option value="' + resDatas.kode + '">' + resDatas.kode + '</option>');
+                        $("#kode-produk-orderin"+ numFieldTrx).append('<option value="' + encodeURI(resDatas.kode) + '">' + resDatas.kode + '</option>');
                     }
 
                     $('select').formSelect();
@@ -277,8 +278,10 @@ $(document).ready(function() {
         $("[id^=kode-produk]").change(function () {
             // console.log($(this).val());
             let parentForm = $(this).closest('.row');
+            let curVal = decodeURI($(this).val());
+            let custId = $('#customerId').val();
                 $.ajax({
-                    url: './get-item?id='+ $(this).val() +'&cust='+ $('#customerId').val(),
+                    url: './get-item?id='+ curVal +'&cust='+ custId,
                     type: "GET",
                     dataType: "json",
                     success: function (datas) {
@@ -287,11 +290,13 @@ $(document).ready(function() {
                             if(datas[0].hargajual == null){
                                 $(parentForm).find('input[id^=harga-Jual]').val(Intl.NumberFormat('en-IND').format(0));
                                 $(parentForm).find('input[id^=hargaJual]').val(Intl.NumberFormat('en-IND').format(0));
+                                $(parentForm).find('input[id^=jumlah]').addClass('disabled').prop('disabled', true);
                                 $(btnSoSubmit).addClass('disabled');
                                 $(btnSoSubmit).prop('disabled', true);
                             }else{
                                 $(parentForm).find('input[id^=harga-Jual]').val(Intl.NumberFormat('en-IND').format(datas[0].hargajual));
                                 $(parentForm).find('input[id^=hargaJual]').val(Intl.NumberFormat('en-IND').format(datas[0].hargajual));
+                                $(parentForm).find('input[id^=jumlah]').removeClass('disabled').prop('disabled', false);
                                 $(btnSoSubmit).removeClass('disabled');
                                 $(btnSoSubmit).prop('disabled', false);
                             }
@@ -301,12 +306,13 @@ $(document).ready(function() {
                             $(parentForm).find('input[id^=nama-produk]').closest('div').find('label').addClass("active");
                             $(parentForm).find('input[id^=harga-Jual]').closest('div').find('label').addClass("active");
                         }else{
-                            $(parentForm).find('input[id^=nama-produk]').val("");
-                            $(parentForm).find('input[id^=namaBarang]').val("");
-                            $(parentForm).find('input[id^=hargaJual]').val("");
-                            $(parentForm).find('input[id^=harga-Jual]').val("");
-                            $(parentForm).find('input[id^=kodeId]').val("");
+                            $(parentForm).find('input[id^=nama-produk]').addClass('disabled').prop('disabled', true);
+                            $(parentForm).find('input[id^=namaBarang]').addClass('disabled').prop('disabled', true);
+                            $(parentForm).find('input[id^=hargaJual]').addClass('disabled').prop('disabled', true);
+                            $(parentForm).find('input[id^=harga-Jual]').addClass('disabled').prop('disabled', true);
+                            $(parentForm).find('input[id^=kodeId]').addClass('disabled').prop('disabled', true);
                             $(parentForm).find('input[id^=nama-produk]').closest('div').find('label').removeClass("active");
+                            $(parentForm).find('input[id^=jumlah]').addClass('disabled').prop('disabled', true);
                             $(btnSoSubmit).addClass('disabled');
                             $(btnSoSubmit).prop('disabled', true);
                         }
@@ -351,7 +357,7 @@ $(document).ready(function() {
             for (var keyDatas in datas) {
                 if (!datas.hasOwnProperty(keyDatas)) continue;
                 var resDatas = datas[keyDatas];
-                $("#kode-produk"+ numFieldTrx).append('<option value="' + resDatas.kode + '">' + resDatas.kode + '</option>');
+                $("#kode-produk"+ numFieldTrx).append('<option value="' + encodeURI(resDatas.kode) + '">' + resDatas.kode + '</option>');
             }
 
             $('select').formSelect();
@@ -389,6 +395,7 @@ $(document).ready(function() {
     }
 
     if($(btnSoSubmit).length > 0){
+        let custId = "";
         $("[id^=customer]").change(function () {
             $('#message').slideUp("slow");
             let soField = $("#itemSoField");
@@ -407,79 +414,85 @@ $(document).ready(function() {
                         $(custBlock).removeClass("hide");
                         $('#customerDetail').html(custStr);
                         $('#customerId').val(datas[0].idcustomer);
+                        custId = datas[0].idcustomer;
                     }else{
                         $(custBlock).addClass("hide");
                         $('#customerId').val(null);
                     }
-                }
-            });
-            $(soField).empty();
-            $.ajax({
-                url: './get-item',
-                type: "GET",
-                dataType: "json",
-                success: function (datas) {
-                    $(soField).append('' +
-                        '<div class="row addedTrx'+ numFieldTrx +'">' +
-                        '<div class="input-field col s10 m3 l3">' +
-                        '<input id="namaBarang'+ numFieldTrx +'" name="addSo['+ numFieldTrx +'][nama]" type="hidden">' +
-                        '<input id="hargaJual'+ numFieldTrx +'" name="addSo['+ numFieldTrx +'][hargajual]" type="hidden">' +
-                        '<input id="kodeId'+ numFieldTrx +'" name="addSo['+ numFieldTrx +'][idkode]" type="hidden">' +
-                        '<select id="kode-produk'+ numFieldTrx +'" name="addSo['+ numFieldTrx +'][kode]" class="validate" required>' +
-                        '<option value="" disabled selected>Pilih Kode Produk</option>' +
-                        '</select>' +
-                        '<label for="kode-produk">Kode Produk</label>' +
-                        '</div>' +
-                        '<div class="col s1 mt-10 mr-10 hide-on-med-and-up">' +
-                        '<a class="btn-floating btn waves-effect waves-light green darken-3" id="btnAddSo-bot" title="Tambah Barang"><i class="material-icons">add</i></a>' +
-                        '</div>' +
-                        '<div class="input-field col s12 m4 l4">' +
-                        '<input id="nama-produk'+ numFieldTrx +'" type="text" class="validate" disabled>' +
-                        '<label for="nama-produk'+ numFieldTrx +'">Nama Produk</label>' +
-                        '</div>' +
-                        '<div class="input-field col s12 m3 l3">' +
-                        '<input id="harga-Jual'+ numFieldTrx +'" type="text" class="validate" disabled>' +
-                        '<label for="harga-Jual'+ numFieldTrx +'">Harga Jual</label>' +
-                        '</div>' +
-                        '<div class="input-field col s12 m1 l1">' +
-                        '<input id="jumlah'+ numFieldTrx +'" name="addSo['+ numFieldTrx +'][jumlah]" type="number" class="validate" required>' +
-                        '<label for="jumlah'+ numFieldTrx +'">Jumlah</label>' +
-                        '</div>' +
-                        '<div class="col m1 l1 mt-10 hide-on-small-only">' +
-                        '<a class="btn-floating btn waves-effect waves-light green darken-3" id="btnAddSo-bot" title="Tambah Barang"><i class="material-icons">add</i></a>' +
-                        '</div>' +
-                        '</div>');
 
-                    for (var keyDatas in datas) {
-                        if (!datas.hasOwnProperty(keyDatas)) continue;
-                        var resDatas = datas[keyDatas];
-                        $("#kode-produk"+ numFieldTrx).append('<option value="' + resDatas.kode + '">' + resDatas.kode + '</option>');
-                    }
+                    $(soField).empty();
+                    $.ajax({
+                        url: './get-item?&cust='+ custId,
+                        type: "GET",
+                        dataType: "json",
+                        success: function (datas) {
+                            console.log(datas);
+                            $(soField).append('' +
+                                '<div class="row addedTrx'+ numFieldTrx +'">' +
+                                '<div class="input-field col s10 m3 l3">' +
+                                '<input id="namaBarang'+ numFieldTrx +'" name="addSo['+ numFieldTrx +'][nama]" type="hidden">' +
+                                '<input id="hargaJual'+ numFieldTrx +'" name="addSo['+ numFieldTrx +'][hargajual]" type="hidden">' +
+                                '<input id="kodeId'+ numFieldTrx +'" name="addSo['+ numFieldTrx +'][idkode]" type="hidden">' +
+                                '<select id="kode-produk'+ numFieldTrx +'" name="addSo['+ numFieldTrx +'][kode]" class="validate" required>' +
+                                '<option value="" disabled selected>Pilih Kode Produk</option>' +
+                                '</select>' +
+                                '<label for="kode-produk">Kode Produk</label>' +
+                                '</div>' +
+                                '<div class="col s1 mt-10 mr-10 hide-on-med-and-up">' +
+                                '<a class="btn-floating btn waves-effect waves-light green darken-3" id="btnAddSo-bot" title="Tambah Barang"><i class="material-icons">add</i></a>' +
+                                '</div>' +
+                                '<div class="input-field col s12 m4 l4">' +
+                                '<input id="nama-produk'+ numFieldTrx +'" type="text" class="validate" disabled>' +
+                                '<label for="nama-produk'+ numFieldTrx +'">Nama Produk</label>' +
+                                '</div>' +
+                                '<div class="input-field col s12 m3 l3">' +
+                                '<input id="harga-Jual'+ numFieldTrx +'" type="text" class="validate" disabled>' +
+                                '<label for="harga-Jual'+ numFieldTrx +'">Harga Jual</label>' +
+                                '</div>' +
+                                '<div class="input-field col s12 m1 l1">' +
+                                '<input id="jumlah'+ numFieldTrx +'" name="addSo['+ numFieldTrx +'][jumlah]" type="number" class="validate" required>' +
+                                '<label for="jumlah'+ numFieldTrx +'">Jumlah</label>' +
+                                '</div>' +
+                                '<div class="col m1 l1 mt-10 hide-on-small-only">' +
+                                '<a class="btn-floating btn waves-effect waves-light green darken-3" id="btnAddSo-bot" title="Tambah Barang"><i class="material-icons">add</i></a>' +
+                                '</div>' +
+                                '</div>');
 
-                    $('select').formSelect();
+                            for (var keyDatas in datas) {
+                                if (!datas.hasOwnProperty(keyDatas)) continue;
+                                var resDatas = datas[keyDatas];
+                                $("#kode-produk"+ numFieldTrx).append('<option value="' + encodeURI(resDatas.kode) + '">' + resDatas.kode + '</option>');
+                            }
 
-                    $('input[id^=hargaBeli],input[id^=hargaJual], input[id^=jumlah]').each(function(){
-                        $(this).keyup(function(){
-                            var number = ($(this).val() !== '' && $(this).val() !== 'NaN') ? parseInt($(this).val().replace(/[^0-9]/gi, '')) : 0;
-                            $(this).val(Intl.NumberFormat('en-IND').format(number));
+                            $("#kode-produk").removeClass('disabled').prop('disabled', false);
 
-                            $('input[id^=hargaJual]').each(function () {
-                                if($(this).val() === "0"){
-                                    $(btnSoSubmit).addClass('disabled');
-                                    $(btnSoSubmit).prop('disabled', true);
-                                }else{
-                                    $(btnSoSubmit).removeClass('disabled');
-                                    $(btnSoSubmit).prop('disabled', false);
-                                }
-                            })
-                        });
+                            $('select').formSelect();
+
+                            $('input[id^=hargaBeli],input[id^=hargaJual], input[id^=jumlah]').each(function(){
+                                $(this).keyup(function(){
+                                    var number = ($(this).val() !== '' && $(this).val() !== 'NaN') ? parseInt($(this).val().replace(/[^0-9]/gi, '')) : 0;
+                                    $(this).val(Intl.NumberFormat('en-IND').format(number));
+
+                                    $('input[id^=hargaJual]').each(function () {
+                                        if($(this).val() === "0"){
+                                            $(btnSoSubmit).addClass('disabled');
+                                            $(btnSoSubmit).prop('disabled', true);
+                                        }else{
+                                            $(btnSoSubmit).removeClass('disabled');
+                                            $(btnSoSubmit).prop('disabled', false);
+                                        }
+                                    })
+                                });
+                            });
+
+                            autoFillSo();
+                            addSoBtnClick(datas);
+                            numFieldTrx++;
+                        }
                     });
-
-                    autoFillSo();
-                    addSoBtnClick(datas);
-                    numFieldTrx++;
                 }
             });
+
         });
 
         $.ajax({

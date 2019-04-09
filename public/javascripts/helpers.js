@@ -320,6 +320,11 @@ exports.soStatusParser = function (str) {
     return parse;
 };
 
+exports.encodeURI = function (str) {
+    // console.log(encodeURI(str));
+    return encodeURI(str);
+};
+
 exports.compare = function(lvalue, rvalue, options) {
 
     if (arguments.length < 3)

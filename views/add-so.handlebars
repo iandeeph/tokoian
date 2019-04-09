@@ -43,11 +43,8 @@
                                 <input id="namaBarang" name="addSo[0][nama]" type="hidden">
                                 <input id="hargaJual" name="addSo[0][hargajual]" type="hidden">
                                 <input id="kodeId" name="addSo[0][idkode]" type="hidden">
-                                <select id="kode-produk" name="addSo[0][kode]" class="validate" required>
+                                <select id="kode-produk" name="addSo[0][kode]" class="validate" required disabled>
                                     <option value="" disabled selected>Pilih Kode Produk</option>
-                                    {{#each kodeRow}}
-                                        <option value="{{kode}}">{{kode}}</option>
-                                    {{/each}}
                                 </select>
                                 <label for="kode-produk">Kode Produk</label>
                             </div>
@@ -63,7 +60,7 @@
                                 <label for="harga-Jual">Harga Jual</label>
                             </div>
                             <div class="input-field col s12 m1 l1">
-                                <input id="jumlah" name="addSo[0][jumlah]" type="number" class="validate" required>
+                                <input id="jumlah" name="addSo[0][jumlah]" type="number" class="validate" required disabled>
                                 <label for="jumlah">Jumlah</label>
                             </div>
                             <div class="col m1 l1 mt-10 hide-on-small-only">

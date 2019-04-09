@@ -9,16 +9,16 @@
             <span class="font-40">Barang Masuk</span>
         </div>
         <div class="row">
+            <div class="col s12">
+                <span class="font-20 {{message.color}}-text" id="message">{{message.text}}</span>
+            </div>
+        </div>
+        <div class="row">
             <form action="" method="post">
                 <div class="col s12 container">
                     <div class="row">
                         <div class="col s12">
                             <span class="font-20 ">Order ID : {{orderid}}</span>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col s12">
-                            <span class="font-20 {{message.color}}-text" id="message">{{message.text}}</span>
                         </div>
                     </div>
                     <div class="row" id="orderInField">
@@ -28,10 +28,10 @@
                                 <select id="kode-produk-orderin" name="inOrder[0][kode]" class="validate" required>
                                     <option value="" disabled selected>Pilih Kode Produk</option>
                                     {{#each kodeRow}}
-                                        <option value="{{kode}}">{{kode}}</option>
+                                        <option value="{{encodeURI kode}}">{{kode}}</option>
                                     {{/each}}
                                 </select>
-                                <label for="kode-produk-orderin">Kode Produk</label>
+                                <label for="kode-produk">Kode Produk</label>
                             </div>
                             <div class="col s1 mt-10 mr-10 hide-on-med-and-up">
                                 <a class="btn-floating btn waves-effect waves-light green darken-3" id="btnAddOrderIn-top" title="Tambah Barang"><i class="material-icons">add</i></a>
@@ -45,7 +45,7 @@
                                 <label for="hargaBeli">Harga Beli</label>
                             </div>
                             <div class="input-field col s12 m2 l2">
-                                <input id="jumlah" name="inOrder[0][jumlah]" type="number" class="validate" required>
+                                <input id="jumlah" name="inOrder[0][jumlah]" type="text" class="validate" required>
                                 <label for="jumlah">Jumlah</label>
                             </div>
                             <div class="col m1 l1 mt-10 hide-on-small-only">
