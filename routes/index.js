@@ -1204,7 +1204,7 @@ router.get('/income-report', function(req, res) {
         "MONTH(trx.tanggal) = '" + dateMonth + "' " +
         "AND YEAR(trx.tanggal) = '" + dateYear + "' " +
         "order by trx.tanggal";
-    //console.log(queryString);
+    console.log(queryString);
     tokoianConn.query(queryString)
         .then(function (rowItem) {
             rows = rowItem;
@@ -1258,10 +1258,9 @@ router.get('/income-report', function(req, res) {
 
             promiseDeleteExp.then(function (rowDeleteExp) {
                 grandTotalDelExp = (_.isNumber(_.sumBy(rowDeleteExp, 'totaljual'))) ? _.sumBy(rowDeleteExp, 'totaljual') : 0;
-                //console.log(grandTotalEdit);
-
             });
         }).then(function () {
+        // console.log(grandTotalDelExp);
             res.render('income-report', {
                 rows: rows,
                 template: groupedOrderid,
@@ -1280,6 +1279,10 @@ router.get('/income-report', function(req, res) {
 router.post('/income-report', function(req, res) {
     var grandTotalJual = 0;
     var grandTotalBeli = 0;
+    var grandTotalEdit = 0;
+    var grandTotalExp = 0;
+    var grandTotalDelExp = 0;
+    var groupedOrderid, rows;
     var postDate = req.body.periode;
     if (_.isEmpty(postDate.start)) {
         res.redirect('/income-report');
@@ -1297,14 +1300,13 @@ router.post('/income-report', function(req, res) {
             "trx.tanggal between '" + startDate + "' " +
             "AND '" + endDate + "' " +
             "order by trx.tanggal";
-        var groupedOrderid, rowItem;
         tokoianConn.query(queryString)
-            .then(function (rows) {
-                rowItem = rows;
-                groupedOrderid = _.groupBy(rowItem, 'orderid');
-                //PEMBELIAN
+            .then(function (rowItem) {
+                rows = rowItem;
+                groupedOrderid = _.groupBy(rows, 'orderid');
+                //PEMBELIAN = minus
                 var promisePembelian = new Promise(function (resolve, reject) {
-                    resolve(_.filter(rowItem, {'jenistrx': 1}));
+                    resolve(_.filter(rows, {'jenistrx': 1}));
                 });
 
                 promisePembelian.then(function (rowPembelian) {
@@ -1312,9 +1314,9 @@ router.post('/income-report', function(req, res) {
 
                 });
             }).then(function () {
-                //PENJUALAN
+                //PENJUALAN = plus
                 var promisePenjualan = new Promise(function (resolve, reject) {
-                    resolve(_.filter(rowItem, {'jenistrx': 2}));
+                    resolve(_.filter(rows, {'jenistrx': 2}));
                 });
 
                 promisePenjualan.then(function (rowPenjualan) {
@@ -1322,13 +1324,44 @@ router.post('/income-report', function(req, res) {
 
                 });
             }).then(function () {
-                if (!_.isEmpty(rowItem)) {
+                //REOPEN SO = minus
+                var promiseEditStock = new Promise(function (resolve, reject) {
+                    resolve(_.filter(rows, {'jenistrx': 3}));
+                });
+
+                promiseEditStock.then(function (rowEditStock) {
+                    grandTotalEdit = (_.isNumber(_.sumBy(rowEditStock, 'totalbeli'))) ? _.sumBy(rowEditStock, 'totalbeli') : 0;
+                    //console.log(grandTotalEdit);
+
+                });
+            }).then(function () {
+                //ADD EXPENSE = minus
+                var promiseAddExp = new Promise(function (resolve, reject) {
+                    resolve(_.filter(rows, {'jenistrx': 4}));
+                });
+
+                promiseAddExp.then(function (rowAddExp) {
+                    grandTotalExp = (_.isNumber(_.sumBy(rowAddExp, 'totalbeli'))) ? _.sumBy(rowAddExp, 'totalbeli') : 0;
+                    //console.log(grandTotalEdit);
+
+                });
+            }).then(function () {
+                //delete EXPENSE = plus
+                var promiseDeleteExp = new Promise(function (resolve, reject) {
+                    resolve(_.filter(rows, {'jenistrx': 5}));
+                });
+
+                promiseDeleteExp.then(function (rowDeleteExp) {
+                    grandTotalDelExp = (_.isNumber(_.sumBy(rowDeleteExp, 'totaljual'))) ? _.sumBy(rowDeleteExp, 'totaljual') : 0;
+                });
+            }).then(function () {
+                if (!_.isEmpty(rows)) {
                     res.render('income-report', {
-                        rows: rowItem,
+                        rows: rows,
                         template: groupedOrderid,
-                        grandTotalJual: grandTotalJual,
-                        grandTotalBeli: grandTotalBeli,
-                        totalLaba: (grandTotalJual - grandTotalBeli),
+                        grandTotalJual: (grandTotalJual + grandTotalDelExp),
+                        grandTotalBeli: (grandTotalBeli + grandTotalEdit + grandTotalExp),
+                        totalLaba: ((grandTotalJual + grandTotalDelExp) - (grandTotalBeli + grandTotalEdit + grandTotalExp)),
                         filterDate: filterDate
                     });
                 } else {
