@@ -953,57 +953,57 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
             }).then(function () {
                 if (!_.isEmpty(stock) || !_.isUndefined(stock)) {
                     let message = {"text": "Sales Order gagal diproses, stock kurang.!", "color": "red"};
-                    if (curUrl === '/recap-sales-order'){
+                    tokoianConn.query("ROLLBACK");
+                    if (curUrl === '/recap-sales-order') {
                         getPage.recapSO(message, req, res);
                     } else {
                         getPage.soCust(message, req, res);
                     }
-                    return Promise.reject(() =>{
-                        return tokoianConn.query("ROLLBACK");
-                        });
-                }else {
-                    return Promise.each(rows, function (itemRow) {
-                        // console.log(typeof itemRow.jumlah);
-                        var jumlah = parseInt(itemRow.jumlah);
-                        var stock = parseInt(itemRow.stock);
-                        var hargaJual = parseInt(itemRow.hargajual);
-                        var sisaStock;
-
-                        sisaStock = (stock - jumlah);
-                        // console.log(sisaStock);
-                        queryItemString = "UPDATE item SET " +
-                            "jumlah = ? " +
-                            "where idkode = ? ";
-
-                        querySoString = "UPDATE salesorder SET " +
-                            "status = 'Done' " +
-                            "where soid = ? ";
-
-                        arrItemQry.push([itemRow.idkode, itemRow.soid, hargaJual, dateNow, '2', jumlah]);
-
-                        let logString = "Sales Order ID : " + itemRow.soid + "\n" +
-                            "Nama Toko : " + itemRow.customer + "\n" +
-                            "Alamat Toko : " + itemRow.alamat;
-
-                        arrLogQry.push([user, 'Proses SO to DO', logString, dateNow]);
-
-                        return tokoianConn.query(queryItemString, [sisaStock, itemRow.idkode])
-                            .then(function () {
-                                return tokoianConn.query(querySoString, [itemRow.soid]);
-                            }).catch(function (error) {
-                                let message = {"text": "Proses SO Gagal :"+ error, "color": "red"};
-                                if (curUrl === '/recap-sales-order'){
-                                    getPage.recapSO(message, req, res);
-                                } else {
-                                    getPage.soCust(message, req, res);
-                                }
-                                return tokoianConn.query("ROLLBACK").then(() => {
-                                    console.error(error);
-                                });
-                                //logs out the error
-                            });
-                    });
+                    return Promise.reject("Sales Order gagal diproses, stock kurang.!");
                 }
+            }).then(function () {
+                return Promise.each(rows, function (itemRow) {
+                    // console.log(typeof itemRow.jumlah);
+                    var jumlah = parseInt(itemRow.jumlah);
+                    var stock = parseInt(itemRow.stock);
+                    var hargaJual = parseInt(itemRow.hargajual);
+                    var sisaStock;
+
+                    sisaStock = (stock - jumlah);
+                    // console.log(sisaStock);
+                    queryItemString = "UPDATE item SET " +
+                        "jumlah = ? " +
+                        "where idkode = ? ";
+
+                    querySoString = "UPDATE salesorder SET " +
+                        "status = 'Done' " +
+                        "where soid = ? ";
+
+                    arrItemQry.push([itemRow.idkode, itemRow.soid, hargaJual, dateNow, '2', jumlah]);
+
+                    let logString = "Sales Order ID : " + itemRow.soid + "\n" +
+                        "Nama Toko : " + itemRow.customer + "\n" +
+                        "Alamat Toko : " + itemRow.alamat;
+
+                    arrLogQry.push([user, 'Proses SO to DO', logString, dateNow]);
+
+                    return tokoianConn.query(queryItemString, [sisaStock, itemRow.idkode])
+                        .then(function () {
+                            return tokoianConn.query(querySoString, [itemRow.soid]);
+                        }).catch(function (error) {
+                            tokoianConn.query("ROLLBACK").then(() => {
+                                console.error(error);
+                            });
+                            let message = {"text": "Proses SO Gagal :"+ error, "color": "red-text"};
+                            if (curUrl === '/recap-sales-order'){
+                                getPage.recapSO(message, req, res);
+                            } else {
+                                getPage.soCust(message, req, res);
+                            }
+                            //logs out the error
+                            return Promise.reject("Proses SO Gagal :"+ error);
+                        });
+                });
             }).then(function () {
                 queryTrxString = "INSERT INTO trx (idkode, orderid, hargajual, tanggal, jenistrx, jumlah) VALUES ?";
                 return tokoianConn.query(queryTrxString, [arrItemQry]);
@@ -1020,16 +1020,17 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
                     getPage.soCust(message, req, res);
                 }
             }).catch(function (error) {
-                let message = {"text": "Proses SO Gagal :"+ error, "color": "red"};
+                tokoianConn.query("ROLLBACK").then(() => {
+                    console.error(error);
+                });
+                let message = {"text": "Proses SO Gagal :"+ error, "color": "red-text"};
                 if (curUrl === '/recap-sales-order'){
                     getPage.recapSO(message, req, res);
                 } else {
                     getPage.soCust(message, req, res);
                 }
-                return tokoianConn.query("ROLLBACK").then(() => {
-                    console.error(error);
-                });
                 //logs out the error
+                return Promise.reject("Proses SO Gagal :"+ error);
             });
     }else if (!_.isUndefined(req.body.reopenSoBtn)) {
         return tokoianConn.query("START TRANSACTION;")
@@ -1067,10 +1068,18 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
                         .then(function () {
                             return tokoianConn.query(querySoString, [itemRow.soid]);
                         }).catch(function (error) {
-                            return tokoianConn.query("ROLLBACK").then(() => {
+                            tokoianConn.query("ROLLBACK").then(() => {
                                 console.error(error);
                             });
+                            let message = {"text": "Sales Order gagal repoen.!", "color": "red-text"};
+                            console.log(curUrl);
+                            if (curUrl === '/recap-sales-order'){
+                                getPage.recapSO(message, req, res);
+                            } else {
+                                getPage.soCust(message, req, res);
+                            }
                             //logs out the error
+                            return Promise.reject("Proses Reopen SO Gagal :"+ error);
                         });
                 });
             }).then(function () {
@@ -1090,9 +1099,18 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
                     getPage.soCust(message, req, res);
                 }
             }).catch(function (error) {
-                return tokoianConn.query("ROLLBACK").then(() => {
+                tokoianConn.query("ROLLBACK").then(() => {
                     console.error(error);
                 });
+                let message = {"text": "Sales Order gagal repoen.!", "color": "red-text"};
+                console.log(curUrl);
+                if (curUrl === '/recap-sales-order'){
+                    getPage.recapSO(message, req, res);
+                } else {
+                    getPage.soCust(message, req, res);
+                }
+                //logs out the error
+                return Promise.reject("Proses Reopen SO Gagal :"+ error);
             });
     //logs out the error
     }else if (!_.isUndefined(req.body.printSoBtn)) {
