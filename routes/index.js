@@ -342,18 +342,18 @@ router.post('/order-in', function(req, res) {
             }).then(function (rows) {
                 // console.log(queryStr);
                 var lists = Array.prototype.slice.call(postOrder);
-                return Promise.each(lists, function (listStock) {
-                    // console.log(listStock);
+                Promise.each(lists, function (listStock) {
+                    console.log(listStock);
                     var hargaBeli = parseInt(listStock.hargabeli.replace(/[^0-9]/gi, ''));
                     var jumlah = parseInt(listStock.jumlah.replace(/[^0-9]/gi, ''));
                     var total;
 
                     var cekNamakodePromise = new Promise(function (resolve, reject) {
-                        resolve(_.find(rows, {'kode': listStock.kode}));
+                        resolve(_.find(rows, {'kode': decodeURI(listStock.kode)}));
                     });
 
                     cekNamakodePromise.then(function (resRows) {
-                        // console.log(resRows);
+                        console.log(resRows);
                         if (!_.isEmpty(resRows) || !_.isUndefined(resRows)) {
                             total = (parseInt(listStock.jumlah.replace(/[^0-9]/gi, '')) + resRows.jumlah);
 
@@ -388,7 +388,9 @@ router.post('/order-in', function(req, res) {
                         //logs out the error
                     });
                 });
-            }).then(function () {
+                return Promise.all([trxPush, logPush]);
+            }).then(function (a) {
+                console.log(a);
                 return tokoianConn.query(queryTrxString, [trxPush]);
             }).then(function () {
                 return tokoianConn.query(queryLogString, [logPush]);
@@ -1067,6 +1069,7 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
                 return tokoianConn.query("COMMIT;");
             }).then(() => {
                 let message = {"text": "Sales Order repoen.!", "color": "green"};
+                console.log(req.session.tempUrl);
                 if (req.session.tempUrl === '/recap-sales-order'){
                     getPage.recapSO(message, req, res);
                 } else {
@@ -1911,16 +1914,16 @@ router.post('/pl-customer-list', function(req, res) {
                 // console.log(rows);
                 if (!_.isEmpty(rows)) {
                     queryPlString = "UPDATE pricelist SET " +
-                        "hargajual = '" + parseInt(postPl.hargajual.replace(/[^0-9]/gi, '')) + "' " +
+                        "hargajual = ? " +
                         "where " +
                         "idcustomer = ? and " +
                         "idkode = ?";
-                    queryPlData = [rows[0].idcustomer, rows[0].idkode];
+                    queryPlData = [parseInt(postPl.hargajual.replace(/[^0-9]/gi, '')), rows[0].idcustomer, rows[0].idkode];
                 }else {
                     queryPlString = "INSERT INTO pricelist (idcustomer, idkode, hargajual) VALUES ?";
-                        queryPlData = [postPl.customer, idkode, hargajual];
+                        queryPlData = [[[postPl.customer, idkode, hargajual]]];
                 }
-                return tokoianConn.query(queryPlString, [[queryPlData]]);
+                return tokoianConn.query(queryPlString, queryPlData);
             }).then(function () {
                 let logString = "Nama Toko : " + postPl.namatoko + "\n" +
                     "Kode Barang : " + postPl.namabarang + "\n" +
