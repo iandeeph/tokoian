@@ -859,13 +859,15 @@ router.get('/get-customer', function(req, res) {
 
 /* GET recap sales order page. */
 router.get('/recap-sales-order', function(req, res) {
+    // console.log(req.url);
     let message = {"text": "", "color": ""};
     getPage.recapSO(message, req, res);
 });
 
 /* POST recap sales order. */
 router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
-    // console.log(req.session.tempUrl);
+    // console.log(req.url);
+    let curUrl = req.url;
     var dateNow = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
     var user = req.session.name;
     let querySoString = "";
@@ -951,7 +953,7 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
             }).then(function () {
                 if (!_.isEmpty(stock) || !_.isUndefined(stock)) {
                     let message = {"text": "Sales Order gagal diproses, stock kurang.!", "color": "red"};
-                    if (req.session.tempUrl === '/recap-sales-order'){
+                    if (curUrl === '/recap-sales-order'){
                         getPage.recapSO(message, req, res);
                     } else {
                         getPage.soCust(message, req, res);
@@ -989,6 +991,12 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
                             .then(function () {
                                 return tokoianConn.query(querySoString, [itemRow.soid]);
                             }).catch(function (error) {
+                                let message = {"text": "Proses SO Gagal :"+ error, "color": "red"};
+                                if (curUrl === '/recap-sales-order'){
+                                    getPage.recapSO(message, req, res);
+                                } else {
+                                    getPage.soCust(message, req, res);
+                                }
                                 return tokoianConn.query("ROLLBACK").then(() => {
                                     console.error(error);
                                 });
@@ -1006,12 +1014,18 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
                 return tokoianConn.query("COMMIT;");
             }).then(() => {
                 let message = {"text": "Sales Order diproses.!", "color": "green"};
-                if (req.session.tempUrl === '/recap-sales-order'){
+                if (curUrl === '/recap-sales-order'){
                     getPage.recapSO(message, req, res);
                 } else {
                     getPage.soCust(message, req, res);
                 }
             }).catch(function (error) {
+                let message = {"text": "Proses SO Gagal :"+ error, "color": "red"};
+                if (curUrl === '/recap-sales-order'){
+                    getPage.recapSO(message, req, res);
+                } else {
+                    getPage.soCust(message, req, res);
+                }
                 return tokoianConn.query("ROLLBACK").then(() => {
                     console.error(error);
                 });
@@ -1069,8 +1083,8 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
                 return tokoianConn.query("COMMIT;");
             }).then(() => {
                 let message = {"text": "Sales Order repoen.!", "color": "green"};
-                console.log(req.session.tempUrl);
-                if (req.session.tempUrl === '/recap-sales-order'){
+                console.log(curUrl);
+                if (curUrl === '/recap-sales-order'){
                     getPage.recapSO(message, req, res);
                 } else {
                     getPage.soCust(message, req, res);
@@ -1929,7 +1943,7 @@ router.post('/pl-customer-list', function(req, res) {
                     "Kode Barang : " + postPl.namabarang + "\n" +
                     "Nama Barang : " + postPl.kodebarang + "\n" +
                     "Harga Jual Lama : " + Intl.NumberFormat('en-IND').format(postPl.hargajuallama)+ "\n" +
-                    "Harga Jual Baru : " + Intl.NumberFormat('en-IND').format(postPl.hargajual);
+                    "Harga Jual Baru : " + postPl.hargajual;
 
                     let queryLogString = [user, 'Edit Pricelist', logString, dateNow];
                 return tokoianConn.query("INSERT INTO log (user, aksi, detail, tanggal) VALUES ?", [[queryLogString]]);
