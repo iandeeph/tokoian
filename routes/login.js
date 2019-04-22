@@ -73,7 +73,8 @@ function decrypt(value) {
 /* GET Login page. */
 router.get('/', function(req, res, next) {
     res.render('login',{
-        layout: 'login'
+        layout: 'login',
+        message : req.session.message
     });
 });
 
@@ -82,29 +83,39 @@ router.post('/', function(req, res, next) {
     var dateNow = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
     var postUsername = req.body.login_username;
     var postPassword = req.body.login_password;
-    let users = {};
+    let logString, queryLogString;
+    let logPush = {};
     // console.log(postPassword);
     tokoianConn.query('SELECT * FROM user where username = "'+ postUsername +'" and status = "1" limit 1')
         .then(function(users) {
             // console.log(decrypt(users[0].password));
             if (!_.isEmpty(users)){
                 if (decrypt(users[0].password) !== postPassword){
-                    res.render('login',{
-                        layout: 'login',
-                        message : 'Username atau Password Salah..!!'
-                    });
+                    logString = "Username : "+ users[0].username +"\n" +
+                        "Nama : "+users[0].nama;
+                    queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
+                        "('" + users[0].nama + "', 'Wrong Password Login..!!','" + logString + "','" + dateNow + "')";
+
+                    logPush = tokoianConn.query(queryLogString);
+
+                    Promise.all([logPush])
+                        .then(function () {
+                            req.session.message = {"text": "Username atau Password Salah..!!", "color": "red"};
+                            res.redirect("/login-auth");
+                            delete req.session.message;
+                        });
                 }else{
                     req.session.login       = 'loged';
                     req.session.username    = users[0].username;
                     req.session.name        = users[0].nama;
                     req.session.priv        = users[0].priv;
                     //console.log(req.session.name );
-                    var logString = "Username : "+ users[0].username +"\n" +
+                    logString = "Username : "+ users[0].username +"\n" +
                         "Nama : "+users[0].nama;
-                    var queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
+                    queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
                         "('" + users[0].nama + "', 'User Login','" + logString + "','" + dateNow + "')";
 
-                    var logPush = tokoianConn.query(queryLogString);
+                    logPush = tokoianConn.query(queryLogString);
 
                     Promise.all([logPush])
                         .then(function () {
@@ -112,10 +123,19 @@ router.post('/', function(req, res, next) {
                         });
                 }
             } else {
-                res.render('login',{
-                    layout: 'login',
-                    message : 'Account tidak ada..!!'
-                });
+                logString = "Username : "+ postUsername +"\n" +
+                    "Password : "+postPassword;
+                queryLogString = "INSERT INTO log (user, aksi, detail, tanggal) VALUES " +
+                    "('" + postUsername + "', 'Account tidak ada..!!','" + logString + "','" + dateNow + "')";
+
+                logPush = tokoianConn.query(queryLogString);
+
+                Promise.all([logPush])
+                    .then(function () {
+                        req.session.message = {"text": "Account tidak ada..!!", "color": "red"};
+                        res.redirect("/login-auth");
+                        delete req.session.message;
+                    });
             }
         }).catch(function(error){
             //logs out the error

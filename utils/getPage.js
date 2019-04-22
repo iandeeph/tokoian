@@ -87,8 +87,9 @@ exports.codeList = (message, req, res) => {
             res.render('code', {
                 listCode : listCode,
                 priv : req.session.priv,
-                message: message
+                message: req.session.message
             });
+            delete req.session.message;
         }).catch(function (error) {
             //logs out the error
             console.error(error);
@@ -109,8 +110,9 @@ exports.orderIn = (message, req, res) => {
             res.render('order-in', {
                 orderid : orderid,
                 kodeRow : kodeRow,
-                message: message
+                message: req.session.message
             });
+            delete req.session.message
         }).catch(function (error) {
             //logs out the error
             console.error(error);
@@ -135,8 +137,9 @@ exports.addSO = (message, req, res) => {
                 orderid : orderid,
                 kodeRow : kodeRows,
                 custRow : custRow,
-                message: message
+                message: req.session.message
             });
+            delete req.session.message;
         }).catch(function (error) {
             //logs out the error
             console.error(error);
@@ -181,9 +184,11 @@ exports.recapSO = (message, req, res) =>{
             res.render('recap-sales-order', {
                 rows: groupBySoid,
                 priv: req.session.priv,
-                message: message,
+                message: req.session.message,
                 grandTotal: grandTotal
             });
+            // console.log(req.session.message);
+            delete req.session.message;
         }).catch(function (error) {
             //logs out the error
             console.error(error);
@@ -238,9 +243,9 @@ exports.soCust = (message, req, res) =>{
                         priv: req.session.priv,
                         grandTotal: grandTotal,
                         customer: customer,
-                        message: message
-
+                        message: req.session.message
                     });
+                    delete req.session.message
                 } else {
                     res.redirect('/customer-list');
                 }
@@ -263,8 +268,9 @@ exports.expense = (message, req, res) => {
             var orderid = "#EXP-" + randomize('?Aa0', 3, dateNow).concat(moment(Date.now()).format("YY"), ("00000" + (maxOrderId + 1)).slice(-5));
             res.render('add-expense', {
                 orderid : orderid,
-                message: message
+                message: req.session.message
             });
+            delete req.session.message;
         }).catch(function (error) {
             //logs out the error
             console.error(error);
@@ -290,9 +296,9 @@ exports.recapExpense = (message, req, res) => {
                 rows: groupByExpid,
                 priv: req.session.priv,
                 grandTotal: grandTotal,
-                message: message
-
+                message: req.session.message
             });
+            delete req.session.message;
         }).catch(function (error) {
             //logs out the error
             console.error(error);
@@ -339,8 +345,9 @@ exports.pricelist = (message, req, res) => {
                     rows: row,
                     priv: req.session.priv,
                     customer: customer,
-                    message: message
+                    message: req.session.message
                 });
+                delete req.session.message;
             }).catch(function (error) {
                 //logs out the error
                 console.error(error);
@@ -355,8 +362,9 @@ exports.userman = (message, req, res) => {
         .then(function (listUser) {
             res.render('user', {
                 listUser : listUser,
-                message: message
+                message: req.session.message
             });
+            delete req.session.message;
         }).catch(function (error) {
             //logs out the error
             console.error(error);

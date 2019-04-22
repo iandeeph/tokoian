@@ -40,6 +40,16 @@ $(document).ready(function() {
             }
         });
     });
+    $('input[id^=userStatus]').change(function(){
+        let priv = $(this).attr("data-text");
+        let iduser = $(this).attr("data-kode");
+        $.ajax({
+            url: './user-status?changeStatus='+ priv +'&priv='+iduser,
+            type: "GET",
+            success: function (datas) {
+            }
+        });
+    });
 
     // ============= pl customer list =================
     $('[id^=modalEditBtn]').click(function () {
@@ -59,10 +69,12 @@ $(document).ready(function() {
     // ======== print invoice ==================
     $('[id^=printInvoice]').click(function () {
         let so = $(this).val();
+        var soPage = $('#print-so-page');
         var printWindow = window.open('./print-so?so='+ so);
         printWindow.onload = function(e){
-            printWindow.print();
-            printWindow.onfocus = function () { setTimeout(function () { printWindow.close(); }, 0); };
+                setTimeout(function () { printWindow.print(); }, 500);
+            printWindow.onfocus = function () { setTimeout(function () { printWindow.close(); }, 500); };
+                $(soPage).click(function () { setTimeout(function () { printWindow.close(); }, 500); });
         };
     });
 

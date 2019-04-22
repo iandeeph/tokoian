@@ -50,7 +50,7 @@
                                     <div class="switch">
                                         <label>
                                             Active
-                                            <input type="checkbox" id="userStatus{{iduser}}" data-text="{{invertStatus status}}" data-kode="{{iduser}}" {{#compare status "1" operator="=="}}checked{{/compare}}>
+                                            <input type="checkbox" id="userStatus{{iduser}}" data-text="{{invertStatus status}}" data-kode="{{encrypt iduser}}" {{#compare status "1" operator="=="}}checked{{/compare}}>
                                             <span class="lever"></span>
                                             Inactive
                                         </label>

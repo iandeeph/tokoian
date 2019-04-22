@@ -213,8 +213,8 @@ router.post('/code-list', (req, res) => {
             }).then(() => {
                 return tokoianConn.query("COMMIT;");
             }).then(() => {
-                message = {"text": "Tambah Kode Suskses..", "color": "green"};
-                getPage.codeList(message,req, res);
+                req.session.message = {"text": "Tambah Kode Suskses..", "color": "green"};
+                res.redirect('/code-list');
             }).catch(function (error) {
                 return tokoianConn.query("ROLLBACK").then(() => {
                     console.error(error);
@@ -240,8 +240,8 @@ router.post('/code-list', (req, res) => {
             }).then(function () {
                 return tokoianConn.query("COMMIT;");
             }).then(() => {
-                message = {"text": "Edit Kode Suskses..", "color": "green"};
-                getPage.codeList(message, req, res);
+                req.session.message = {"text": "Edit Kode Suskses..", "color": "green"};
+                res.redirect('/code-list');
             }).catch(function (error) {
                 return tokoianConn.query("ROLLBACK").then(() => {
                     console.error(error);
@@ -364,9 +364,10 @@ router.post('/order-in', function(req, res) {
 
                             tokoianConn.query(queryItemString, [hargaBeli, total, resRows.idkode])
                                 .catch(function (error) {
-                                    return tokoianConn.query("ROLLBACK").then(() => {
-                                        console.error(error);
-                                    });
+                                    req.session.message = {"text": "Order baru gagal diproses.! Error : "+ error, "color": "red"};
+                                    tokoianConn.query("ROLLBACK");
+                                    res.redirect('/order-in');
+                                    return Promise.reject("Order baru gagal diproses.! Error : "+ error);
                                     //logs out the error
                                 });
 
@@ -397,13 +398,12 @@ router.post('/order-in', function(req, res) {
             }).then(function () {
                 return tokoianConn.query("COMMIT;");
             }).then(() => {
-                let message = {"text": "Barang masuk berhasil.", "color": "green"};
-                getPage.orderIn(message, req, res);
+                req.session.message = {"text": "Barang masuk berhasil.", "color": "green"};
+                res.redirect('/order-in');
             }).catch(function (error) {
+                req.session.message = {"text": "Order baru gagal diproses.! Error : "+ error, "color": "red"};
                 return tokoianConn.query("ROLLBACK").then(() => {
                     console.error(error);
-                    let message = {"text": "Barang masuk gagal."+ error, "color": "green"};
-                    getPage.orderIn(message, req, res);
                 });
                 //logs out the error
             });
@@ -624,7 +624,7 @@ router.post('/trxin-report', function(req, res) {
 
 /* GET list customer page. */
 router.get('/customer-list', function(req, res) {
-    var message = {"text": "", "color": ""};
+    // var message = {"text": "", "color": ""};
     return tokoianConn.query("select *, " +
         "customer.idcustomer idcustomer, " +
         "salesorder.idcustomer idcustsales, " +
@@ -643,8 +643,9 @@ router.get('/customer-list', function(req, res) {
             res.render('recap-customer', {
                 listCode : listCust,
                 priv : req.session.priv,
-                message: message
+                message: req.session.message
             });
+            delete req.session.message;
         }).catch(function (error) {
             //logs out the error
             console.error(error);
@@ -688,6 +689,7 @@ router.post('/customer-list', function(req, res) {
             }).then(function (results) {
                 return tokoianConn.query("COMMIT;");
             }).then(() => {
+                req.session.message = {"text": "Toko baru berhasil ditambah.", "color": "green"};
                 res.redirect('/customer-list');
             }).catch(function (error) {
                 return tokoianConn.query("ROLLBACK").then(() => {
@@ -721,6 +723,7 @@ router.post('/customer-list', function(req, res) {
             }).then(function () {
                 return tokoianConn.query("COMMIT;");
             }).then(() => {
+                req.session.message = {"text": "Edit toko berhasil.", "color": "green"};
                 res.redirect('/customer-list');
             }).catch(function (error) {
                 return tokoianConn.query("ROLLBACK").then(() => {
@@ -794,7 +797,7 @@ router.post('/add-sales-order', function(req, res) {
 
             let logString = "Sales Order ID : " + orderid + "\n" +
                 "Nama Customer : " + customer.nama + "\n" +
-                "Kode Barang : " + listSo.kode + "\n" +
+                "Kode Barang : " + decodeURI(listSo.kode) + "\n" +
                 "Nama Barang : " + listSo.nama + "\n" +
                 "Harga Jual : " + Intl.NumberFormat('en-IND').format(hargaJual) + "\n" +
                 "Jumlah : " + jumlah;
@@ -812,8 +815,8 @@ router.post('/add-sales-order', function(req, res) {
         }).then(function () {
             return tokoianConn.query("COMMIT;");
         }).then(() => {
-            let message = {"text": "Sales order berhasil ditambah.", "color": "green"};
-            getPage.addSO(message, req, res);
+            req.session.message = {"text": "Sales order berhasil ditambah.", "color": "green"};
+            res.redirect('/add-sales-order');
         }).catch(function (error) {
             return tokoianConn.query("ROLLBACK").then(() => {
                 console.error(error);
@@ -889,6 +892,7 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
         "customer.telp telp, " +
         "customer.alamat alamat, " +
         "item.jumlah stock, " +
+        "item.hargabeli hargabeli, " +
         "(item.jumlah-so.jumlah) sisastock, " +
         "kode.kode kode, " +
         "kode.nama namaitem " +
@@ -921,11 +925,12 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
             }).then(function () {
                 return tokoianConn.query("COMMIT;");
             }).then(() => {
-                let message = {"text": "Sales Order dihapus.!", "color": "red"};
-                if (req.session.tempUrl === '/recap-sales-order'){
-                    getPage.recapSO(message, req, res);
+                req.session.message = {"text": "Sales Order dihapus.!", "color": "red"};
+
+                if (curUrl === '/recap-sales-order'){
+                    res.redirect('/recap-sales-order')
                 } else {
-                    getPage.soCust(message, req, res);
+                    res.redirect('/so-customer-list')
                 }
             }).catch(function (error) {
                 return tokoianConn.query("ROLLBACK").then(() => {
@@ -952,12 +957,12 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
                 });
             }).then(function () {
                 if (!_.isEmpty(stock) || !_.isUndefined(stock)) {
-                    let message = {"text": "Sales Order gagal diproses, stock kurang.!", "color": "red"};
+                    req.session.message = {"text": "Sales Order gagal diproses, stock kurang.!", "color": "red"};
                     tokoianConn.query("ROLLBACK");
-                    if (curUrl === '/recap-sales-order') {
-                        getPage.recapSO(message, req, res);
+                    if (curUrl === '/recap-sales-order'){
+                        res.redirect('/recap-sales-order')
                     } else {
-                        getPage.soCust(message, req, res);
+                        res.redirect('/so-customer-list')
                     }
                     return Promise.reject("Sales Order gagal diproses, stock kurang.!");
                 }
@@ -983,7 +988,12 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
 
                     let logString = "Sales Order ID : " + itemRow.soid + "\n" +
                         "Nama Toko : " + itemRow.customer + "\n" +
-                        "Alamat Toko : " + itemRow.alamat;
+                        "Alamat Toko : " + itemRow.alamat + "\n" +
+                        "Kode Barang : " + itemRow.kode + "\n" +
+                        "Nama Barang : " + itemRow.namaitem + "\n" +
+                        "Jumlah : " + itemRow.jumlah + "\n" +
+                        "Harga Beli : " + itemRow.hargabeli + "\n" +
+                        "Harga Jual : " + itemRow.hargaJual;
 
                     arrLogQry.push([user, 'Proses SO to DO', logString, dateNow]);
 
@@ -991,14 +1001,12 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
                         .then(function () {
                             return tokoianConn.query(querySoString, [itemRow.soid]);
                         }).catch(function (error) {
-                            tokoianConn.query("ROLLBACK").then(() => {
-                                console.error(error);
-                            });
-                            let message = {"text": "Proses SO Gagal :"+ error, "color": "red-text"};
+                            req.session.message = {"text": "Proses SO Gagal :"+ error, "color": "red-text"};
+                            tokoianConn.query("ROLLBACK");
                             if (curUrl === '/recap-sales-order'){
-                                getPage.recapSO(message, req, res);
+                                res.redirect('/recap-sales-order')
                             } else {
-                                getPage.soCust(message, req, res);
+                                res.redirect('/so-customer-list')
                             }
                             //logs out the error
                             return Promise.reject("Proses SO Gagal :"+ error);
@@ -1013,24 +1021,25 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
             }).then(function () {
                 return tokoianConn.query("COMMIT;");
             }).then(() => {
-                let message = {"text": "Sales Order diproses.!", "color": "green"};
+                req.session.message = {"text": "Sales Order diproses.!", "color": "green"};
                 if (curUrl === '/recap-sales-order'){
-                    getPage.recapSO(message, req, res);
+                    res.redirect('/recap-sales-order')
                 } else {
-                    getPage.soCust(message, req, res);
+                    res.redirect('/so-customer-list')
                 }
             }).catch(function (error) {
-                tokoianConn.query("ROLLBACK").then(() => {
+                req.session.message = {"text": "Proses SO Gagal :"+ error, "color": "red-text"};
+                return tokoianConn.query("ROLLBACK").then(() => {
                     console.error(error);
                 });
-                let message = {"text": "Proses SO Gagal :"+ error, "color": "red-text"};
-                if (curUrl === '/recap-sales-order'){
-                    getPage.recapSO(message, req, res);
-                } else {
-                    getPage.soCust(message, req, res);
-                }
-                //logs out the error
-                return Promise.reject("Proses SO Gagal :"+ error);
+                // let message = {"text": "Proses SO Gagal :"+ error, "color": "red-text"};
+                // if (curUrl === '/recap-sales-order'){
+                //     getPage.recapSO(message, req, res);
+                // } else {
+                //     getPage.soCust(message, req, res);
+                // }
+                // //logs out the error
+                // return Promise.reject("Proses SO Gagal :"+ error);
             });
     }else if (!_.isUndefined(req.body.reopenSoBtn)) {
         return tokoianConn.query("START TRANSACTION;")
@@ -1071,12 +1080,12 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
                             tokoianConn.query("ROLLBACK").then(() => {
                                 console.error(error);
                             });
-                            let message = {"text": "Sales Order gagal repoen.!", "color": "red-text"};
-                            console.log(curUrl);
+                            req.session.message = {"text": "Sales Order gagal reopen.!", "color": "red-text"};
+                            // console.log(curUrl);
                             if (curUrl === '/recap-sales-order'){
-                                getPage.recapSO(message, req, res);
+                                res.redirect('/recap-sales-order')
                             } else {
-                                getPage.soCust(message, req, res);
+                                res.redirect('/so-customer-list')
                             }
                             //logs out the error
                             return Promise.reject("Proses Reopen SO Gagal :"+ error);
@@ -1091,52 +1100,46 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
             }).then(function () {
                 return tokoianConn.query("COMMIT;");
             }).then(() => {
-                let message = {"text": "Sales Order repoen.!", "color": "green"};
-                console.log(curUrl);
+                req.session.message = {"text": "Sales Order repoen.!", "color": "green"};
+
                 if (curUrl === '/recap-sales-order'){
-                    getPage.recapSO(message, req, res);
+                    res.redirect('/recap-sales-order')
                 } else {
-                    getPage.soCust(message, req, res);
+                    res.redirect('/so-customer-list')
                 }
             }).catch(function (error) {
-                tokoianConn.query("ROLLBACK").then(() => {
+                req.session.message = {"text": "Sales Order gagal reopen.!", "color": "red-text"};
+                return tokoianConn.query("ROLLBACK").then(() => {
                     console.error(error);
                 });
-                let message = {"text": "Sales Order gagal repoen.!", "color": "red-text"};
-                console.log(curUrl);
-                if (curUrl === '/recap-sales-order'){
-                    getPage.recapSO(message, req, res);
-                } else {
-                    getPage.soCust(message, req, res);
-                }
-                //logs out the error
-                return Promise.reject("Proses Reopen SO Gagal :"+ error);
             });
     //logs out the error
     }else if (!_.isUndefined(req.body.printSoBtn)) {
-        let soid;
+        let soid, row;
+        let logStringArr = [];
         return tokoianConn.query("START TRANSACTION;")
             .then(() => {
                 return tokoianConn.query(recapSoMainQry, [[req.body.prosesSoid]]);
-            }).then(function (row) {
+            }).then(function (rows) {
             // console.log(row);
+                row = rows;
                 querySoString = "UPDATE salesorder SET " +
                     "printed = '1', " +
                     "userprinted = ?, " +
                     "dateprinted = ? " +
                     "where soid = ? ";
 
-                let logString = "Sales Order ID : " + itemRow.soid + "\n" +
-                    "Nama Toko : " + itemRow.kode + "\n" +
-                    "Alamat Toko : " + itemRow.nama;
+                let logString = "Sales Order ID : " + row[0].soid + "\n" +
+                    "Nama Toko : " + row[0].kode + "\n" +
+                    "Alamat Toko : " + row[0].nama;
 
-                queryLogString.push([user, 'Print DO', logString, dateNow]);
-            }).then(function (row) {
+                logStringArr.push([user, 'Print DO', logString, dateNow]);
+            }).then(function () {
                 soid = row[0].soid;
                 // console.log(soid);
                 var soPush = tokoianConn.query(querySoString, [user, dateNow, soid]);
             }).then(function () {
-                logPush = tokoianConn.query("INSERT INTO log (user, aksi, detail, tanggal) VALUES ?", [queryLogString] );
+                logPush = tokoianConn.query("INSERT INTO log (user, aksi, detail, tanggal) VALUES ?", [[logStringArr]] );
             }).then(function () {
                 let string = encrypt(soid);
                 res.redirect('/print-do?so=' + string);
@@ -1470,7 +1473,7 @@ router.get('/log', function(req, res) {
                                 pagination[totalPage] = {
                                     "active" : (totalPage === page)? "active": "waves-effect",
                                     "value" : totalPage,
-                                    "link" : ""+thisUrlPath+"?p="+encrypt(""+i)+"&start=" + ""+req.query.start+"&end=" + ""+req.query.end+"'"
+                                    "link" : ""+thisUrlPath+"?p="+encrypt(""+totalPage)+"&start=" + ""+req.query.start+"&end=" + ""+req.query.end+"'"
                                 };
                             }
                         }else if (page > 5 && page < totalPage-5){
@@ -1488,7 +1491,7 @@ router.get('/log', function(req, res) {
                                 pagination[totalPage] = {
                                     "active" : (totalPage === page)? "active": "waves-effect",
                                     "value" : totalPage,
-                                    "link" : ""+thisUrlPath+"?p="+encrypt(""+i)+"&start=" + ""+req.query.start+"&end=" + ""+req.query.end+"'"
+                                    "link" : ""+thisUrlPath+"?p="+encrypt(""+totalPage)+"&start=" + ""+req.query.start+"&end=" + ""+req.query.end+"'"
                                 };
                             }
                         }else if (page >= totalPage-5){
@@ -1575,7 +1578,7 @@ router.get('/log', function(req, res) {
                                 pagination[totalPage] = {
                                     "active" : (totalPage === page)? "active": "waves-effect",
                                     "value" : totalPage,
-                                    "link" : ""+thisUrlPath+"?p="+encrypt(""+i)
+                                    "link" : ""+thisUrlPath+"?p="+encrypt(""+totalPage)
                                 };
                             }
                         }else if (page > 5 && page < totalPage-5){
@@ -1593,7 +1596,7 @@ router.get('/log', function(req, res) {
                                 pagination[totalPage] = {
                                     "active" : (totalPage === page)? "active": "waves-effect",
                                     "value" : totalPage,
-                                    "link" : ""+thisUrlPath+"?p="+encrypt(""+i)
+                                    "link" : ""+thisUrlPath+"?p="+encrypt(""+totalPage)
                                 };
                             }
                         }else if (page >= totalPage-5){
@@ -1697,7 +1700,7 @@ router.post('/log', function(req, res) {
                                 pagination[totalPage] = {
                                     "active" : (totalPage === page)? "active": "waves-effect",
                                     "value" : totalPage,
-                                    "link" : ""+thisUrlPath+"?p="+encrypt(""+i)+"&start=" + encrypt(""+startDate)+"&end=" + encrypt(""+endDate)+"'"
+                                    "link" : ""+thisUrlPath+"?p="+encrypt(""+totalPage)+"&start=" + encrypt(""+startDate)+"&end=" + encrypt(""+endDate)+"'"
                                 };
                             }
                         }else if (page > 5 && page < totalPage-5){
@@ -1715,7 +1718,7 @@ router.post('/log', function(req, res) {
                                 pagination[totalPage] = {
                                     "active" : (totalPage === page)? "active": "waves-effect",
                                     "value" : totalPage,
-                                    "link" : ""+thisUrlPath+"?p="+encrypt(""+i)+"&start=" + encrypt(""+startDate)+"&end=" + encrypt(""+endDate)+"'"
+                                    "link" : ""+thisUrlPath+"?p="+encrypt(""+totalPage)+"&start=" + encrypt(""+startDate)+"&end=" + encrypt(""+endDate)+"'"
                                 };
                             }
                         }else if (page >= totalPage-5){
@@ -1760,6 +1763,63 @@ router.post('/log', function(req, res) {
         });
 
     }
+});
+
+/* GET print sales order page. */
+router.get('/print-do', function(req, res) {
+    var passedVariable = decrypt(req.query.so) || {};
+    var row;
+    return tokoianConn.query("select *, " +
+        "so.soid soid, " +
+        "so.hargajual hargajual, " +
+        "so.jumlah jumlah, " +
+        "(so.jumlah*so.hargajual) total, " +
+        "so.status status, " +
+        "customer.nama customer, " +
+        "customer.pic pic, " +
+        "customer.telp telp, " +
+        "customer.alamat alamat, " +
+        "kode.kode kode, " +
+        "kode.nama namaitem " +
+        "from " +
+        "salesorder so " +
+        "left join " +
+        "customer " +
+        "on " +
+        "so.idcustomer = customer.idcustomer " +
+        "left join " +
+        "kode " +
+        "on " +
+        "so.idkode = kode.idkode " +
+        "where so.soid = ? " +
+        // "where so.soid = '#SO-zTf1900002' " +
+        "order by so.status desc, so.tanggal desc", [passedVariable])
+        .then(function (rows) {
+            row = rows;
+            // console.log(row[0].soid);
+            return tokoianConn.query("select * from company");
+        }).then(function (company) {
+            var groupBySoid = _.groupBy(row, 'soid');
+            var grandTotal =
+                _(row)
+                    .groupBy('soid')
+                    .map((objs, key) => (
+                        groupBySoid[key].push({
+                            grandTotal : _.sumBy(objs, 'total')
+                        })))
+                    .value();
+            // console.log(groupBySoid);
+            res.render('print-do', {
+                rows: groupBySoid,
+                company: company,
+                title: row[0].soid,
+                grandTotal: grandTotal
+
+            });
+        }).catch(function (error) {
+            //logs out the error
+            console.error(error);
+        });
 });
 
 /* GET print sales order page. */
@@ -1856,8 +1916,8 @@ router.post('/add-expense', function(req, res) {
             }).then(() => {
                 return tokoianConn.query("COMMIT;");
             }).then(() => {
-                let message = {"text": "Tambah expense berhasil.", "color": "green"};
-                getPage.expense(message, req, res);
+                req.session.message = {"text": "Tambah expense berhasil.", "color": "green"};
+                res.redirect('/add-expense');
             }).catch(function (error) {
                 return tokoianConn.query("ROLLBACK").then(() => {
                     console.error(error);
@@ -1906,13 +1966,13 @@ router.post('/recap-expense', function(req, res) {
             }).then(() => {
                 return tokoianConn.query("COMMIT;");
             }).then(() => {
-                var message = {"text": "Hapus Expense Berhasil.", "color": "green"};
-                getPage.recapExpense(message, req, res);
+                req.session.message = {"text": "Hapus Expense Berhasil.", "color": "green"};
+                res.redirect('/recap-expense');
             }).catch(function (error) {
                 return tokoianConn.query("ROLLBACK").then(() => {
                     console.error(error);
-                    var message = {"text": "Hapus Expense gagal." + error, "color": "red"};
-                    getPage.recapExpense(message, req, res);
+                    req.session.message = {"text": "Hapus Expense gagal." + error, "color": "red"};
+                    res.redirect('/recap-expense');
                 });
                 //logs out the error
             });
@@ -1968,8 +2028,8 @@ router.post('/pl-customer-list', function(req, res) {
             }).then(function () {
                 return tokoianConn.query("COMMIT;");
             }).then(() => {
-                var message = {"text": "Update pricelist berhasil.", "color": "green"};
-                getPage.pricelist(message, req, res);
+                req.session.message = {"text": "Update pricelist berhasil.", "color": "green"};
+                res.redirect('/pl-customer-list');
             }).catch(function (error) {
                 return tokoianConn.query("ROLLBACK").then(() => {
                     console.error(error);
@@ -2015,8 +2075,8 @@ router.post('/user-manager', function(req, res) {
             }).then(() => {
                 return tokoianConn.query("COMMIT;");
             }).then(() => {
-                var message = {"text": "Tambah user berhasil.", "color": "green"};
-                getPage.userman(message, req, res);
+                req.session.message = {"text": "Tambah user berhasil.", "color": "green"};
+                res.redirect('/user-manager');
             }).catch(function (error) {
                 return tokoianConn.query("ROLLBACK").then(() => {
                     console.error(error);
@@ -2031,8 +2091,7 @@ router.post('/user-manager', function(req, res) {
                     "username =  ?, " +
                     "password =  ? " +
                     "where iduser = ?";
-                dataedit = [req.body.editUser.nama, req.body.editUser.username, encrypt(req.body.editUser.password), decrypt(req.body.editUserSubmit)];
-                return tokoianConn.query(updateUser, [dataedit]);
+                return tokoianConn.query(updateUser, [req.body.editUser.nama, req.body.editUser.username, encrypt(req.body.editUser.password), decrypt(req.body.editUserSubmit)]);
             }).then(() => {
                 let logString = "Username : " + req.body.editUser.usernameOld + "\n" +
                     "Nama : " + req.body.editUser.namaOld + "\n" +
@@ -2040,15 +2099,20 @@ router.post('/user-manager', function(req, res) {
                     "Username : " + req.body.editUser.username + "\n" +
                     "Nama : " + req.body.editUser.namaOld;
                 var insertLog = [user, 'Edit Detail User', logString, dateNow];
-                return tokoianConn.query("INSERT INTO log (user, aksi, detail, tanggal) VALUES ", [insertLog]);
+                return tokoianConn.query("INSERT INTO log (user, aksi, detail, tanggal) VALUES ?", [[insertLog]]);
             }).then(() => {
                 return tokoianConn.query("COMMIT;");
             }).then(() => {
-                var message = {"text": "Edit user berhasil.", "color": "green"};
-                getPage.userman(message, req, res);
+                req.session.message = {"text": "Edit user berhasil.", "color": "green"};
+                res.redirect('/user-manager');
             }).catch(function (error) {
                 //logs out the error
                 console.error(error);
+                req.session.message = {"text": "Edit user gagal.! Error : "+ error, "color": "red"};
+                res.redirect('/user-manager');
+                return tokoianConn.query("ROLLBACK").then(() => {
+                    console.error(error);
+                });
             });
     }
 });
@@ -2060,18 +2124,57 @@ router.get('/priv-user', function(req, res) {
     var passedVariable = req.query.changeStatus || {};
     var iduser = decrypt(req.query.priv) || {};
     var updatePriv = "UPDATE user SET priv =  ? where iduser = ?";
+    let listUser;
     // console.log(updatePriv);
     return tokoianConn.query("START TRANSACTION;")
         .then(() => {
             return tokoianConn.query("select * from user where iduser = '" + iduser + "'");
-        }).then(function (listUser) {
+        }).then(function (listUsers) {
+            listUser = listUsers;
             return tokoianConn.query(updatePriv, [passedVariable, iduser]);
         }).then(function () {
+            let changePriv = (passedVariable === '1')? "Administrator" : "Operator";
             var logString = "User Name : " + listUser[0].username + "\n" +
                 "Nama : " + listUser[0].nama + "\n" +
-                "Privilege to : " + (passedVariable === '1')? "Administrator" : "Operator" + "\n";
+                "Privilege to : " + changePriv + "\n";
             var insertLog =  [user, 'Edit Privilege', logString, dateNow];
-            return tokoianConn.query("INSERT INTO log (user, aksi, detail, tanggal) VALUES ?", [insertLog]);
+            return tokoianConn.query("INSERT INTO log (user, aksi, detail, tanggal) VALUES ?", [[insertLog]]);
+        }).then(function () {
+            return tokoianConn.query("COMMIT;");
+        }).then(() => {
+                res.send("ok");
+
+        }).catch(function (error) {
+            return tokoianConn.query("ROLLBACK").then(() => {
+                console.error(error);
+            });
+            //logs out the error
+        });
+});
+
+/* GET AJAX user-list page. */
+router.get('/user-status', function(req, res) {
+    var user = req.session.name;
+    var dateNow = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
+    var passedVariable = req.query.changeStatus || {};
+    var iduser = decrypt(req.query.priv) || {};
+    var updatePriv = "UPDATE user SET status =  ? where iduser = ?";
+    let listUser;
+
+    // console.log(updatePriv);
+    return tokoianConn.query("START TRANSACTION;")
+        .then(() => {
+            return tokoianConn.query("select * from user where iduser = '" + iduser + "'");
+        }).then(function (listUsers) {
+            listUser = listUsers;
+            return tokoianConn.query(updatePriv, [passedVariable, iduser]);
+        }).then(function () {
+            let changeStatus = (passedVariable === '1')? "Active" : "Deactive";
+            var logString = "User Name : " + listUser[0].username + "\n" +
+                "Nama : " + listUser[0].nama + "\n" +
+                "Status to : " + changeStatus + "\n";
+            var insertLog =  [user, 'Edit Status', logString, dateNow];
+            return tokoianConn.query("INSERT INTO log (user, aksi, detail, tanggal) VALUES ?", [[insertLog]]);
         }).then(function () {
             return tokoianConn.query("COMMIT;");
         }).then(() => {
