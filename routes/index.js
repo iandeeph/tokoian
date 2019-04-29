@@ -371,7 +371,7 @@ router.post('/order-in', function(req, res) {
                                     req.session.message = {"text": "Order baru gagal diproses.! Error : "+ error, "color": "red"};
                                     tokoianConn.query("ROLLBACK");
                                     res.redirect('/order-in');
-                                    return Promise.reject("Order baru gagal diproses.! Error : "+ error);
+                                    return Promise.reject(dateNow + " - Order baru gagal diproses.! Error : "+ error);
                                     //logs out the error
                                 });
 
@@ -1072,7 +1072,7 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
                     } else {
                         res.redirect('/so-customer-list')
                     }
-                    return Promise.reject("Sales Order gagal diproses, stock kurang.!");
+                    return Promise.reject(dateNow +  " - Sales Order gagal diproses, stock kurang.!");
                 }
             }).then(function () {
                 return Promise.each(rows, function (itemRow) {
