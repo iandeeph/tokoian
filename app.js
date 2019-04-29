@@ -17,7 +17,7 @@ function checkAuth (req, res, next) {
     // you should add to this list, for each and every secure url
     // console.log(req.url);
     //   req.session.tempUrl = "/";
-    if (req.url === '/landing-page') {
+    if (req.url.substring(0, 13) === '/landing-page') {
         // on landing page
     }else{
         if (!req.session || !req.session.login) {

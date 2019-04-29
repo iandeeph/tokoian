@@ -1117,7 +1117,7 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
                                 res.redirect('/so-customer-list')
                             }
                             //logs out the error
-                            return Promise.reject("Proses SO Gagal :"+ error);
+                            return Promise.reject(dateNow +  " - Proses SO Gagal :"+ error);
                         });
                 });
             }).then(function () {
