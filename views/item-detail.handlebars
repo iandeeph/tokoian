@@ -1,0 +1,52 @@
+{{#section 'title'}}
+    Item Detail
+{{/section}}
+{{error}}
+
+<div class="row almost-full">
+    <div class="col s12 mt-20">
+        <div class="col s12 mb-20 mt-20 center">
+            <span class="font-40">Item Detail</span><br>
+            <span class="font-20">({{rows.0.kode}} - {{rows.0.nama}})</span>
+        </div>
+        <div class="row">
+            <div class="col s12">
+                <a class="btn-floating btn-large waves-effect waves-light grey left modal-trigger" title="Kembali ke List Customer" href="/recap-stock"><i class="material-icons">keyboard_backspace</i></a>
+            </div>
+        </div>
+        <div class="row">
+            <form action="" method="post">
+                <div class="col s12 almost-full">
+                    <div class="home-table row">
+                        <table class="bordered">
+                            <thead>
+                            <tr class="border-bottom">
+                                <th width="7%">Tanggal</th>
+                                <th width="7%">Order ID</th>
+                                <th width="7%">Nama Customer</th>
+                                <th width="3%">Masuk</th>
+                                <th width="3%">Keluar</th>
+                                <th width="3%">Sisa Stock</th>
+                                <th width="7%">Keterangan</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{#each rows}}
+                                <tr>
+                                    <td class="center">{{readableDate trxtanggal}}</td>
+                                    <td>{{orderid}}</td>
+                                    <td>{{namacustomer}}</td>
+                                    <td>{{zeroOrNumber masuk}}</td>
+                                    <td>{{zeroOrNumber keluar}}</td>
+                                    <td>{{zeroOrNumber stock}}</td>
+                                    <td>{{jenisTrx jenistrx}}</td>
+                                </tr>
+                            {{/each}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -82,8 +82,8 @@ $(document).ready(function() {
     var doPage = $('#print-do-page');
     if($(doPage).length > 0){
         setTimeout(function () { window.print(); }, 500);
-        window.onfocus = function () { setTimeout(function () { window.location.replace("./recap-sales-order"); }, 500); };
-        $(doPage).click(function () { setTimeout(function () { window.location.replace("./recap-sales-order"); }, 500); });
+        window.onfocus = function () { setTimeout(function () { history.go(-1) }, 500); };
+        $(doPage).click(function () { setTimeout(function () { history.go(-1)}, 500); });
     }
 
     // ================== HOME PAGE =====================

@@ -82,6 +82,10 @@ function decrypt(value) {
     return decrypted.toString();
 }
 
+function printDateNow() {
+    return moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
+}
+
 /* GET home page. */
 router.get('/', (req, res) => {
     let groupedOrderid, bulanTahun;
@@ -119,7 +123,7 @@ router.get('/', (req, res) => {
             });
         }).catch(function (error) {
             //logs out the error
-            console.error(error);
+            console.error(printDateNow() + error);
         });
 });
 
@@ -158,7 +162,7 @@ router.get('/get-top-chart', (req, res) => {
             res.json(template);
         }).catch(function (error) {
             //logs out the error
-            console.error(error);
+            console.error(printDateNow() + error);
         });
 });
 
@@ -217,7 +221,7 @@ router.post('/code-list', (req, res) => {
                 res.redirect('/code-list');
             }).catch(function (error) {
                 return tokoianConn.query("ROLLBACK").then(() => {
-                    console.error(error);
+                    console.error(printDateNow() + error);
                 });
                 //logs out the error
             });
@@ -244,7 +248,7 @@ router.post('/code-list', (req, res) => {
                 res.redirect('/code-list');
             }).catch(function (error) {
                 return tokoianConn.query("ROLLBACK").then(() => {
-                    console.error(error);
+                    console.error(printDateNow() + error);
                 });
                 //logs out the error
             });
@@ -297,7 +301,7 @@ router.get('/status-code', (req, res) => {
             return res.send("ok");
         }).catch(function (error) {
             return tokoianConn.query("ROLLBACK").then(() => {
-                console.error(error);
+                console.error(printDateNow() + error);
             });
             //logs out the error
         });
@@ -384,7 +388,7 @@ router.post('/order-in', function(req, res) {
                         }
                     }).catch(function (error) {
                         return tokoianConn.query("ROLLBACK").then(() => {
-                            console.error(error);
+                            console.error(printDateNow() + error);
                         });
                         //logs out the error
                     });
@@ -403,7 +407,7 @@ router.post('/order-in', function(req, res) {
             }).catch(function (error) {
                 req.session.message = {"text": "Order baru gagal diproses.! Error : "+ error, "color": "red"};
                 return tokoianConn.query("ROLLBACK").then(() => {
-                    console.error(error);
+                    console.error(printDateNow() + error);
                 });
                 //logs out the error
             });
@@ -443,7 +447,7 @@ router.get('/get-item', function(req, res) {
                 res.json(listKode);
             }).catch(function (error) {
                 //logs out the error
-                console.error(error);
+                console.error(printDateNow() + error);
             });
     } else if (!_.isUndefined(req.query.id) && _.isUndefined(req.query.cust)){
         let qryString ="select " +
@@ -467,7 +471,7 @@ router.get('/get-item', function(req, res) {
                 res.json(listKode);
             }).catch(function (error) {
                 //logs out the error
-                console.error(error);
+                console.error(printDateNow() + error);
             });
     } else if (_.isUndefined(req.query.id) && _.isUndefined(req.query.cust)){
         return tokoianConn.query("select " +
@@ -489,7 +493,7 @@ router.get('/get-item', function(req, res) {
                 res.json(listKode);
             }).catch(function (error) {
                 //logs out the error
-                console.error(error);
+                console.error(printDateNow() + error);
             });
     } else if (_.isUndefined(req.query.id) && !_.isUndefined(req.query.cust)){
         return tokoianConn.query("select * " +
@@ -506,7 +510,7 @@ router.get('/get-item', function(req, res) {
                 res.json(listKode);
             }).catch(function (error) {
                 //logs out the error
-                console.error(error);
+                console.error(printDateNow() + error);
             });
     }
 });
@@ -548,7 +552,110 @@ router.get('/recap-stock', function(req, res) {
                 });
             }).catch(function (error) {
                 //logs out the error
-                console.error(error);
+                console.error(printDateNow() + error);
+            });
+});
+
+/* GET recap page. */
+router.get('/item-detail', function(req, res) {
+    let idkode = decrypt(req.query.item);
+    tokoianConn.query("SELECT *, " +
+        "customer.nama namacustomer " +
+        "FROM " +
+        "(SELECT " +
+        "t.idtrx idtrx, " +
+        "t.jenistrx jenistrx, " +
+        "t.trxidkode trxidkode, " +
+        "t.trxtanggal trxtanggal, " +
+        "t.orderid orderid, " +
+        "t.itemMasuk masuk, " +
+        "t.itemKeluar keluar, " +
+        "@currStock:=@currStock + (t.itemMasuk - t.itemKeluar) stock " +
+        "FROM " +
+        "(SELECT " +
+            "idtrx, " +
+            "jenistrx, " +
+            "idkode trxidkode, " +
+            "orderid, " +
+            "tanggal trxtanggal, " +
+            "SUM(CASE " +
+                "WHEN " +
+                "jenistrx = '1' OR jenistrx = '3' OR jenistrx = '4' " +
+                "THEN " +
+                "jumlah " +
+                "ELSE 0 " +
+                "END) AS itemMasuk, " +
+            "SUM(CASE " +
+                "WHEN jenistrx = '2' OR jenistrx = '5' " +
+                "THEN jumlah " +
+                "ELSE 0 " +
+                "END) AS itemKeluar " +
+        "FROM " +
+        "trx, (SELECT @currStock:=0) AS currsStock " +
+        "WHERE " +
+        "idkode = ? " +
+        "GROUP BY idtrx) AS t) AS t1 " +
+        "LEFT JOIN " +
+        "kode ON t1.trxidkode = kode.idkode " +
+        "LEFT JOIN " +
+        "salesorder ON t1.orderid = salesorder.soid " +
+        "LEFT JOIN " +
+        "customer ON salesorder.idcustomer = customer.idcustomer " +
+        "where salesorder.idkode = ? or salesorder.idkode is null " +
+        "ORDER BY t1.trxtanggal DESC", [idkode, idkode])
+            .then(function (rowItem) {
+                let text = "SELECT *, " +
+                    "customer.nama namacustomer " +
+                    "FROM " +
+                    "(SELECT " +
+                    "t.idtrx idtrx, " +
+                    "t.jenistrx jenistrx, " +
+                    "t.trxidkode trxidkode, " +
+                    "t.trxtanggal trxtanggal, " +
+                    "t.orderid orderid, " +
+                    "t.itemMasuk masuk, " +
+                    "t.itemKeluar keluar, " +
+                    "@currStock:=@currStock + (t.itemMasuk - t.itemKeluar) stock " +
+                    "FROM " +
+                    "(SELECT " +
+                    "idtrx, " +
+                    "jenistrx, " +
+                    "idkode trxidkode, " +
+                    "orderid, " +
+                    "tanggal trxtanggal, " +
+                    "SUM(CASE " +
+                    "WHEN " +
+                    "jenistrx = '1' OR jenistrx = '3' OR jenistrx = '4' " +
+                    "THEN " +
+                    "jumlah " +
+                    "ELSE 0 " +
+                    "END) AS itemMasuk, " +
+                    "SUM(CASE " +
+                    "WHEN jenistrx = '2' OR jenistrx = '5' " +
+                    "THEN jumlah " +
+                    "ELSE 0 " +
+                    "END) AS itemKeluar " +
+                    "FROM " +
+                    "trx, (SELECT @currStock:=0) AS currsStock " +
+                    "WHERE " +
+                    "idkode = '"+ idkode +"' " +
+                    "GROUP BY idtrx) AS t) AS t1 " +
+                    "LEFT JOIN " +
+                    "kode ON t1.trxidkode = kode.idkode " +
+                    "LEFT JOIN " +
+                    "salesorder ON t1.orderid = salesorder.soid " +
+                    "LEFT JOIN " +
+                    "customer ON salesorder.idcustomer = customer.idcustomer " +
+                    "where salesorder.idkode = ? or salesorder.idkode is null " +
+                    "ORDER BY t1.trxtanggal DESC";
+                console.log(text);
+                res.render('item-detail', {
+                    rows: rowItem,
+                    priv: req.session.priv
+                });
+            }).catch(function (error) {
+                //logs out the error
+                console.error(printDateNow() + error);
             });
 });
 
@@ -573,7 +680,7 @@ router.get('/trxin-report', function(req, res) {
             });
         }).catch(function (error) {
         //logs out the error
-        console.error(error);
+        console.error(printDateNow() + error);
     });
 });
 
@@ -617,7 +724,7 @@ router.post('/trxin-report', function(req, res) {
                 }
             }).catch(function (error) {
             //logs out the error
-            console.error(error);
+            console.error(printDateNow() + error);
         });
     }
 });
@@ -648,7 +755,7 @@ router.get('/customer-list', function(req, res) {
             delete req.session.message;
         }).catch(function (error) {
             //logs out the error
-            console.error(error);
+            console.error(printDateNow() + error);
         });
 });
 
@@ -693,7 +800,7 @@ router.post('/customer-list', function(req, res) {
                 res.redirect('/customer-list');
             }).catch(function (error) {
                 return tokoianConn.query("ROLLBACK").then(() => {
-                    console.error(error);
+                    console.error(printDateNow() + error);
                 });
                 //logs out the error
             });
@@ -727,7 +834,7 @@ router.post('/customer-list', function(req, res) {
                 res.redirect('/customer-list');
             }).catch(function (error) {
                 return tokoianConn.query("ROLLBACK").then(() => {
-                    console.error(error);
+                    console.error(printDateNow() + error);
                 });
                 //logs out the error
             });
@@ -764,7 +871,7 @@ router.get('/cust-status-code', function(req, res) {
                 res.send("ok");
         }).catch(function (error) {
             return tokoianConn.query("ROLLBACK").then(() => {
-                console.error(error);
+                console.error(printDateNow() + error);
             });
             //logs out the error
         });
@@ -819,7 +926,7 @@ router.post('/add-sales-order', function(req, res) {
             res.redirect('/add-sales-order');
         }).catch(function (error) {
             return tokoianConn.query("ROLLBACK").then(() => {
-                console.error(error);
+                console.error(printDateNow() + error);
             });
             //logs out the error
         });
@@ -841,7 +948,7 @@ router.get('/get-customer', function(req, res) {
                 res.json(listKode);
             }).catch(function (error) {
                 //logs out the error
-                console.error(error);
+                console.error(printDateNow() + error);
             });
     }else{
         let qryString = "select * " +
@@ -855,7 +962,7 @@ router.get('/get-customer', function(req, res) {
                 res.json(listKode);
             }).catch(function (error) {
                 //logs out the error
-                console.error(error);
+                console.error(printDateNow() + error);
             });
     }
 });
@@ -911,6 +1018,7 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
         "on " +
         "so.idkode = item.idkode " +
         "where so.soid = ?";
+    console.log(recapSoMainQry);
     if (!_.isUndefined(req.body.hapusSoBtn)) { //DELETE SO
         querySoString = "UPDATE salesorder SET status='Dihapus' WHERE soid = ?";
         let logString = "Sales Order ID : " + req.body.deletedSoid;
@@ -934,7 +1042,7 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
                 }
             }).catch(function (error) {
                 return tokoianConn.query("ROLLBACK").then(() => {
-                    console.error(error);
+                    console.error(printDateNow() + error);
                 });
                 //logs out the error
             });
@@ -969,12 +1077,12 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
             }).then(function () {
                 return Promise.each(rows, function (itemRow) {
                     // console.log(typeof itemRow.jumlah);
-                    var jumlah = parseInt(itemRow.jumlah);
-                    var stock = parseInt(itemRow.stock);
+                    var jumlah = parseInt(itemRow.jumlah); //so jumlah
+                    var stock = parseInt(itemRow.stock); //item jumlah
                     var hargaJual = parseInt(itemRow.hargajual);
-                    var sisaStock;
+                    var sisaStock = (stock - jumlah);
 
-                    sisaStock = (stock - jumlah);
+                    // sisaStock = (stock - jumlah);
                     // console.log(sisaStock);
                     queryItemString = "UPDATE item SET " +
                         "jumlah = ? " +
@@ -993,7 +1101,7 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
                         "Nama Barang : " + itemRow.namaitem + "\n" +
                         "Jumlah : " + itemRow.jumlah + "\n" +
                         "Harga Beli : " + itemRow.hargabeli + "\n" +
-                        "Harga Jual : " + itemRow.hargaJual;
+                        "Harga Jual : " + itemRow.hargajual;
 
                     arrLogQry.push([user, 'Proses SO to DO', logString, dateNow]);
 
@@ -1030,7 +1138,7 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
             }).catch(function (error) {
                 req.session.message = {"text": "Proses SO Gagal :"+ error, "color": "red-text"};
                 return tokoianConn.query("ROLLBACK").then(() => {
-                    console.error(error);
+                    console.error(printDateNow() + error);
                 });
                 // let message = {"text": "Proses SO Gagal :"+ error, "color": "red-text"};
                 // if (curUrl === '/recap-sales-order'){
@@ -1078,7 +1186,7 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
                             return tokoianConn.query(querySoString, [itemRow.soid]);
                         }).catch(function (error) {
                             tokoianConn.query("ROLLBACK").then(() => {
-                                console.error(error);
+                                console.error(printDateNow() + error);
                             });
                             req.session.message = {"text": "Sales Order gagal reopen.!", "color": "red-text"};
                             // console.log(curUrl);
@@ -1110,7 +1218,7 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
             }).catch(function (error) {
                 req.session.message = {"text": "Sales Order gagal reopen.!", "color": "red-text"};
                 return tokoianConn.query("ROLLBACK").then(() => {
-                    console.error(error);
+                    console.error(printDateNow() + error);
                 });
             });
     //logs out the error
@@ -1139,13 +1247,13 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
                 // console.log(soid);
                 var soPush = tokoianConn.query(querySoString, [user, dateNow, soid]);
             }).then(function () {
-                logPush = tokoianConn.query("INSERT INTO log (user, aksi, detail, tanggal) VALUES ?", [[logStringArr]] );
+                logPush = tokoianConn.query("INSERT INTO log (user, aksi, detail, tanggal) VALUES ?", [logStringArr] );
             }).then(function () {
                 let string = encrypt(soid);
                 res.redirect('/print-do?so=' + string);
             }).catch(function (error) {
                 //logs out the error
-                console.error(error);
+                console.error(printDateNow() + error);
             });
     }
 });
@@ -1177,7 +1285,7 @@ router.get('/trxout-report', function(req, res) {
             });
         }).catch(function (error) {
         //logs out the error
-        console.error(error);
+        console.error(printDateNow() + error);
     });
 });
 
@@ -1221,7 +1329,7 @@ router.post('/trxout-report', function(req, res) {
                 }
             }).catch(function (error) {
             //logs out the error
-            console.error(error);
+            console.error(printDateNow() + error);
         });
     }
 });
@@ -1309,7 +1417,7 @@ router.get('/income-report', function(req, res) {
 
         }).catch(function (error) {
             //logs out the error
-            console.error(error);
+            console.error(printDateNow() + error);
         });
 });
 
@@ -1415,7 +1523,7 @@ router.post('/income-report', function(req, res) {
                 }
             }).catch(function (error) {
                 //logs out the error
-                console.error(error);
+                console.error(printDateNow() + error);
             });
     }
 });
@@ -1528,11 +1636,11 @@ router.get('/log', function(req, res) {
                         });
                     }).catch(function (error) {
                     //logs out the error
-                    console.error(error);
+                    console.error(printDateNow() + error);
                 });
             }).catch(function (error) {
             //logs out the error
-            console.error(error);
+            console.error(printDateNow() + error);
         });
     }else{
         qryLogStr = "select * from log where " +
@@ -1634,11 +1742,11 @@ router.get('/log', function(req, res) {
                         });
                     }).catch(function (error) {
                     //logs out the error
-                    console.error(error);
+                    console.error(printDateNow() + error);
                 });
             }).catch(function (error) {
             //logs out the error
-            console.error(error);
+            console.error(printDateNow() + error);
         });
     }
 
@@ -1755,11 +1863,11 @@ router.post('/log', function(req, res) {
                         });
                     }).catch(function (error) {
                     //logs out the error
-                    console.error(error);
+                    console.error(printDateNow() + error);
                 });
             }).catch(function (error) {
             //logs out the error
-            console.error(error);
+            console.error(printDateNow() + error);
         });
 
     }
@@ -1818,7 +1926,7 @@ router.get('/print-do', function(req, res) {
             });
         }).catch(function (error) {
             //logs out the error
-            console.error(error);
+            console.error(printDateNow() + error);
         });
 });
 
@@ -1875,7 +1983,7 @@ router.get('/print-so', function(req, res) {
             });
         }).catch(function (error) {
             //logs out the error
-            console.error(error);
+            console.error(printDateNow() + error);
         });
 });
 
@@ -1920,7 +2028,7 @@ router.post('/add-expense', function(req, res) {
                 res.redirect('/add-expense');
             }).catch(function (error) {
                 return tokoianConn.query("ROLLBACK").then(() => {
-                    console.error(error);
+                    console.error(printDateNow() + error);
                     let message = {"text": error, "color": "red"};
                     getPage.expense(message, req, res);
                 });
@@ -1970,7 +2078,7 @@ router.post('/recap-expense', function(req, res) {
                 res.redirect('/recap-expense');
             }).catch(function (error) {
                 return tokoianConn.query("ROLLBACK").then(() => {
-                    console.error(error);
+                    console.error(printDateNow() + error);
                     req.session.message = {"text": "Hapus Expense gagal." + error, "color": "red"};
                     res.redirect('/recap-expense');
                 });
@@ -2029,12 +2137,10 @@ router.post('/pl-customer-list', function(req, res) {
                 return tokoianConn.query("COMMIT;");
             }).then(() => {
                 req.session.message = {"text": "Update pricelist berhasil.", "color": "green"};
-                res.redirect('/pl-customer-list');
+                res.redirect('/pl-customer-list?so='+ encrypt(postPl.customer) );
             }).catch(function (error) {
                 return tokoianConn.query("ROLLBACK").then(() => {
-                    console.error(error);
-                    var message = {"text": error, "color": "red"};
-                    getPage.pricelist(message, req, res);
+                    console.error(printDateNow() + error);
                 });
                 //logs out the error
             });
@@ -2079,7 +2185,7 @@ router.post('/user-manager', function(req, res) {
                 res.redirect('/user-manager');
             }).catch(function (error) {
                 return tokoianConn.query("ROLLBACK").then(() => {
-                    console.error(error);
+                    console.error(printDateNow() + error);
                 });
                 //logs out the error
             });
@@ -2107,11 +2213,11 @@ router.post('/user-manager', function(req, res) {
                 res.redirect('/user-manager');
             }).catch(function (error) {
                 //logs out the error
-                console.error(error);
+                console.error(printDateNow() + error);
                 req.session.message = {"text": "Edit user gagal.! Error : "+ error, "color": "red"};
                 res.redirect('/user-manager');
                 return tokoianConn.query("ROLLBACK").then(() => {
-                    console.error(error);
+                    console.error(printDateNow() + error);
                 });
             });
     }
@@ -2146,7 +2252,7 @@ router.get('/priv-user', function(req, res) {
 
         }).catch(function (error) {
             return tokoianConn.query("ROLLBACK").then(() => {
-                console.error(error);
+                console.error(printDateNow() + error);
             });
             //logs out the error
         });
@@ -2182,7 +2288,7 @@ router.get('/user-status', function(req, res) {
 
         }).catch(function (error) {
             return tokoianConn.query("ROLLBACK").then(() => {
-                console.error(error);
+                console.error(printDateNow() + error);
             });
             //logs out the error
         });

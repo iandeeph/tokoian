@@ -357,28 +357,36 @@ exports.compare = function(lvalue, rvalue, options) {
 };
 
 exports.encrypt = function(value) {
-    let str = value.toString();
-    const iv = new Buffer(randomBytes(16));
-    const cipher = createCipheriv(algorithm, key, iv);
-    let crypted = cipher.update(str, inputEncoding, outputEncoding);
-    crypted += cipher.final(outputEncoding);
-    return `${iv.toString('hex')}:${crypted.toString()}`;
+    if (!_.isEmpty(value) || !_.isUndefined(value)){
+        let str = value.toString();
+        const iv = new Buffer(randomBytes(16));
+        const cipher = createCipheriv(algorithm, key, iv);
+        let crypted = cipher.update(str, inputEncoding, outputEncoding);
+        crypted += cipher.final(outputEncoding);
+        return `${iv.toString('hex')}:${crypted.toString()}`;
+    } else {
+        return value;
+    }
 };
 
 exports.decrypt = function(value) {
-    const textParts = value.split(':');
+    if (!_.isEmpty(value) || !_.isUndefined(value)){
+        const textParts = value.split(':');
 
-    //extract the IV from the first half of the value
-    const IV = new Buffer(textParts.shift(), outputEncoding);
+        //extract the IV from the first half of the value
+        const IV = new Buffer(textParts.shift(), outputEncoding);
 
-    //extract the encrypted text without the IV
-    const encryptedText = new Buffer(textParts.join(':'), outputEncoding);
+        //extract the encrypted text without the IV
+        const encryptedText = new Buffer(textParts.join(':'), outputEncoding);
 
-    //decipher the string
-    const decipher = createDecipheriv(algorithm,key, IV);
-    let decrypted = decipher.update(encryptedText,  outputEncoding, inputEncoding);
-    decrypted += decipher.final(inputEncoding);
-    return decrypted.toString();
+        //decipher the string
+        const decipher = createDecipheriv(algorithm, key, IV);
+        let decrypted = decipher.update(encryptedText, outputEncoding, inputEncoding);
+        decrypted += decipher.final(inputEncoding);
+        return decrypted.toString();
+    } else {
+        return value;
+    }
 };
 
 exports.formatRupiah = function(angka){
