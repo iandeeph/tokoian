@@ -560,7 +560,8 @@ router.get('/recap-stock', function(req, res) {
 router.get('/item-detail', function(req, res) {
     let idkode = decrypt(req.query.item);
     tokoianConn.query("SELECT *, " +
-        "customer.nama namacustomer " +
+        "kode.nama namaitem, " +
+        "kode.kode kode " +
         "FROM " +
         "(SELECT " +
         "t.idtrx idtrx, " +
