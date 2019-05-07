@@ -220,7 +220,7 @@ router.post('/code-list', (req, res) => {
                 req.session.message = {"text": "Tambah Kode Suskses..", "color": "green"};
                 res.redirect('/code-list');
             }).catch(function (error) {
-                return tokoianConn.query("ROLLBACK").then(() => {
+                return tokoianConn.query("ROLLBACK;").then(() => {
                     console.error(printDateNow() + error);
                 });
                 //logs out the error
@@ -247,7 +247,7 @@ router.post('/code-list', (req, res) => {
                 req.session.message = {"text": "Edit Kode Suskses..", "color": "green"};
                 res.redirect('/code-list');
             }).catch(function (error) {
-                return tokoianConn.query("ROLLBACK").then(() => {
+                return tokoianConn.query("ROLLBACK;").then(() => {
                     console.error(printDateNow() + error);
                 });
                 //logs out the error
@@ -284,7 +284,7 @@ router.get('/status-code', (req, res) => {
             if (listCode[0].jumlah > 0 ) {
                 res.send("Not Empty");
                 return Promise.reject((error) =>{
-                    return tokoianConn.query("ROLLBACK");
+                    return tokoianConn.query("ROLLBACK;");
                 });
             }
         }).then(() => {
@@ -300,7 +300,7 @@ router.get('/status-code', (req, res) => {
         }).then(() => {
             return res.send("ok");
         }).catch(function (error) {
-            return tokoianConn.query("ROLLBACK").then(() => {
+            return tokoianConn.query("ROLLBACK;").then(() => {
                 console.error(printDateNow() + error);
             });
             //logs out the error
@@ -369,7 +369,7 @@ router.post('/order-in', function(req, res) {
                             tokoianConn.query(queryItemString, [hargaBeli, total, resRows.idkode])
                                 .catch(function (error) {
                                     req.session.message = {"text": "Order baru gagal diproses.! Error : "+ error, "color": "red"};
-                                    tokoianConn.query("ROLLBACK");
+                                    tokoianConn.query("ROLLBACK;");
                                     res.redirect('/order-in');
                                     return Promise.reject(dateNow + " - Order baru gagal diproses.! Error : "+ error);
                                     //logs out the error
@@ -387,7 +387,7 @@ router.post('/order-in', function(req, res) {
                 // console.log(trxPush);
                         }
                     }).catch(function (error) {
-                        return tokoianConn.query("ROLLBACK").then(() => {
+                        return tokoianConn.query("ROLLBACK;").then(() => {
                             console.error(printDateNow() + error);
                         });
                         //logs out the error
@@ -406,7 +406,7 @@ router.post('/order-in', function(req, res) {
                 res.redirect('/order-in');
             }).catch(function (error) {
                 req.session.message = {"text": "Order baru gagal diproses.! Error : "+ error, "color": "red"};
-                return tokoianConn.query("ROLLBACK").then(() => {
+                return tokoianConn.query("ROLLBACK;").then(() => {
                     console.error(printDateNow() + error);
                 });
                 //logs out the error
@@ -800,7 +800,7 @@ router.post('/customer-list', function(req, res) {
                 req.session.message = {"text": "Toko baru berhasil ditambah.", "color": "green"};
                 res.redirect('/customer-list');
             }).catch(function (error) {
-                return tokoianConn.query("ROLLBACK").then(() => {
+                return tokoianConn.query("ROLLBACK;").then(() => {
                     console.error(printDateNow() + error);
                 });
                 //logs out the error
@@ -834,7 +834,7 @@ router.post('/customer-list', function(req, res) {
                 req.session.message = {"text": "Edit toko berhasil.", "color": "green"};
                 res.redirect('/customer-list');
             }).catch(function (error) {
-                return tokoianConn.query("ROLLBACK").then(() => {
+                return tokoianConn.query("ROLLBACK;").then(() => {
                     console.error(printDateNow() + error);
                 });
                 //logs out the error
@@ -871,7 +871,7 @@ router.get('/cust-status-code', function(req, res) {
         }).then(() => {
                 res.send("ok");
         }).catch(function (error) {
-            return tokoianConn.query("ROLLBACK").then(() => {
+            return tokoianConn.query("ROLLBACK;").then(() => {
                 console.error(printDateNow() + error);
             });
             //logs out the error
@@ -926,7 +926,7 @@ router.post('/add-sales-order', function(req, res) {
             req.session.message = {"text": "Sales order berhasil ditambah.", "color": "green"};
             res.redirect('/add-sales-order');
         }).catch(function (error) {
-            return tokoianConn.query("ROLLBACK").then(() => {
+            return tokoianConn.query("ROLLBACK;").then(() => {
                 console.error(printDateNow() + error);
             });
             //logs out the error
@@ -1042,7 +1042,7 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
                     res.redirect('/so-customer-list')
                 }
             }).catch(function (error) {
-                return tokoianConn.query("ROLLBACK").then(() => {
+                return tokoianConn.query("ROLLBACK;").then(() => {
                     console.error(printDateNow() + error);
                 });
                 //logs out the error
@@ -1067,7 +1067,9 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
             }).then(function () {
                 if (!_.isEmpty(stock) || !_.isUndefined(stock)) {
                     req.session.message = {"text": "Sales Order gagal diproses, stock kurang.!", "color": "red"};
-                    tokoianConn.query("ROLLBACK");
+                    tokoianConn.query("ROLLBACK;").then(() => {
+                        console.error(printDateNow() + error);
+                    });
                     if (curUrl === '/recap-sales-order'){
                         res.redirect('/recap-sales-order')
                     } else {
@@ -1111,7 +1113,9 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
                             return tokoianConn.query(querySoString, [itemRow.soid]);
                         }).catch(function (error) {
                             req.session.message = {"text": "Proses SO Gagal :"+ error, "color": "red-text"};
-                            tokoianConn.query("ROLLBACK");
+                            tokoianConn.query("ROLLBACK;").then(() => {
+                                console.error(printDateNow() + error);
+                            });
                             if (curUrl === '/recap-sales-order'){
                                 res.redirect('/recap-sales-order')
                             } else {
@@ -1138,7 +1142,7 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
                 }
             }).catch(function (error) {
                 req.session.message = {"text": "Proses SO Gagal :"+ error, "color": "red-text"};
-                return tokoianConn.query("ROLLBACK").then(() => {
+                return tokoianConn.query("ROLLBACK;").then(() => {
                     console.error(printDateNow() + error);
                 });
                 // let message = {"text": "Proses SO Gagal :"+ error, "color": "red-text"};
@@ -1186,7 +1190,7 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
                         .then(function () {
                             return tokoianConn.query(querySoString, [itemRow.soid]);
                         }).catch(function (error) {
-                            tokoianConn.query("ROLLBACK").then(() => {
+                            tokoianConn.query("ROLLBACK;").then(() => {
                                 console.error(printDateNow() + error);
                             });
                             req.session.message = {"text": "Sales Order gagal reopen.!", "color": "red-text"};
@@ -1218,7 +1222,7 @@ router.post(['/recap-sales-order', '/so-customer-list'], function(req, res) {
                 }
             }).catch(function (error) {
                 req.session.message = {"text": "Sales Order gagal reopen.!", "color": "red-text"};
-                return tokoianConn.query("ROLLBACK").then(() => {
+                return tokoianConn.query("ROLLBACK;").then(() => {
                     console.error(printDateNow() + error);
                 });
             });
@@ -2028,7 +2032,7 @@ router.post('/add-expense', function(req, res) {
                 req.session.message = {"text": "Tambah expense berhasil.", "color": "green"};
                 res.redirect('/add-expense');
             }).catch(function (error) {
-                return tokoianConn.query("ROLLBACK").then(() => {
+                return tokoianConn.query("ROLLBACK;").then(() => {
                     console.error(printDateNow() + error);
                     let message = {"text": error, "color": "red"};
                     getPage.expense(message, req, res);
@@ -2078,7 +2082,7 @@ router.post('/recap-expense', function(req, res) {
                 req.session.message = {"text": "Hapus Expense Berhasil.", "color": "green"};
                 res.redirect('/recap-expense');
             }).catch(function (error) {
-                return tokoianConn.query("ROLLBACK").then(() => {
+                return tokoianConn.query("ROLLBACK;").then(() => {
                     console.error(printDateNow() + error);
                     req.session.message = {"text": "Hapus Expense gagal." + error, "color": "red"};
                     res.redirect('/recap-expense');
@@ -2140,7 +2144,7 @@ router.post('/pl-customer-list', function(req, res) {
                 req.session.message = {"text": "Update pricelist berhasil.", "color": "green"};
                 res.redirect('/pl-customer-list?so='+ encrypt(postPl.customer) );
             }).catch(function (error) {
-                return tokoianConn.query("ROLLBACK").then(() => {
+                return tokoianConn.query("ROLLBACK;").then(() => {
                     console.error(printDateNow() + error);
                 });
                 //logs out the error
@@ -2185,7 +2189,7 @@ router.post('/user-manager', function(req, res) {
                 req.session.message = {"text": "Tambah user berhasil.", "color": "green"};
                 res.redirect('/user-manager');
             }).catch(function (error) {
-                return tokoianConn.query("ROLLBACK").then(() => {
+                return tokoianConn.query("ROLLBACK;").then(() => {
                     console.error(printDateNow() + error);
                 });
                 //logs out the error
@@ -2217,7 +2221,7 @@ router.post('/user-manager', function(req, res) {
                 console.error(printDateNow() + error);
                 req.session.message = {"text": "Edit user gagal.! Error : "+ error, "color": "red"};
                 res.redirect('/user-manager');
-                return tokoianConn.query("ROLLBACK").then(() => {
+                return tokoianConn.query("ROLLBACK;").then(() => {
                     console.error(printDateNow() + error);
                 });
             });
@@ -2252,7 +2256,7 @@ router.get('/priv-user', function(req, res) {
                 res.send("ok");
 
         }).catch(function (error) {
-            return tokoianConn.query("ROLLBACK").then(() => {
+            return tokoianConn.query("ROLLBACK;").then(() => {
                 console.error(printDateNow() + error);
             });
             //logs out the error
@@ -2288,7 +2292,7 @@ router.get('/user-status', function(req, res) {
                 res.send("ok");
 
         }).catch(function (error) {
-            return tokoianConn.query("ROLLBACK").then(() => {
+            return tokoianConn.query("ROLLBACK;").then(() => {
                 console.error(printDateNow() + error);
             });
             //logs out the error
